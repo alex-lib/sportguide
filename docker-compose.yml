@@ -1,0 +1,17 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./stadium.png:/docker-entrypoint-initdb.d/stadium.png
+    ports:
+      - "5432:5432"
