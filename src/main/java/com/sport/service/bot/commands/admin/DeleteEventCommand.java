@@ -1,6 +1,6 @@
 package com.sport.service.bot.commands.admin;
-import com.sport.service.sessions.PlaceSession;
-import com.sport.service.services.PlaceService;
+import com.sport.service.sessions.EventSession;
+import com.sport.service.services.EventService;
 import com.sport.service.sessions.CommandStateStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,25 +11,25 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
-@Service
 @RequiredArgsConstructor
+@Service
 @Slf4j
-public class DeletePlaceCommand implements IBotCommand {
+public class DeleteEventCommand implements IBotCommand {
 
-	private final PlaceService placeService;
+	private final EventSession eventSession;
 
-	private final PlaceSession placeSession;
+	private final EventService eventService;
 
 	private final CommandStateStore commandStateStore;
 
 	@Override
 	public String getCommandIdentifier() {
-		return "delete_place";
+		return "delete_event";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Let admin to delete a created place";
+		return "Let admin to delete a created event";
 	}
 
 	@Override
@@ -39,13 +39,13 @@ public class DeletePlaceCommand implements IBotCommand {
 
 		Long chatId = message.getChatId();
 
-		commandStateStore.setCurrentCommand(user.getId(), "delete_place");
+		commandStateStore.setCurrentCommand(user.getId(), "delete_event");
 
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId);
 
-		answer.setText("Удалить место можно только по точному имени ранее сохраненного места. " +
-				"Напишите название места, которое хотите удалить:");
+		answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
+				"Напишите название события, которое хотите удалить:");
 
 		String text = message.getText();
 		log.info("Received text: {}", text);
@@ -62,7 +62,7 @@ public class DeletePlaceCommand implements IBotCommand {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		if (!"delete_place".equals(commandStateStore.getCurrentCommand(userId))) {
+		if (!"delete_event".equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
 
@@ -70,8 +70,8 @@ public class DeletePlaceCommand implements IBotCommand {
 		answer.setChatId(chatId.toString());
 		String text = message.getText();
 		log.info("Received text: {}", text);
-		placeService.deleteByName(text);
-		placeSession.clear(chatId);
+		eventService.deleteByName(text);
+		eventSession.clear(chatId);
 		commandStateStore.clearCurrentCommand(userId);
 		answer.setText("Удаление места завершено.");
 

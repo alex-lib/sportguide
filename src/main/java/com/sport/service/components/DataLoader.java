@@ -1,7 +1,7 @@
 package com.sport.service.components;
 import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.PlaceDistrict;
-import com.sport.service.entities.place.PlaceType;
+import com.sport.service.entities.place.District;
+import com.sport.service.entities.place.Type;
 import com.sport.service.repositories.PlaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -30,12 +30,12 @@ public class DataLoader implements CommandLineRunner {
 
             Place place = Place.builder()
                     .name("Центральный стадион профсоюзов")
-                    .district(PlaceDistrict.CENTRALNYY)
+                    .district(District.CENTRALNYY)
                     .address("Студенческая улица, 12")
                     .description("Главный футбольный стадион города")
                     .webSite("https://fkfakel.ru/hall")
                     .outdoor(false)
-                    .type(PlaceType.FOOTBALL_FIELD)
+                    .type(Type.FOOTBALL_FIELD)
                     .photo(photoBytes)
                     .build();
 

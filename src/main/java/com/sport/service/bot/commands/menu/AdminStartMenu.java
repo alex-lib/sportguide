@@ -1,54 +1,34 @@
-package com.sport.service.bot.commands.admin;
+package com.sport.service.bot.commands.menu;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
-@Slf4j
-public class StartAdminCommand implements IBotCommand {
+public class AdminStartMenu {
 
-    @Override
-    public String getCommandIdentifier() {
-        return "start";
-    }
+    private final SendMessage answer;
 
-    @Override
-    public String getDescription() {
-        return "Launch bot and save user's data to database";
-    }
-
-    @Override
-    public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-        User user = message.getFrom();
-        log.info("Call command start by user: {}", user.getUserName());
-        SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
-        answer.setText("""
+    private static final String ADMIN_MENU = """
                👋\s
                Ты здесь один из администраторов нашего бота.
                Ты можешь создать/удалить спортивные места и события.
                Также ты можешь пользоваться ботом как обычный юзер.
                Доступные команды:
                /get_place - выбрать место (по дефолту ты можешь найти сейчас одно место загруженное в БД: центральный-футбольное поле-помещение)
-               /get_upcoming_events - недоступно
-               /get_notifications - недоступно (подписаться на получение уведомлений о грядущих спортивных событиях)
-               /stop_notifications - недоступно (отписаться от получения уведомлений о грядущих спортивных событиях)
+               /get_upcoming_events - получить список грядущих событий
+               /get_notifications - подписаться на получение уведомлений о грядущих спортивных событиях
+               /stop_notifications - отписаться от получения уведомлений о грядущих спортивных событиях
                /create_place - создать место
                /delete_place - удалить место
-               /create_event - недоступно
-               /delete_event - недоступно
-               \s""");
+               /create_event - создать событие
+               /delete_event - удалить событие
+               \s""";
+
+    public void getAdminMenu() {
+        answer.setText(ADMIN_MENU);
 
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setResizeKeyboard(true);
@@ -79,11 +59,5 @@ public class StartAdminCommand implements IBotCommand {
 
         keyboardMarkup.setKeyboard(keyboard);
         answer.setReplyMarkup(keyboardMarkup);
-
-        try {
-            absSender.execute(answer);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred in /start command", e);
-        }
     }
 }

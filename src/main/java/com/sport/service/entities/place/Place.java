@@ -1,9 +1,6 @@
 package com.sport.service.entities.place;
-import com.sport.service.entities.Event;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "places", schema = "app_schema")
@@ -25,7 +22,7 @@ public class Place {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "district")
-    private PlaceDistrict district;
+    private District district;
 
     @Column(name = "address")
     private String address;
@@ -41,14 +38,9 @@ public class Place {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "type")
-    private PlaceType type;
+    private Type type;
 
-    @Lob
+//    @Lob
     @Column(name = "photo")
     private byte[] photo;
-
-//    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-//    @ToString.Exclude
-//    @Builder.Default
-//    private List<Event> events = new ArrayList<>();
 }

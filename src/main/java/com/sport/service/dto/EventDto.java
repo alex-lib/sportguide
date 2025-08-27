@@ -1,8 +1,8 @@
 package com.sport.service.dto;
+import com.sport.service.entities.place.District;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +22,8 @@ public class EventDto {
     private String date;
 
     private String time;
+
+    private District district;
 
     private int step = 0;
 }

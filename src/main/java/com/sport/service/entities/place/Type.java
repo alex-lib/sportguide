@@ -1,12 +1,12 @@
 package com.sport.service.entities.place;
 
-public enum PlaceType {
+public enum Type {
     SPORT_GROUND,
     FOOTBALL_FIELD,
     BASKETBALL_FIELD,
     VOLLEYBALL_FIELD,
-    TENNIS_CORT,
-    PINGPONG_CORT,
+    TENNIS_COURT,
+    PINGPONG_TABLE,
     PADEL_CORT,
     RUNNING_PLACE,
     ICE_RING,

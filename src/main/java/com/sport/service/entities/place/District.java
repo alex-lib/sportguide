@@ -1,6 +1,6 @@
 package com.sport.service.entities.place;
 
-public enum PlaceDistrict {
+public enum District {
     ZHELEZNODOROZHNYY,
     CENTRALNYY,
     KOMINTERNOVSKYY,

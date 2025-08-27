@@ -1,5 +1,5 @@
 package com.sport.service.entities;
-import com.sport.service.entities.place.Place;
+import com.sport.service.entities.place.District;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -22,22 +22,21 @@ public class Event {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "district")
+    @Column(name = "description")
     private String description;
 
     @Column(name = "place_name")
     private String placeName;
 
-//    @ManyToOne
-//    @JoinColumn(name = "place_id")
-//    @ToString.Exclude
-//    private Place place;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "district")
+    private District district;
 
     @Column(name = "address")
     private String address;
 
-    @Column(name = "web_site")
-    private String webSite;
+    @Column(name = "link")
+    private String link;
 
     @Column(name = "date")
     private LocalDate date;
