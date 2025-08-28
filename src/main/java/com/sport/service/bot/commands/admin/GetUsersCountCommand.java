@@ -1,6 +1,4 @@
-package com.sport.service.bot.commands.subscriber;
-import com.sport.service.bot.commands.menu.AdminMenu;
-import com.sport.service.bot.commands.menu.SubscriberMenu;
+package com.sport.service.bot.commands.admin;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,43 +13,32 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class StartCommand implements IBotCommand {
+public class GetUsersCountCommand implements IBotCommand {
 
     private final SubscriberService subscriberService;
 
     @Override
     public String getCommandIdentifier() {
-        return "start";
+        return "get_users_count";
     }
 
     @Override
     public String getDescription() {
-        return "Launch bot and save user's data to database or find there uploaded admin's data";
+        return "Let admin get count of users";
     }
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-        User user = message.getFrom();
-        log.info("Call command start by user: {}, with id: {}",user.getUserName(), user.getId());
-
         SendMessage answer = new SendMessage();
         answer.setChatId(message.getChatId());
 
-        if (subscriberService.checkIfAdmin(user.getId())) {
-            answer.setText(AdminMenu.ADMIN_MENU);
-            AdminMenu adminMenu = new AdminMenu(answer);
-            adminMenu.getAdminMenu();
-        } else {
-            subscriberService.addSubscriber(user);
-            answer.setText(SubscriberMenu.SUBSCRIBER_MENU);
-            SubscriberMenu subscriberMenu = new SubscriberMenu(answer);
-            subscriberMenu.getSubscriberMenu();
-        }
+        int count = subscriberService.getUsersCount();
 
+        answer.setText("Количество юзеров: " + count);
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {
-            log.error("Error occurred in /start command", e);
+            log.error("Error occurred in /get_users_count command", e);
         }
     }
 }

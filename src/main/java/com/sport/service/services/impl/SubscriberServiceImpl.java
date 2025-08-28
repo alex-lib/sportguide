@@ -67,4 +67,14 @@ public class SubscriberServiceImpl implements SubscriberService {
         BeanUtils.copyNonNullProperties(subscriber, existedSubscriber);
         subscriberRepository.save(existedSubscriber);
     }
+
+    @Override
+    public int getUsersCount() {
+        return subscriberRepository.getUsersCount();
+    }
+
+    @Override
+    public int getSubscriptionsCount() {
+        return subscriberRepository.getSubscriptionsCount();
+    }
 }

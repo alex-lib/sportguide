@@ -5,6 +5,7 @@ import com.sport.service.bot.commands.admin.DeletePlaceCommand;
 import com.sport.service.bot.commands.subscriber.ContactAdminCommand;
 import com.sport.service.bot.commands.subscriber.GetPlaceCommand;
 import com.sport.service.bot.commands.admin.CreatePlaceCommand;
+import com.sport.service.mappers.ButtonToCommandMapper;
 import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
@@ -36,6 +37,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 	private final CreateEventCommand createEventCommand;
 	private final DeleteEventCommand deleteEventCommand;
 	private final ContactAdminCommand contactAdminCommand;
+	private final Map<String, IBotCommand> commands = new HashMap<>();
 
 	public SportPlacesAndEventsBot(
 			@Value("${telegram.bot.token}") String botToken,
@@ -57,7 +59,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 		this.deleteEventCommand = deleteEventCommand;
 		this.contactAdminCommand = contactAdminCommand;
 		this.commandStateStore = commandStateStore;
-		commandList.forEach(this::register);
+		commandList.forEach(this::registerCommand);
 	}
 
 	@Value("${telegram.mainAdminId}")
@@ -110,6 +112,17 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 		if (update.hasMessage() && update.getMessage().hasText()) {
 			Message message = update.getMessage();
 			long userId = message.getFrom().getId();
+			String text = message.getText();
+
+			// Map Russian button labels to original slash commands and dispatch immediately
+			String mappedCommand = ButtonToCommandMapper.mapButtonToCommand(text);
+			if (mappedCommand != null) {
+				// Reset any ongoing stateful flow as user picked a new command via button
+				commandStateStore.clearCurrentCommand(userId);
+				dispatchCommand(mappedCommand, update);
+				return;
+			}
+
 			String currentCommand = commandStateStore.getCurrentCommand(userId);
 
 			if ("create_place".equals(currentCommand)) {
@@ -202,5 +215,26 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 				.append(" написал вам:\n")
 				.append(text)
 				.toString();
+	}
+
+	private void registerCommand(IBotCommand command) {
+		commands.put("/" + command.getCommandIdentifier(), command);
+	}
+
+	private void dispatchCommand(String commandText, Update update) {
+		String[] parts = commandText.split(" ");
+		String command = parts[0];
+		String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
+
+		IBotCommand cmd = commands.get(command);
+		if (cmd != null) {
+			try {
+				cmd.processMessage(this, update.getMessage(), args);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Команда не найдена: " + command);
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package com.sport.service.bot.commands.admin;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.EventDto;
-import com.sport.service.entities.Event;
 import com.sport.service.entities.place.District;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.sessions.EventSession;
