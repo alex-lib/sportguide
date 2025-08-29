@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -28,12 +29,15 @@ public class GetSubscriptionsCountCommand implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
+        User user = message.getFrom();
         SendMessage answer = new SendMessage();
         answer.setChatId(message.getChatId());
 
-        int count = subscriberService.getSubscriptionsCount();
-
-        answer.setText("Количество подписок на получение событий: " + count);
+        if (subscriberService.checkIfAdmin(user.getId())) {
+            answer.setText("Количество подписок на получение событий: " + subscriberService.getSubscriptionsCount());
+        } else {
+            answer.setText("Вы не являетесь администратором.");
+        }
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

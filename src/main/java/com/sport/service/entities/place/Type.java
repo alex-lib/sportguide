@@ -10,5 +10,6 @@ public enum Type {
     PADEL_CORT,
     RUNNING_PLACE,
     ICE_RING,
-    SWIMMING_POOL
+    SWIMMING_POOL,
+    MARTIAL_ARTS_HALL
 }

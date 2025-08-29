@@ -1,4 +1,5 @@
 package com.sport.service.bot.commands.admin;
+import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.EventSession;
 import com.sport.service.services.EventService;
 import com.sport.service.sessions.CommandStateStore;
@@ -22,6 +23,8 @@ public class DeleteEventCommand implements IBotCommand {
 
 	private final CommandStateStore commandStateStore;
 
+	private final SubscriberService subscriberService;
+
 	@Override
 	public String getCommandIdentifier() {
 		return "delete_event";
@@ -36,19 +39,25 @@ public class DeleteEventCommand implements IBotCommand {
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
 		log.info("Call command delete_place by user: {}", user.getUserName());
-
 		Long chatId = message.getChatId();
-
-		commandStateStore.setCurrentCommand(user.getId(), "delete_event");
-
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId);
+		if (subscriberService.checkIfAdmin(user.getId())) {
 
-		answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
-				"Напишите название события, которое хотите удалить:");
 
-		String text = message.getText();
-		log.info("Received text: {}", text);
+			commandStateStore.setCurrentCommand(user.getId(), "delete_event");
+
+
+
+
+			answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
+					"Напишите название события, которое хотите удалить:");
+
+			String text = message.getText();
+			log.info("Received text: {}", text);
+		} else {
+			answer.setText("Вы не являетесь администратором.");
+		}
 
 
 		try {

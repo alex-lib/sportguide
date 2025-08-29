@@ -5,7 +5,7 @@ import java.util.List;
 
 public abstract class ChoosingPlaceOptionsMenu {
 
-    public static InlineKeyboardMarkup createDistrictKeyboard() {
+    public static InlineKeyboardMarkup createDistrictKeyboardForGettingPlace() {
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Железнодорожный", "ZHELEZNODOROZHNYY"),
                 createButtonRow("Центральный", "CENTRALNYY"),
@@ -19,10 +19,34 @@ public abstract class ChoosingPlaceOptionsMenu {
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 
-    public static InlineKeyboardMarkup createOutdoorKeyboard() {
+    public static InlineKeyboardMarkup createDistrictKeyboardForCreatingPlace() {
+        List<List<InlineKeyboardButton>> keyboard = List.of(
+                createButtonRow("Железнодорожный", "ZHELEZNODOROZHNYY"),
+                createButtonRow("Центральный", "CENTRALNYY"),
+                createButtonRow("Коминтерновский", "KOMINTERNOVSKYY"),
+                createButtonRow("Ленинский", "LENINSKYY"),
+                createButtonRow("Советский", "SOVETSKYY"),
+                createButtonRow("Левобережный", "LEVOBEREZNYY"),
+                createButtonRow("За городом", "BEHIND_OF_CITY")
+        );
+        return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
+    }
+
+    public static InlineKeyboardMarkup createOutdoorKeyboardForGettingPlace() {
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Улица", "true"),
-                createButtonRow("Помещение", "false")
+                createButtonRow("Помещение", "false"),
+                createButtonRow("Все", "all"),
+                createButtonRow("НАЗАД", "BACK")
+        );
+        return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
+    }
+
+    public static InlineKeyboardMarkup createOutdoorKeyboardForCreatingPlace() {
+        List<List<InlineKeyboardButton>> keyboard = List.of(
+                createButtonRow("Улица", "true"),
+                createButtonRow("Помещение", "false"),
+                createButtonRow("НАЗАД", "BACK")
         );
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
@@ -38,7 +62,9 @@ public abstract class ChoosingPlaceOptionsMenu {
                 createButtonRow("Падел корт", "PADEL_COURT"),
                 createButtonRow("Ледовая арена", "ICE_RING"),
                 createButtonRow("Бассейн", "SWIMMING_POOL"),
-                createButtonRow("Беговая зона", "RUNNING_PLACE")
+                createButtonRow("Беговая зона", "RUNNING_PLACE"),
+                createButtonRow("Зал для единоборств", "MARTIAL_ARTS_HALL"),
+                createButtonRow("НАЗАД", "BACK")
         );
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }

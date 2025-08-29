@@ -41,6 +41,6 @@ public class Place {
     private Type type;
 
 //    @Lob
-    @Column(name = "photo")
+    @Column(name = "photo", columnDefinition = "BYTEA")
     private byte[] photo;
 }

@@ -3,6 +3,7 @@ import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.mappers.event.EventMapper;
+import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.EventSession;
 import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.services.EventService;
@@ -30,6 +31,8 @@ public class CreateEventCommand implements IBotCommand {
 
 	private final EventMapper eventMapper;
 
+	private final SubscriberService subscriberService;
+
 	private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
 
 	private static final Pattern TIME_PATTERN = Pattern.compile("^\\d{2}:\\d{2}$");
@@ -48,18 +51,21 @@ public class CreateEventCommand implements IBotCommand {
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
 		log.info("Call command create_event by user: {}", user.getUserName());
-		Long chatId = message.getChatId();
-
-		EventDto dto = eventSession.createSession(chatId);
-		dto.setStep(1);
-		eventSession.save(chatId, dto);
-
-		commandStateStore.setCurrentCommand(user.getId(), "create_event");
-
 		SendMessage answer = new SendMessage();
+		Long chatId = message.getChatId();
 		answer.setChatId(chatId.toString());
-		answer.setText("Выберите район:");
-		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard());
+		if (subscriberService.checkIfAdmin(user.getId())) {
+
+			EventDto dto = eventSession.createSession(chatId);
+			dto.setStep(1);
+			eventSession.save(chatId, dto);
+			commandStateStore.setCurrentCommand(user.getId(), "create_event");
+
+			answer.setText("Выберите район:");
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
+		} else {
+			answer.setText("Вы не являетесь администратором.");
+		}
 
 		try {
 			absSender.execute(answer);
@@ -113,7 +119,7 @@ public class CreateEventCommand implements IBotCommand {
 			dto.setStep(2);
 		} catch (IllegalArgumentException e) {
 			answer.setText("Неверный район. Попробуйте еще раз:");
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard());
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
 		}
 	}
 

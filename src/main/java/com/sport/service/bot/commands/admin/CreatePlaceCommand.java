@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.admin;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.mappers.place.PlaceMapper;
+import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.PlaceSession;
 import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.dto.PlaceDto;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import com.sport.service.entities.place.District;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -34,6 +36,8 @@ public class CreatePlaceCommand implements IBotCommand {
 	private final CommandStateStore commandStateStore;
 
 	private final PlaceMapper placeMapper;
+
+	private final SubscriberService subscriberService;
 
 	@Value("${telegram.bot.token}")
 	private String botToken;
@@ -53,18 +57,19 @@ public class CreatePlaceCommand implements IBotCommand {
 		User user = message.getFrom();
 		log.info("Call command create_place by user: {}", user.getUserName());
 		Long chatId = message.getChatId();
-
-		PlaceDto dto = placeSession.createSession(chatId);
-		dto.setStep(1);
-		placeSession.save(chatId, dto);
-
-		commandStateStore.setCurrentCommand(user.getId(), "create_place");
-
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId.toString());
-		answer.setText("Выберите район:");
-		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard());
 
+		if (subscriberService.checkIfAdmin(user.getId())) {
+			PlaceDto dto = placeSession.createSession(chatId);
+			dto.setStep(1);
+			placeSession.save(chatId, dto);
+			commandStateStore.setCurrentCommand(user.getId(), "create_place");
+			answer.setText("Выберите район:");
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreatingPlace());
+		} else {
+			answer.setText("Вы не являетесь администратором.");
+		}
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {
@@ -96,6 +101,35 @@ public class CreatePlaceCommand implements IBotCommand {
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId.toString());
 
+		// Handle BACK navigation between callback-driven steps (1..3)
+		if ("BACK".equals(data)) {
+			if (dto.getStep() == 2) {
+				// Going back from type selection to district
+				dto.setType(null);
+				answer.setText("Выберите район:");
+				answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreatingPlace());
+				dto.setStep(1);
+			} else if (dto.getStep() == 3) {
+				// Going back from outdoor selection to type
+				dto.setOutdoor(null);
+				answer.setText("Выберите тип места:");
+				answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard());
+				dto.setStep(2);
+			} else {
+				// At first step, nothing to go back to; re-show districts
+				answer.setText("Выберите район:");
+				answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreatingPlace());
+				dto.setStep(1);
+			}
+			try {
+				placeSession.save(chatId, dto);
+				absSender.execute(answer);
+			} catch (Exception e) {
+				log.error("Error sending back step", e);
+			}
+			return;
+		}
+
 		try {
 			switch (dto.getStep()) {
 				case 1 -> handleDistrictStep(dto, data, answer);
@@ -119,7 +153,7 @@ public class CreatePlaceCommand implements IBotCommand {
 			dto.setStep(2);
 		} catch (IllegalArgumentException e) {
 			answer.setText("Неверный район. Попробуйте еще раз:");
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard());
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreatingPlace());
 		}
 	}
 
@@ -127,7 +161,7 @@ public class CreatePlaceCommand implements IBotCommand {
 		try {
 			dto.setType(Type.valueOf(data));
 			answer.setText("Это улица или помещение?");
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboard());
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForCreatingPlace());
 			dto.setStep(3);
 		} catch (IllegalArgumentException e) {
 			answer.setText("Неверный тип. Попробуйте еще раз:");
@@ -164,7 +198,6 @@ public class CreatePlaceCommand implements IBotCommand {
 
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId.toString());
-
 		try {
 			handleTextInput(message, dto, answer);
 			placeSession.save(chatId, dto);
@@ -236,8 +269,16 @@ public class CreatePlaceCommand implements IBotCommand {
 
 		try {
 			if (message.hasPhoto()) {
-				String fileId = message.getPhoto().get(0).getFileId();
+				List<PhotoSize> photos = message.getPhoto();
+				PhotoSize bestPhoto = photos.get(photos.size() - 1);
+				String fileId = bestPhoto.getFileId();
+				
+				log.info("Processing photo: {} sizes available, selected size: {}x{}, file size: {} bytes", 
+					photos.size(), bestPhoto.getWidth(), bestPhoto.getHeight(), bestPhoto.getFileSize());
+				
 				byte[] photoBytes = downloadPhoto(absSender, fileId);
+				log.info("Downloaded photo: {} bytes", photoBytes.length);
+				
 				dto.setPhoto(photoBytes);
 				placeService.create(placeMapper.placeDtoToPlace(dto));
 				answer.setText("✅ Место создано!");
@@ -270,15 +311,24 @@ public class CreatePlaceCommand implements IBotCommand {
 		org.telegram.telegrambots.meta.api.objects.File file = absSender.execute(getFileMethod);
 
 		String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
+		log.info("Downloading photo from: {}", fileUrl);
 
 		try (InputStream inputStream = new URL(fileUrl).openStream();
 		     ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-			byte[] buffer = new byte[4096];
+			byte[] buffer = new byte[8192]; // Increased buffer size for better performance
 			int bytesRead;
+			long totalBytes = 0;
 			while ((bytesRead = inputStream.read(buffer)) != -1) {
 				outputStream.write(buffer, 0, bytesRead);
+				totalBytes += bytesRead;
 			}
-			return outputStream.toByteArray();
+			
+			byte[] result = outputStream.toByteArray();
+			log.info("Successfully downloaded photo: {} bytes", result.length);
+			return result;
+		} catch (Exception e) {
+			log.error("Failed to download photo from URL: {}", fileUrl, e);
+			throw new RuntimeException("Failed to download photo: " + e.getMessage(), e);
 		}
 	}
 }

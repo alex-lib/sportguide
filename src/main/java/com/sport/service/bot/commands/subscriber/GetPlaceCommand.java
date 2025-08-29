@@ -8,7 +8,6 @@ import com.sport.service.services.PlaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -28,7 +27,6 @@ import java.util.*;
 public class GetPlaceCommand implements IBotCommand {
 
     @Autowired
-    @Qualifier("placeServiceImpl")
     private  PlaceService placeService;
 
     private final CommandStateStore commandStateStore;
@@ -56,7 +54,7 @@ public class GetPlaceCommand implements IBotCommand {
         try {
             if (arguments.length == 0) {
                 sendMessage.setText("Выберите район Воронежа в котором хотите найти место:");
-                sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard());
+                sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
                 absSender.execute(sendMessage);
 
             } else if (arguments.length == 1) {
@@ -66,13 +64,17 @@ public class GetPlaceCommand implements IBotCommand {
 
             } else if (arguments.length == 2) {
                 sendMessage.setText("Выберите тип локации (улица/помещение):");
-                sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboard());
+                sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForGettingPlace());
                 absSender.execute(sendMessage);
 
             } else if (arguments.length == 3) {
                 List<Place> places = placeService.findByDistrict(District.valueOf(arguments[0]));
+
                 places = placeService.findByType(places, Type.valueOf(arguments[1]));
-                places = placeService.findByOutdoor(places, Boolean.valueOf(arguments[2]));
+
+                if (arguments[2].equals("false") || arguments[2].equals("true")) {
+                    places = placeService.findByOutdoor(places, Boolean.valueOf(arguments[2]));
+                }
 
                 if (places.isEmpty()) {
                     sendMessage.setText("По выбранным параметрам места не найдены.");
@@ -88,23 +90,28 @@ public class GetPlaceCommand implements IBotCommand {
                                 .toString());
 
                         absSender.execute(sendMessage);
-
                         byte[] photo = place.getPhoto();
 
                         if (photo != null) {
                             try (InputStream photoStream = new ByteArrayInputStream(photo)) {
                                 SendPhoto photoMessage = new SendPhoto();
                                 photoMessage.setChatId(message.getChatId());
-                                photoMessage.setPhoto(new InputFile(photoStream, "photo.png"));
+                                photoMessage.setPhoto(new InputFile(photoStream, "photo.jpg"));
+                                photoMessage.setCaption(place.getName()); // Add caption for better UX
                                 absSender.execute(photoMessage);
+                                log.info("Sent photo for place '{}': {} bytes", place.getName(), photo.length);
                             } catch (TelegramApiException e) {
-                                e.printStackTrace();
+                                log.error("Failed to send photo for place '{}': {}", place.getName(), e.getMessage());
+                                SendMessage fallbackMsg = new SendMessage();
+                                fallbackMsg.setChatId(message.getChatId());
+                                fallbackMsg.setText("Фото недоступно для места: " + place.getName());
+                                absSender.execute(fallbackMsg);
                             }
                         }
                     }
                 }
             }
-            } catch(Exception e){
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }

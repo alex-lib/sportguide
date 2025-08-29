@@ -31,10 +31,13 @@ public class GetUsersCountCommand implements IBotCommand {
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         SendMessage answer = new SendMessage();
         answer.setChatId(message.getChatId());
+        User user = message.getFrom();
 
-        int count = subscriberService.getUsersCount();
-
-        answer.setText("Количество юзеров: " + count);
+        if (subscriberService.checkIfAdmin(user.getId())) {
+            answer.setText("Количество юзеров: " + subscriberService.getUsersCount());
+        } else {
+            answer.setText("Вы не являетесь администратором.");
+        }
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

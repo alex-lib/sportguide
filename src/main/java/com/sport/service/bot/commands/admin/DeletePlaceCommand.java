@@ -1,4 +1,5 @@
 package com.sport.service.bot.commands.admin;
+import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
 import com.sport.service.sessions.CommandStateStore;
@@ -22,6 +23,8 @@ public class DeletePlaceCommand implements IBotCommand {
 
 	private final CommandStateStore commandStateStore;
 
+	private final SubscriberService subscriberService;
+
 	@Override
 	public String getCommandIdentifier() {
 		return "delete_place";
@@ -36,21 +39,19 @@ public class DeletePlaceCommand implements IBotCommand {
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
 		log.info("Call command delete_place by user: {}", user.getUserName());
-
 		Long chatId = message.getChatId();
-
-		commandStateStore.setCurrentCommand(user.getId(), "delete_place");
-
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId);
 
-		answer.setText("Удалить место можно только по точному имени ранее сохраненного места. " +
-				"Напишите название места, которое хотите удалить:");
-
-		String text = message.getText();
-		log.info("Received text: {}", text);
-
-
+		if (subscriberService.checkIfAdmin(user.getId())) {
+			commandStateStore.setCurrentCommand(user.getId(), "delete_place");
+			answer.setText("Удалить место можно только по точному имени ранее сохраненного места. " +
+					"Напишите название места, которое хотите удалить:");
+			String text = message.getText();
+			log.info("Received text: {}", text);
+		} else {
+			answer.setText("Вы не являетесь администратором.");
+		}
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {
