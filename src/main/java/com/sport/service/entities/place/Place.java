@@ -1,6 +1,8 @@
 package com.sport.service.entities.place;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "places", schema = "app_schema")
@@ -40,6 +42,8 @@ public class Place {
     @Column(name = "type", nullable = false)
     private Type type;
 
-    @Column(name = "photo", columnDefinition = "bytea")
+    @Lob
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(name = "photo")
     private byte[] photo;
 }

@@ -1,5 +1,0 @@
-DROP SCHEMA app_schema CASCADE;
-CREATE SCHEMA app_schema;
-
---DROP SCHEMA app_schema CASCADE;
---CREATE SCHEMA IF NOT EXISTS app_schema;

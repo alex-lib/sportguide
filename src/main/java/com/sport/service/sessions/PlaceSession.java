@@ -23,7 +23,6 @@ public class PlaceSession {
 		store.delete(key(chatId));
 	}
 
-
 	public PlaceDto createSession(Long chatId) {
 		PlaceDto dto = new PlaceDto();
 		store.put(key(chatId), dto, TTL_SECONDS);

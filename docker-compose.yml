@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
 
   postgres:
@@ -10,13 +10,26 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./stadium.png:/docker-entrypoint-initdb.d/stadium.png
     ports:
       - "5432:5432"
 
   redis:
     image: redis:7.0.12
+    container_name: redis
     ports:
       - "6379:6379"
+
+  app:
+    build: .
+    container_name: app
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres?currentSchema=app_schema
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379

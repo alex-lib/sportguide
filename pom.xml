@@ -54,18 +54,10 @@
 			<version>4.31.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<!--		<dependency>-->
-		<!--			<groupId>org.springframework.ai</groupId>-->
-		<!--			<artifactId>spring-ai-starter-model-openai</artifactId>-->
-		<!--		</dependency>-->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>32.0.1-jre</version>
-		</dependency>
-		<dependency>
-			<groupId>io.lettuce</groupId>
-			<artifactId>lettuce-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
