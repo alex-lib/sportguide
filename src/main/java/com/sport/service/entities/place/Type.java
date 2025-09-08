@@ -7,7 +7,7 @@ public enum Type {
     VOLLEYBALL_FIELD,
     TENNIS_COURT,
     PINGPONG_TABLE,
-    PADEL_CORT,
+    PADEL_COURT,
     RUNNING_PLACE,
     ICE_RING,
     SWIMMING_POOL,

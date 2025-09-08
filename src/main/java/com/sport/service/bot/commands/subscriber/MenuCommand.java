@@ -1,5 +1,4 @@
 package com.sport.service.bot.commands.subscriber;
-
 import com.sport.service.bot.commands.menu.AdminMenu;
 import com.sport.service.bot.commands.menu.SubscriberMenu;
 import com.sport.service.services.SubscriberService;

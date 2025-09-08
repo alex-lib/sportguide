@@ -44,8 +44,7 @@ public class ContactAdminCommand implements IBotCommand {
 		try {
 			absSender.execute(answer);
 		} catch (TelegramApiException e) {
-			log.error("Error occurred in /get_feedback command", e);
-
+			log.error("Error occurred in /contact_admin command", e);
 		}
 	}
 

@@ -1,4 +1,5 @@
 package com.sport.service.services.impl;
+
 import com.sport.service.entities.subscriber.RoleType;
 import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.repositories.SubscriberRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.User;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -76,5 +78,10 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Override
     public int getSubscriptionsCount() {
         return subscriberRepository.getSubscriptionsCount();
+    }
+
+    @Override
+    public List<Subscriber> findAll() {
+        return subscriberRepository.findAll();
     }
 }

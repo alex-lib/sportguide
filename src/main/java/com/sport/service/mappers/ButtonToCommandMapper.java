@@ -21,6 +21,7 @@ public class ButtonToCommandMapper {
         BUTTON_COMMANDS.put("\uD83E\uDE83 Связаться с админом", "/contact_admin");
         BUTTON_COMMANDS.put("🔎 Получить кол-во юзеров", "/get_users_count");
         BUTTON_COMMANDS.put("🔎 Получить кол-во подписавшихся юзеров", "/get_subscriptions_count");
+        BUTTON_COMMANDS.put("✉\uFE0F Отправить сообщение всем пользователям", "/send_message_to_all_users");
     }
 
     public static String mapButtonToCommand(String buttonText) {

@@ -7,13 +7,13 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
     @Override
     public Place placeDtoToPlace(PlaceDto dto) {
         return Place.builder()
-                .district(dto.getDistrict())
-                .type(dto.getType())
-                .outdoor(dto.getOutdoor())
                 .name(dto.getName())
+                .district(dto.getDistrict())
                 .address(dto.getAddress())
                 .description(dto.getDescription())
                 .webSite(dto.getWebSite())
+                .outdoor(dto.getOutdoor())
+                .type(dto.getType())
                 .photo(dto.getPhoto())
                 .build();
     }

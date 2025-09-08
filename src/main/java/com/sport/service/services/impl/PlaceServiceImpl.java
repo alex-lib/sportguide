@@ -1,6 +1,7 @@
 package com.sport.service.services.impl;
-import com.sport.service.entities.place.Place;
+
 import com.sport.service.entities.place.District;
+import com.sport.service.entities.place.Place;
 import com.sport.service.entities.place.Type;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.services.PlaceService;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -43,6 +45,9 @@ public class PlaceServiceImpl implements PlaceService {
             return placeRepository.findAll();
         } else {
             return placeRepository.findAllByDistrict(district);
+//            return placeRepository.findAll().stream()
+//            .filter(place -> place.getDistrict() == district)
+//            .toList();
         }
     }
 

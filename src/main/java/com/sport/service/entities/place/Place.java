@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(exclude = "photo")
 public class Place {
 
     @Id
@@ -17,11 +17,11 @@ public class Place {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "district")
+    @Column(name = "district", nullable = false)
     private District district;
 
     @Column(name = "address")
@@ -37,10 +37,9 @@ public class Place {
     private Boolean outdoor;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "type")
+    @Column(name = "type", nullable = false)
     private Type type;
 
-//    @Lob
-    @Column(name = "photo", columnDefinition = "BYTEA")
+    @Column(name = "photo", columnDefinition = "bytea")
     private byte[] photo;
 }

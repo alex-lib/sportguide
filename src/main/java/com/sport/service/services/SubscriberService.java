@@ -1,6 +1,8 @@
 package com.sport.service.services;
+
 import com.sport.service.entities.subscriber.Subscriber;
 import org.telegram.telegrambots.meta.api.objects.User;
+
 import java.util.List;
 
 public interface SubscriberService {
@@ -18,4 +20,6 @@ public interface SubscriberService {
     int getUsersCount();
 
     int getSubscriptionsCount();
+
+    List<Subscriber> findAll();
 }

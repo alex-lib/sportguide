@@ -1,16 +1,15 @@
 package com.sport.service.bot;
-import com.sport.service.bot.commands.admin.CreateEventCommand;
-import com.sport.service.bot.commands.admin.DeleteEventCommand;
-import com.sport.service.bot.commands.admin.DeletePlaceCommand;
+
+import com.sport.service.bot.commands.admin.*;
 import com.sport.service.bot.commands.subscriber.ContactAdminCommand;
 import com.sport.service.bot.commands.subscriber.GetPlaceCommand;
-import com.sport.service.bot.commands.admin.CreatePlaceCommand;
-import com.sport.service.mappers.ButtonToCommandMapper;
-import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.events.EventContactAdmin;
 import com.sport.service.events.EventCreatedEvent;
+import com.sport.service.events.EventSendMessageToAllUsers;
+import com.sport.service.mappers.ButtonToCommandMapper;
+import com.sport.service.sessions.CommandStateStore;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -23,20 +22,33 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 
 	private final CommandStateStore commandStateStore;
+
 	private final String botUsername;
+
 	private final CreatePlaceCommand createPlaceCommand;
+
 	private final GetPlaceCommand getPlaceCommand;
+
 	private final DeletePlaceCommand deletePlaceCommand;
+
 	private final CreateEventCommand createEventCommand;
+
 	private final DeleteEventCommand deleteEventCommand;
+
 	private final ContactAdminCommand contactAdminCommand;
+
+	private final SendMessageToAllUsersCommand sendMessageToAllUsersCommand;
+
 	private final Map<String, IBotCommand> commands = new HashMap<>();
 
 	public SportPlacesAndEventsBot(
@@ -49,7 +61,8 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 			CreateEventCommand createEventCommand,
 			DeleteEventCommand deleteEventCommand,
 			ContactAdminCommand contactAdminCommand,
-			CommandStateStore commandStateStore) {
+			CommandStateStore commandStateStore,
+			SendMessageToAllUsersCommand sendMessageToAllUsersCommand) {
 		super(botToken);
 		this.botUsername = botUsername;
 		this.createPlaceCommand = createPlaceCommand;
@@ -59,6 +72,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 		this.deleteEventCommand = deleteEventCommand;
 		this.contactAdminCommand = contactAdminCommand;
 		this.commandStateStore = commandStateStore;
+		this.sendMessageToAllUsersCommand = sendMessageToAllUsersCommand;
 		commandList.forEach(this::registerCommand);
 	}
 
@@ -77,7 +91,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 			CallbackQuery callback = update.getCallbackQuery();
 			if (callback == null || callback.getFrom() == null) return;
 
-			// 🚀 Ignore bot’s own callbacks
+			// Ignore bot’s own callbacks
 			if (callback.getFrom().getIsBot()) return;
 
 			long userId = callback.getFrom().getId();
@@ -92,6 +106,22 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 			log.info("currentCommand " + currentCommand);
 
 			if ("get_place".equals(currentCommand)) {
+				if ("BACK".equals(data)) {
+					List<String> selections = commandStateStore.getSelections(userId);
+					if (!selections.isEmpty()) {
+						// Remove last selection to go one step back
+						selections.remove(selections.size() - 1);
+					}
+					// Rebuild selections in store
+					commandStateStore.clearSelections(userId);
+					for (String sel : selections) {
+						commandStateStore.addSelection(userId, sel);
+					}
+					getPlaceCommand.processMessage(this, message, selections.toArray(new String[0]));
+					return;
+				}
+
+				// Regular forward selection
 				commandStateStore.addSelection(userId, data);
 				List<String> args = commandStateStore.getSelections(userId);
 				getPlaceCommand.processMessage(this, message, args.toArray(new String[0]));
@@ -100,6 +130,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 					commandStateStore.clearCurrentCommand(userId);
 				}
 			} else if ("create_place".equals(currentCommand)) {
+				// Delegate all create_place callbacks (including BACK) to the command
 				createPlaceCommand.processCallback(this, callback);
 				return;
 			} else if ("create_event".equals(currentCommand)) {
@@ -149,6 +180,11 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 				contactAdminCommand.processTextInput(this, message);
 				return;
 			}
+
+			if ("send_message_to_all_users".equals(currentCommand)) {
+				sendMessageToAllUsersCommand.processTextInput(this, message);
+				return;
+			}
 		}
 
 		if (update.hasMessage() && update.getMessage().hasPhoto()) {
@@ -175,6 +211,21 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 			}
 		} catch (TelegramApiException e) {
 			log.error("Failed to send notification of {}", event.getEvent());
+		}
+	}
+
+	@EventListener
+	private void setSendMessageToAllUsersCommand(EventSendMessageToAllUsers event) {
+		try {
+			for (Subscriber subscriber : event.getSubscribers()) {
+				SendMessage sendMessage = SendMessage.builder()
+						.chatId(subscriber.getId().toString())
+						.text(event.getText())
+						.build();
+				execute(sendMessage);
+			}
+		} catch (TelegramApiException e) {
+			log.error("Failed to send message to subscribers");
 		}
 	}
 
@@ -236,5 +287,9 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 		} else {
 			System.out.println("Команда не найдена: " + command);
 		}
+	}
+
+	private void sendPhotoInput(EventSendMessageToAllUsers sendMessageToAllUsers) {
+
 	}
 }

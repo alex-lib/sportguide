@@ -1,4 +1,5 @@
 package com.sport.service.bot.commands.subscriber;
+
 import com.sport.service.entities.Event;
 import com.sport.service.services.EventService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.util.List;
 
 @Service
@@ -40,9 +42,16 @@ public class GetUpcomingEventsCommand implements IBotCommand {
         answer.setChatId(message.getChatId());
 
         try {
-            for (Event event : events) {
-                answer.setText(createEventMessage(event));
+
+            if (events.isEmpty()) {
+                answer.setText("Ближайших событий нет");
                 absSender.execute(answer);
+            } else {
+
+                for (Event event : events) {
+                    answer.setText(createEventMessage(event));
+                    absSender.execute(answer);
+                }
             }
         } catch (TelegramApiException e) {
             log.error("Error occurred in /get_upcoming_events command", e);

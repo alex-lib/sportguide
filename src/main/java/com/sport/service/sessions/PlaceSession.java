@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 public class PlaceSession {
 
 	private static final String KEY_PREFIX = "session:place:";
-	private static final long TTL_SECONDS = 300;
+
+    private static final long TTL_SECONDS = 300;
 
 	private final RedisSessionStore store;
 
