@@ -27,7 +27,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand {
 
     @Override
     public String getCommandIdentifier() {
-        return "/send_message_to_all_users";
+        return "send_message_to_all_users";
     }
 
     @Override
