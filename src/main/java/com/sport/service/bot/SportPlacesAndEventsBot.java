@@ -215,7 +215,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 	}
 
 	@EventListener
-	private void setSendMessageToAllUsersCommand(EventSendMessageToAllUsers event) {
+    private void sendMessageToAllUsersCommand(EventSendMessageToAllUsers event) {
 		try {
 			for (Subscriber subscriber : event.getSubscribers()) {
 				SendMessage sendMessage = SendMessage.builder()
@@ -287,9 +287,5 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 		} else {
 			System.out.println("Команда не найдена: " + command);
 		}
-	}
-
-	private void sendPhotoInput(EventSendMessageToAllUsers sendMessageToAllUsers) {
-
 	}
 }

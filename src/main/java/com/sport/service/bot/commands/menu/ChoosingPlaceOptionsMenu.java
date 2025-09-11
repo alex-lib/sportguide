@@ -1,6 +1,8 @@
 package com.sport.service.bot.commands.menu;
+
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import java.util.List;
 
 public abstract class ChoosingPlaceOptionsMenu {
@@ -37,7 +39,7 @@ public abstract class ChoosingPlaceOptionsMenu {
                 createButtonRow("Улица", "true"),
                 createButtonRow("Помещение", "false"),
                 createButtonRow("Все", "all"),
-                createButtonRow("НАЗАД", "BACK")
+                createButtonRow("ВЫБРАТЬ ТИП МЕСТА ЗАНОВО", "BACK")
         );
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
@@ -46,14 +48,14 @@ public abstract class ChoosingPlaceOptionsMenu {
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Улица", "true"),
                 createButtonRow("Помещение", "false"),
-                createButtonRow("НАЗАД", "BACK")
+                createButtonRow("ВЫБРАТЬ ТИП МЕСТА ЗАНОВО", "BACK")
         );
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 
     public static InlineKeyboardMarkup createTypeKeyboard() {
         List<List<InlineKeyboardButton>> keyboard = List.of(
-                createButtonRow("Уличная спортивная площадка", "SPORT_GROUND"),
+                createButtonRow("Открытая уличная спортивная площадка", "SPORT_GROUND"),
                 createButtonRow("Футбольное поле", "FOOTBALL_FIELD"),
                 createButtonRow("Баскетбольное поле", "BASKETBALL_FIELD"),
                 createButtonRow("Волейбольное поле", "VOLLEYBALL_FIELD"),
@@ -64,7 +66,8 @@ public abstract class ChoosingPlaceOptionsMenu {
                 createButtonRow("Бассейн", "SWIMMING_POOL"),
                 createButtonRow("Беговая зона", "RUNNING_PLACE"),
                 createButtonRow("Зал для единоборств", "MARTIAL_ARTS_HALL"),
-                createButtonRow("НАЗАД", "BACK")
+                createButtonRow("Тренажерный зал", "GYM"),
+                createButtonRow("ВЫБРАТЬ РАЙОН ЗАНОВО", "BACK")
         );
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
