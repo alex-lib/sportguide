@@ -17,15 +17,21 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -102,6 +108,8 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 			if (!(callback.getMessage() instanceof Message)) return;
 			Message message = (Message) callback.getMessage();
 
+			deleteMenuAndMessage(message);
+
 			String currentCommand = commandStateStore.getCurrentCommand(userId);
 			log.info("currentCommand " + currentCommand);
 
@@ -130,7 +138,6 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 					commandStateStore.clearCurrentCommand(userId);
 				}
 			} else if ("create_place".equals(currentCommand)) {
-				// Delegate all create_place callbacks (including BACK) to the command
 				createPlaceCommand.processCallback(this, callback);
 				return;
 			} else if ("create_event".equals(currentCommand)) {
@@ -195,6 +202,43 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 			if ("create_place".equals(currentCommand)) {
 				createPlaceCommand.processPhotoInput(this, message);
 			}
+		}
+	}
+
+	private void deleteMenuAndMessage(Message message) {
+		try {
+			// 1️⃣ Сначала меняем меню на "⏳ Удаление меню..."
+			InlineKeyboardMarkup loadingKeyboard = InlineKeyboardMarkup.builder()
+					.keyboard(List.of(
+							List.of(InlineKeyboardButton.builder()
+									.text("⏳ Удаление меню...")
+									.callbackData("IGNORE") // "пустая" кнопка
+									.build())
+					))
+					.build();
+
+			EditMessageReplyMarkup loadingMarkup = new EditMessageReplyMarkup();
+			loadingMarkup.setChatId(message.getChatId());
+			loadingMarkup.setMessageId(message.getMessageId());
+			loadingMarkup.setReplyMarkup(loadingKeyboard);
+			execute(loadingMarkup);
+
+			// 2️⃣ Через 30 сек удаляем полностью сообщение (и текст, и клавиатуру)
+			Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+				try {
+					DeleteMessage deleteMessage = new DeleteMessage();
+					deleteMessage.setChatId(message.getChatId());
+					deleteMessage.setMessageId(message.getMessageId());
+					execute(deleteMessage);
+					log.info("Сообщение с меню удалено: {}", message.getMessageId());
+				} catch (TelegramApiException e) {
+					log.error("Не удалось удалить сообщение {} с id - {}: {}",
+							message.getText(), message.getMessageId(), e.getMessage());
+				}
+			}, 30, TimeUnit.SECONDS);
+
+		} catch (TelegramApiException e) {
+			log.error("Ошибка при замене клавиатуры", e);
 		}
 	}
 

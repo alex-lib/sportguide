@@ -1,27 +1,30 @@
 package com.sport.service.bot.commands.admin;
+
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
-import com.sport.service.mappers.place.PlaceMapper;
-import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.PlaceSession;
-import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.dto.PlaceDto;
-import com.sport.service.entities.place.*;
+import com.sport.service.entities.place.District;
+import com.sport.service.entities.place.Type;
+import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.services.PlaceService;
+import com.sport.service.services.SubscriberService;
+import com.sport.service.sessions.CommandStateStore;
+import com.sport.service.sessions.PlaceSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.*;
-import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
-import java.net.URL;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import com.sport.service.entities.place.District;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.User;
+import java.net.URL;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -124,6 +127,7 @@ public class CreatePlaceCommand implements IBotCommand {
 			try {
 				placeSession.save(chatId, dto);
 				absSender.execute(answer);
+
 			} catch (Exception e) {
 				log.error("Error sending back step", e);
 			}
@@ -202,6 +206,7 @@ public class CreatePlaceCommand implements IBotCommand {
 			handleTextInput(message, dto, answer);
 			placeSession.save(chatId, dto);
 			absSender.execute(answer);
+
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
 			sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз.");
@@ -288,6 +293,7 @@ public class CreatePlaceCommand implements IBotCommand {
 				answer.setText("Пожалуйста, отправьте фото:");
 			}
 			absSender.execute(answer);
+
 		} catch (Exception e) {
 			log.error("Error processing photo", e);
 			sendErrorMessage(absSender, chatId, "❌ Ошибка при создании места: " + e.getMessage());

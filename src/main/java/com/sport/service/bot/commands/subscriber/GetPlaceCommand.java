@@ -61,10 +61,12 @@ public class GetPlaceCommand implements IBotCommand {
                 sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
                 absSender.execute(sendMessage);
 
+
             } else if (arguments.length == 1) {
                 sendMessage.setText("Выберите тип локации:");
                 sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard());
                 absSender.execute(sendMessage);
+
 
             } else if (arguments.length == 2) {
 
@@ -75,6 +77,7 @@ public class GetPlaceCommand implements IBotCommand {
                     sendMessage.setText("Выберите тип локации (улица/помещение):");
                     sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForGettingPlace());
                     absSender.execute(sendMessage);
+
 
                 } else {
                     handlePlaces(absSender, message, arguments[0], arguments[1], "all");
