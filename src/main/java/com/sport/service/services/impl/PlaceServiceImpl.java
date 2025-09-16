@@ -45,9 +45,6 @@ public class PlaceServiceImpl implements PlaceService {
             return placeRepository.findAll();
         } else {
             return placeRepository.findAllByDistrict(district);
-//            return placeRepository.findAll().stream()
-//            .filter(place -> place.getDistrict() == district)
-//            .toList();
         }
     }
 
@@ -60,8 +57,8 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     public List<Place> findByOutdoor(List<Place> places, Boolean outdoor) {
-        return places.stream()
+        return outdoor != null ? places.stream()
                 .filter(place -> place.getOutdoor() == outdoor)
-                .toList();
+                .toList() : places;
     }
 }

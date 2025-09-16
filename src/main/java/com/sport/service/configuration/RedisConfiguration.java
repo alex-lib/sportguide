@@ -17,16 +17,13 @@ public class RedisConfiguration {
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-
         StringRedisSerializer keySerializer = new StringRedisSerializer();
-
         ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(
                 BasicPolymorphicTypeValidator.builder().allowIfSubType(Object.class).build(),
                 ObjectMapper.DefaultTyping.NON_FINAL
         );
         Jackson2JsonRedisSerializer<Object> valueSerializer = new Jackson2JsonRedisSerializer<>(mapper, Object.class);
-
         template.setKeySerializer(keySerializer);
         template.setHashKeySerializer(keySerializer);
         template.setValueSerializer(valueSerializer);

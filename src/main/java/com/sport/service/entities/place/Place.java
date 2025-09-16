@@ -46,4 +46,7 @@ public class Place {
     @JdbcTypeCode(SqlTypes.BINARY)
     @Column(name = "photo")
     private byte[] photo;
+
+    @Column(name = "coordinates")
+    private String coordinates;
 }

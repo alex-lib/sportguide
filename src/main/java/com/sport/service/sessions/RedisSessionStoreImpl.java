@@ -1,16 +1,16 @@
 package com.sport.service.sessions;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+
 import java.time.Duration;
 
 @Component
-public class RedisRedisSessionStoreImpl implements RedisSessionStore {
+@RequiredArgsConstructor
+public class RedisSessionStoreImpl implements RedisSessionStore {
 
 	private final RedisTemplate<String, Object> redis;
-
-	public RedisRedisSessionStoreImpl(RedisTemplate<String, Object> redis) {
-		this.redis = redis;
-	}
 
 	@Override
 	public <T> T get(String key, Class<T> type) {

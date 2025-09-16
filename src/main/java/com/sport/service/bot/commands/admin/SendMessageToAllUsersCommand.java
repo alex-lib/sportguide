@@ -38,50 +38,52 @@ public class SendMessageToAllUsersCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command send_message_to_all_users by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
+        answer.setChatId(chatId);
 
-        commandStateStore.setCurrentCommand(user.getId(), "send_message_to_all_users");
-
-        answer.setText("📩 Напишите, чтто вы хотите отправить подисчикам:");
+        if (subscriberService.checkIfAdmin(userId)) {
+            commandStateStore.setCurrentCommand(userId, "send_message_to_all_users");
+            answer.setText("📩 Напишите, что вы хотите отправить подисчикам:");
+        }
         try {
+            answer.setChatId(chatId.toString());
             absSender.execute(answer);
         } catch (TelegramApiException e) {
-            log.error("Error occurred in /get_feedback command", e);
+            log.error("Error occurred in /send_message_to_all_users command", e);
         }
     }
 
     public void processTextInput(AbsSender absSender, Message message) {
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
-        User user = message.getFrom();
+
         if (!"send_message_to_all_users".equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
+
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
         String text = message.getText();
         log.info("Received text: {}", text);
-
         eventPublisher.publishEvent(new EventSendMessageToAllUsers(text, subscriberService.findAll()));
-
         commandStateStore.clearCurrentCommand(userId);
-
-        answer.setText("Сообщение отправлено всем пользователям.");
-
+        answer.setText("Сообщение отправлено всем пользователям ✅");
         try {
             absSender.execute(answer);
         } catch (Exception e) {
             log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз.");
+            sendErrorMessage(absSender, chatId);
         }
     }
 
-    private void sendErrorMessage(AbsSender absSender, Long chatId, String message) {
+    private void sendErrorMessage(AbsSender absSender, Long chatId) {
         try {
             SendMessage errorMsg = new SendMessage();
             errorMsg.setChatId(chatId.toString());
-            errorMsg.setText(message);
+            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
             absSender.execute(errorMsg);
         } catch (Exception e) {
             log.error("Error sending error message", e);

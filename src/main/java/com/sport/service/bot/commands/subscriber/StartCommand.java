@@ -32,12 +32,13 @@ public class StartCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
-        log.info("Call command start by user: {}, with id: {}",user.getUserName(), user.getId());
-
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command start by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
+        answer.setChatId(chatId);
 
-        if (subscriberService.checkIfAdmin(user.getId())) {
+        if (subscriberService.checkIfAdmin(userId)) {
             answer.setText(AdminMenu.ADMIN_MENU);
             AdminMenu adminMenu = new AdminMenu(answer);
             adminMenu.getAdminMenu();
@@ -47,7 +48,6 @@ public class StartCommand implements IBotCommand {
             SubscriberMenu subscriberMenu = new SubscriberMenu(answer);
             subscriberMenu.getSubscriberMenu();
         }
-
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

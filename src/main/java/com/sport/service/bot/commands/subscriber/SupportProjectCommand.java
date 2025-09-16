@@ -27,16 +27,17 @@ public class SupportProjectCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
-        log.info("Call command support_project by user: {}",user.getUserName());
-
+        Long userId = user.getId();
+        Long chatId = message.getChatId();
+        log.info("Call command support_project by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
-
+        answer.setChatId(chatId);
         answer.setText("""
                 \s
                 USDT
-                address:
-                network:
+                address: 0x53a43924e55251d4a73023a4ee0e7188ffc978fa
+                network: Arbitrum One
+                THANK YOU🙏
                 \s""");
         try {
             absSender.execute(answer);

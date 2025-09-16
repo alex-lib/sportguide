@@ -32,12 +32,13 @@ public class MenuCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
-        log.info("Call command menu by user: {}, with id: {}",user.getUserName(), user.getId());
-
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command menu by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
+        answer.setChatId(chatId);
 
-        if (subscriberService.checkIfAdmin(user.getId())) {
+        if (subscriberService.checkIfAdmin(userId)) {
             AdminMenu adminMenu = new AdminMenu(answer);
             adminMenu.getAdminMenu();
         } else {
@@ -45,9 +46,7 @@ public class MenuCommand implements IBotCommand {
             SubscriberMenu subscriberMenu = new SubscriberMenu(answer);
             subscriberMenu.getSubscriberMenu();
         }
-
-        answer.setText("Меню с кнопками представлены ниже.");
-
+        answer.setText("Меню с кнопками представлены ниже ⬇\uFE0F");
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

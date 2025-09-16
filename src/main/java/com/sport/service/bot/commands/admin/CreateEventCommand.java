@@ -1,12 +1,13 @@
 package com.sport.service.bot.commands.admin;
+
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.mappers.event.EventMapper;
-import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.EventSession;
-import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.services.EventService;
+import com.sport.service.services.SubscriberService;
+import com.sport.service.sessions.CommandStateStore;
+import com.sport.service.sessions.EventSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
+
 import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
@@ -33,9 +35,15 @@ public class CreateEventCommand implements IBotCommand {
 
 	private final SubscriberService subscriberService;
 
-	private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
+    private final Pattern DATE_PATTERN = Pattern.compile(
+            "^([1-9]\\d{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$");
 
-	private static final Pattern TIME_PATTERN = Pattern.compile("^\\d{2}:\\d{2}$");
+    private final Pattern TIME_PATTERN = Pattern.compile(
+            "^([01]\\d|2[0-3]):([0-5]\\d)$");
+
+    private final String sessionExpired = "Сессия истекла. Начните заново с /create_event \uD83D\uDD04";
+
+    private final String unknownStep = "Неизвестный шаг. Начните заново с /create_event \uD83D\uDD04";
 
 	@Override
 	public String getCommandIdentifier() {
@@ -50,23 +58,19 @@ public class CreateEventCommand implements IBotCommand {
 	@Override
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
-		log.info("Call command create_event by user: {}", user.getUserName());
-		SendMessage answer = new SendMessage();
+        Long userId = user.getId();
 		Long chatId = message.getChatId();
+        log.info("Call command create_event by userId={}, username={}", userId, user.getUserName());
+        SendMessage answer = new SendMessage();
 		answer.setChatId(chatId.toString());
-		if (subscriberService.checkIfAdmin(user.getId())) {
 
+        if (subscriberService.checkIfAdmin(userId)) {
 			EventDto dto = eventSession.createSession(chatId);
 			dto.setStep(1);
 			eventSession.save(chatId, dto);
-			commandStateStore.setCurrentCommand(user.getId(), "create_event");
-
-			answer.setText("Выберите район:");
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
-		} else {
-			answer.setText("Вы не являетесь администратором.");
+            commandStateStore.setCurrentCommand(userId, "create_event");
+            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
 		}
-
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {
@@ -77,6 +81,8 @@ public class CreateEventCommand implements IBotCommand {
 	public void processCallback(AbsSender absSender, CallbackQuery callback) {
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
 		if (!"create_event".equals(commandStateStore.getCurrentCommand(userId))) {
 			log.warn("User {} not in create_event session", userId);
@@ -86,16 +92,13 @@ public class CreateEventCommand implements IBotCommand {
 		EventDto dto = eventSession.getIfExists(chatId);
 		if (dto == null) {
 			log.warn("No session found for chatId: {}", chatId);
-			sendErrorMessage(absSender, chatId, "Сессия истекла. Начните заново с /create_event");
+            sendErrorMessage(absSender, chatId, sessionExpired);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
 
 		String data = callback.getData();
 		log.info("Processing callback for create_event: step={}, data={}", dto.getStep(), data);
-
-		SendMessage answer = new SendMessage();
-		answer.setChatId(chatId.toString());
 
 		try {
 			if (dto.getStep() == 1) {
@@ -107,25 +110,21 @@ public class CreateEventCommand implements IBotCommand {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error processing callback", e);
-			sendErrorMessage(absSender, chatId, "Произошла ошибка. Попробуйте еще раз.");
+            sendErrorMessage(absSender, chatId, "Произошла ошибка. Попробуйте еще раз \uD83D\uDD04");
 		}
 	}
 
-
 	private void handleDistrictStep(EventDto dto, String data, SendMessage answer) {
-		try {
-			dto.setDistrict(District.valueOf(data));
-			answer.setText("Введите наименование события:");
-			dto.setStep(2);
-		} catch (IllegalArgumentException e) {
-			answer.setText("Неверный район. Попробуйте еще раз:");
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
-		}
+        dto.setDistrict(District.valueOf(data));
+        answer.setText("\uD83D\uDD8A Введите наименование события:");
+        dto.setStep(2);
 	}
 
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
 		if (!"create_event".equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
@@ -133,13 +132,10 @@ public class CreateEventCommand implements IBotCommand {
 
 		EventDto dto = eventSession.getIfExists(chatId);
 		if (dto == null) {
-			sendErrorMessage(absSender, chatId, "Сессия истекла. Начните заново с /create_event");
+            sendErrorMessage(absSender, chatId, sessionExpired);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
-
-		SendMessage answer = new SendMessage();
-		answer.setChatId(chatId.toString());
 
 		try {
 			handleTextInput(message, dto, answer);
@@ -150,14 +146,15 @@ public class CreateEventCommand implements IBotCommand {
 				eventService.create(eventMapper.eventDtoToEvent(dto));
 				SendMessage successMsg = new SendMessage();
 				successMsg.setChatId(chatId.toString());
-				successMsg.setText("✅ Событие создано!");
+                successMsg.setText("Событие создано ✅");
 				absSender.execute(successMsg);
+                log.info("Event created successfully by userId={}, eventName={}", userId, dto.getName());
 				eventSession.clear(chatId);
 				commandStateStore.clearCurrentCommand(userId);
 			}
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-			sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз.");
+            sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
 		}
 	}
 
@@ -169,33 +166,33 @@ public class CreateEventCommand implements IBotCommand {
 		switch (dto.getStep()) {
 			case 2 -> {
 				dto.setName(text);
-				answer.setText("Введите адрес:");
+                answer.setText("\uD83D\uDD8A Введите адрес:");
 				dto.setStep(3);
 			}
 			case 3 -> {
 				dto.setAddress(text);
-				answer.setText("Введите описание:");
+                answer.setText("\uD83D\uDD8A Введите описание:");
 				dto.setStep(4);
 			}
 			case 4 -> {
 				dto.setDescription(text);
-				answer.setText("Введите ссылку на событие (или '-' если нет):");
+                answer.setText("\uD83D\uDD8A Введите ссылку на событие (или '-' если нет):");
 				dto.setStep(5);
 			}
 			case 5 -> {
 				dto.setLink(text);
-				answer.setText("Введите имя места где будет организовано событие:");
+                answer.setText("\uD83D\uDD8A Введите имя места где будет организовано событие:");
 				dto.setStep(6);
 			}
 			case 6 -> {
 				dto.setPlaceName(text);
-				answer.setText("Введите дату в формате YYYY-MM-DD:");
+                answer.setText("\uD83D\uDD8A Введите дату в формате YYYY-MM-DD:");
 				dto.setStep(7);
 			}
 			case 7 -> {
 				if (isValidDate(text)) {
 					dto.setDate(text);
-					answer.setText("Введите время в формате HH:mm:");
+                    answer.setText("\uD83D\uDD8A Введите время в формате HH:mm:");
 					dto.setStep(8);
 				} else {
 					answer.setText("Неверный формат даты. Введите дату в формате YYYY-MM-DD:");
@@ -204,17 +201,13 @@ public class CreateEventCommand implements IBotCommand {
 			case 8 -> {
 				if (isValidTime(text)) {
 					dto.setTime(text);
-					answer.setText("Все данные получены. Создаю событие...");
+                    answer.setText("Все данные получены. Создаю событие ⏳");
 					dto.setStep(9);
 				} else {
 					answer.setText("Неверный формат времени. Введите время в формате HH:mm:");
 				}
 			}
-			default -> {
-				answer.setText("Неизвестный шаг. Начните заново с /create_event");
-				eventSession.clear(chatId);
-				commandStateStore.clearCurrentCommand(userId);
-			}
+            default -> handleUnknownStep(chatId, userId, answer);
 		}
 	}
 
@@ -230,7 +223,7 @@ public class CreateEventCommand implements IBotCommand {
 	}
 
 	private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
-		answer.setText("Неизвестный шаг. Начните заново с /create_event");
+        answer.setText(unknownStep);
 		eventSession.clear(chatId);
 		commandStateStore.clearCurrentCommand(userId);
 	}
