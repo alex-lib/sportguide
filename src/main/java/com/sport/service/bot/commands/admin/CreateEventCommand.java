@@ -41,9 +41,9 @@ public class CreateEventCommand implements IBotCommand {
     private final Pattern TIME_PATTERN = Pattern.compile(
             "^([01]\\d|2[0-3]):([0-5]\\d)$");
 
-    private final String sessionExpired = "Сессия истекла. Начните заново с /create_event \uD83D\uDD04";
+	private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
 
-    private final String unknownStep = "Неизвестный шаг. Начните заново с /create_event \uD83D\uDD04";
+	private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
 
 	@Override
 	public String getCommandIdentifier() {

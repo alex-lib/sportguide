@@ -42,11 +42,11 @@ public class CreatePlaceCommand implements IBotCommand {
 
 	private final SubscriberService subscriberService;
 
-    private final String sessionExpired = "Сессия истекла. Начните заново с /create_place \uD83D\uDD04";
+	private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
 
-    private final String unknownStep = "Неизвестный шаг. Начните заново с /create_place \uD83D\uDD04";
+	private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
 
-    private final String unexpectedPhoto = "Неожиданное фото. Начните заново с /create_place \uD83D\uDD04";
+	private final String unexpectedPhoto = "Неожиданное фото. Начните заново \uD83D\uDD04";
 
 	@Value("${telegram.bot.token}")
 	private String botToken;

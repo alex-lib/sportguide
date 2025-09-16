@@ -36,9 +36,9 @@ public class GetPlaceCommand implements IBotCommand {
 
     private final CommandStateStore commandStateStore;
 
-    private final String sessionExpired = "Сессия истекла. Начните заново с /get_place \uD83D\uDD04";
+    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
 
-    private final String unknownStep = "Неизвестный шаг. Начните заново с /get_place \uD83D\uDD04";
+    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
 
     @Override
     public String getCommandIdentifier() {
@@ -224,7 +224,7 @@ public class GetPlaceCommand implements IBotCommand {
                 float latitude = Float.parseFloat(coords[0].trim());
                 float longitude = Float.parseFloat(coords[1].trim());
                 String mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
-                caption += String.format("\n🗺️ [Открыть в Google maps](%s)", mapLink);
+                caption += String.format("\n🗺️ [Посмотреть местоположение места в Google maps](%s)", mapLink);
             } catch (Exception e) {
                 log.error("Failed to parse coordinates for place {}", place.getName(), e);
                 caption += "\n\uD83E\uDDED Координаты: " + place.getCoordinates();
