@@ -30,30 +30,24 @@ public class StopNotificationsCommand implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-
-
         User user = message.getFrom();
-        log.info("Call command stop_notifications by user: {}", user.getUserName());
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command stop_notifications by userId={}, username={}", userId, user.getUserName());
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
-        // 🚀 Ignore bot’s own messages immediately
         if (user.getIsBot()) {
             return;
         }
 
-        Long chatId = message.getChatId();
-        Long userId = message.getFrom().getId();
-
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
-
         Subscriber subscriber = subscriberService.findById(userId);
-
         if (subscriber.getGetEvents().equals(Boolean.FALSE)) {
-            answer.setText("Вы не подписаны на получение уведомлений");
+            answer.setText("Вы не подписаны на получение уведомлений \uD83D\uDC4C");
         } else {
             subscriber.setGetEvents(Boolean.FALSE);
-            subscriberService.updateSubscriber(subscriber, user.getId());
-            answer.setText("Теперь вы не будете получать уведомление при создании события");
+            subscriberService.updateSubscriber(subscriber, userId);
+            answer.setText("Теперь вы не будете получать уведомление при создании события ✅");
         }
         try {
             absSender.execute(answer);

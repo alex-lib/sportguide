@@ -26,5 +26,7 @@ public class PlaceDto {
 
     private byte[] photo;
 
+    private String coordinates;
+
     private int step = 0;
 }

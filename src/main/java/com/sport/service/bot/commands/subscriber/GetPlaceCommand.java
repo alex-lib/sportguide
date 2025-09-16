@@ -1,18 +1,20 @@
 package com.sport.service.bot.commands.subscriber;
 
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
 import com.sport.service.entities.place.Type;
 import com.sport.service.services.PlaceService;
 import com.sport.service.sessions.CommandStateStore;
+import com.sport.service.sessions.PlaceSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -20,9 +22,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -30,10 +30,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetPlaceCommand implements IBotCommand {
 
-    @Autowired
-    private PlaceService placeService;
+    private final PlaceSession placeSession;
+
+    private final PlaceService placeService;
 
     private final CommandStateStore commandStateStore;
+
+    private final String sessionExpired = "Сессия истекла. Начните заново с /get_place \uD83D\uDD04";
+
+    private final String unknownStep = "Неизвестный шаг. Начните заново с /get_place \uD83D\uDD04";
 
     @Override
     public String getCommandIdentifier() {
@@ -48,110 +53,202 @@ public class GetPlaceCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
-        log.info("Call command get_place by user: {}", user.getUserName());
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command get_place by userId={}, username={}", userId, user.getUserName());
 
-        commandStateStore.setCurrentCommand(user.getId(), "get_place");
+        PlaceDto dto = placeSession.createSession(chatId);
+        dto.setStep(1);
+        placeSession.save(chatId, dto);
+        commandStateStore.setCurrentCommand(userId, "get_place");
+        showStepMenu(absSender, chatId, dto, userId);
+    }
 
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId());
+    public void processCallback(AbsSender absSender, CallbackQuery callback) {
+        Long chatId = callback.getMessage().getChatId();
+        Long userId = callback.getFrom().getId();
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
+
+        if (!"get_place".equals(commandStateStore.getCurrentCommand(userId))) {
+            log.warn("User {} not in get_place session", userId);
+            return;
+        }
+
+        PlaceDto dto = placeSession.getIfExists(chatId);
+        if (dto == null) {
+            sendError(absSender, chatId, sessionExpired);
+            commandStateStore.clearCurrentCommand(userId);
+            return;
+        }
+
+        String data = callback.getData();
+        log.info("Processing callback for get_place: step={}, data={}", dto.getStep(), data);
+
+        if ("BACK".equals(data)) {
+            if (dto.getStep() == 2) {
+                dto.setType(null);
+                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+                dto.setStep(1);
+            } else if (dto.getStep() == 3) {
+                dto.setOutdoor(null);
+                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard(answer));
+                dto.setStep(2);
+            } else {
+                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+                dto.setStep(1);
+            }
+            try {
+                placeSession.save(chatId, dto);
+                absSender.execute(answer);
+            } catch (Exception e) {
+                log.error("Error sending back step", e);
+            }
+            return;
+        }
 
         try {
-            if (arguments.length == 0) {
-                sendMessage.setText("Выберите район Воронежа в котором хотите найти место:");
-                sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGettingPlace());
-                absSender.execute(sendMessage);
-
-
-            } else if (arguments.length == 1) {
-                sendMessage.setText("Выберите тип локации:");
-                sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard());
-                absSender.execute(sendMessage);
-
-
-            } else if (arguments.length == 2) {
-
-                if (!arguments[1].equals("SPORT_GROUND")
-                        && !arguments[1].equals("SWIMMING_POOL")
-                        && !arguments[1].equals("MARTIAL_ARTS_HALL")
-                        && !arguments[1].equals("GYM")) {
-                    sendMessage.setText("Выберите тип локации (улица/помещение):");
-                    sendMessage.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForGettingPlace());
-                    absSender.execute(sendMessage);
-
-
-                } else {
-                    handlePlaces(absSender, message, arguments[0], arguments[1], "all");
+            switch (dto.getStep()) {
+                case 1 -> {
+                    dto.setDistrict(District.valueOf(data));
+                    dto.setStep(2);
+                    placeSession.save(chatId, dto);
+                    showStepMenu(absSender, chatId, dto, userId);
                 }
-
-            } else if (arguments.length == 3) {
-                String district = arguments[0];
-                String type = arguments[1];
-                String outdoor = arguments[2];
-                handlePlaces(absSender, message, district, type, outdoor);
-
-            } else {
-                log.warn("Unexpected number of arguments: {}", Arrays.toString(arguments));
-                sendMessage.setText("Неверный формат команды. Попробуйте снова.");
-                absSender.execute(sendMessage);
+                case 2 -> {
+                    dto.setType(Type.valueOf(data));
+                    if (needsOutdoorStep(data)) {
+                        dto.setStep(3);
+                        placeSession.save(chatId, dto);
+                        showStepMenu(absSender, chatId, dto, userId);
+                    } else {
+                        dto.setStep(4);
+                        dto.setOutdoor(null);
+                        placeSession.save(chatId, dto);
+                        handlePlaces(absSender, chatId, dto);
+                        cleanupSession(chatId, userId);
+                    }
+                }
+                case 3 -> {
+                    if (data.equals("null")) {
+                        dto.setOutdoor(null);
+                    } else {
+                        dto.setOutdoor(Boolean.parseBoolean(data));
+                    }
+                    dto.setStep(4);
+                    placeSession.save(chatId, dto);
+                    handlePlaces(absSender, chatId, dto);
+                    cleanupSession(chatId, userId);
+                }
+                default -> {
+                    sendError(absSender, chatId, unknownStep);
+                    cleanupSession(chatId, userId);
+                }
             }
         } catch (Exception e) {
-            log.error("Error while processing get_place command", e);
-            try {
-                sendMessage.setText("Произошла ошибка при обработке запроса. Попробуйте снова позже.");
-                absSender.execute(sendMessage);
-            } catch (TelegramApiException ex) {
-                log.error("Failed to send error message to user", ex);
-            }
+            log.error("Error processing callback in get_place", e);
+            sendError(absSender, chatId, "Ошибка. Попробуйте снова \uD83D\uDD04");
         }
     }
 
-    private void handlePlaces(AbsSender absSender, Message message,
-                              String districtArg, String typeArg, String outdoorArg) {
-        List<Place> places = placeService.findByDistrict(District.valueOf(districtArg));
-        places = placeService.findByType(places, Type.valueOf(typeArg));
+    private boolean needsOutdoorStep(String type) {
+        return !(type.equals("SPORT_GROUND") || type.equals("GYM") ||
+                type.equals("SWIMMING_POOL") || type.equals("MARTIAL_ARTS_HALL"));
+    }
 
-        if ("true".equals(outdoorArg) || "false".equals(outdoorArg)) {
-            places = placeService.findByOutdoor(places, Boolean.parseBoolean(outdoorArg));
+    private void showStepMenu(AbsSender absSender, Long chatId, PlaceDto dto, Long userId) {
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
+        try {
+            switch (dto.getStep()) {
+                case 1 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGetting(answer));
+                case 2 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard(answer));
+                case 3 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForGettingPlace(answer));
+                default -> handleUnknownStep(chatId, userId, answer);
+            }
+            absSender.execute(answer);
+        } catch (Exception e) {
+            log.error("Error showing step menu", e);
         }
+    }
 
+    private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
+        answer.setText(unknownStep);
+        cleanupSession(chatId, userId);
+    }
+
+    private void handlePlaces(AbsSender absSender, Long chatId, PlaceDto dto) {
+        List<Place> places = placeService.findByDistrict(dto.getDistrict());
+        places = placeService.findByType(places, dto.getType());
+        places = placeService.findByOutdoor(places, dto.getOutdoor());
         if (places.isEmpty()) {
-            try {
-                absSender.execute(new SendMessage(message.getChatId().toString(), "По выбранным параметрам места не найдены."));
-            } catch (TelegramApiException e) {
-                throw new RuntimeException(e);
+            sendText(absSender, chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
+            return;
+        }
+        for (Place place : places) {
+            sendPlaceInfo(absSender, chatId, place);
+        }
+    }
+
+    private void sendPlaceInfo(AbsSender absSender, Long chatId, Place place) {
+        byte[] photo = place.getPhoto();
+        String caption = createCaption(place);
+        if (photo != null && photo.length > 0) {
+            try (InputStream photoStream = new ByteArrayInputStream(photo)) {
+                SendPhoto photoMessage = new SendPhoto();
+                photoMessage.setChatId(chatId.toString());
+                photoMessage.setPhoto(new InputFile(photoStream, "place.jpg"));
+                photoMessage.setCaption(caption);
+                photoMessage.setParseMode("Markdown");
+                absSender.execute(photoMessage);
+            } catch (Exception e) {
+                log.error("Failed to send photo for place {}", place.getName(), e);
+                sendText(absSender, chatId, caption);
             }
         } else {
-            for (Place place : places) {
-                byte[] photo = place.getPhoto();
+            sendText(absSender, chatId, caption);
+        }
+    }
 
-                if (photo != null) {
-                    try (InputStream photoStream = new ByteArrayInputStream(photo)) {
-                        SendPhoto photoMessage = new SendPhoto();
-                        photoMessage.setChatId(message.getChatId());
-                        photoMessage.setPhoto(new InputFile(photoStream, "photo.jpg"));
-                        photoMessage.setCaption(new StringBuilder()
-                                .append(place.getName()).append("\n")
-                                .append(place.getAddress()).append("\n")
-                                .append(place.getDescription()).append("\n")
-                                .append(place.getWebSite())
-                                .toString()); // Add caption for better UX
-                        absSender.execute(photoMessage);
-                        log.info("Sent photo for place '{}': {} bytes", place.getName(), photo.length);
-                    } catch (TelegramApiException e) {
-                        log.error("Failed to send photo for place '{}': {}", place.getName(), e.getMessage());
-                        SendMessage fallbackMsg = new SendMessage();
-                        fallbackMsg.setChatId(message.getChatId());
-                        fallbackMsg.setText("Фото недоступно для места: " + place.getName());
-                        try {
-                            absSender.execute(fallbackMsg);
-                        } catch (TelegramApiException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+    private String createCaption(Place place) {
+        String caption = String.format(
+                "\uD83D\uDD39 Название: %s\n📍 Адрес: %s\n📝 Описание: %s\n🌐 Ссылка: %s",
+                place.getName(),
+                place.getAddress(),
+                place.getDescription() != null ? place.getDescription() : "Описание не указано \uD83E\uDD37\u200D♂\uFE0F",
+                !place.getWebSite().equals("-") ? place.getWebSite() : "Сайт отсутствует \uD83E\uDD37\u200D♂\uFE0F"
+        );
+        if (!place.getCoordinates().equals("-")) {
+            try {
+                String[] coords = place.getCoordinates().split(",");
+                float latitude = Float.parseFloat(coords[0].trim());
+                float longitude = Float.parseFloat(coords[1].trim());
+                String mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+                caption += String.format("\n🗺️ [Открыть в Google maps](%s)", mapLink);
+            } catch (Exception e) {
+                log.error("Failed to parse coordinates for place {}", place.getName(), e);
+                caption += "\n\uD83E\uDDED Координаты: " + place.getCoordinates();
             }
+        } else {
+            caption += "\n\uD83E\uDDED Координаты отсутствуют \uD83E\uDD37\u200D♂\uFE0F";
+        }
+        return caption;
+    }
+
+    private void cleanupSession(Long chatId, Long userId) {
+        placeSession.clear(chatId);
+        commandStateStore.clearCurrentCommand(userId);
+    }
+
+    private void sendError(AbsSender absSender, Long chatId, String msg) {
+        sendText(absSender, chatId, "⚠️ " + msg);
+    }
+
+    private void sendText(AbsSender absSender, Long chatId, String text) {
+        try {
+            absSender.execute(new SendMessage(chatId.toString(), text));
+        } catch (TelegramApiException e) {
+            log.error("Error sending message", e);
         }
     }
 }

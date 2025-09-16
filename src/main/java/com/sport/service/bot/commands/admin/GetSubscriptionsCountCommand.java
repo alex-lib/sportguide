@@ -30,18 +30,19 @@ public class GetSubscriptionsCountCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command get_subscriptions_count by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
+        answer.setChatId(chatId);
 
-        if (subscriberService.checkIfAdmin(user.getId())) {
-            answer.setText("Количество подписок на получение событий: " + subscriberService.getSubscriptionsCount());
-        } else {
-            answer.setText("Вы не являетесь администратором.");
+        if (subscriberService.checkIfAdmin(userId)) {
+            answer.setText("\uD83E\uDDEE Количество подписок на получение событий: " + subscriberService.getSubscriptionsCount());
         }
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {
-            log.error("Error occurred in /get_users_count command", e);
+            log.error("Error occurred in /get_subscriptions_count command", e);
         }
     }
 }

@@ -29,14 +29,15 @@ public class GetUsersCountCommand implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-        SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
         User user = message.getFrom();
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command get_users_count by userId={}, username={}", userId, user.getUserName());
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId);
 
-        if (subscriberService.checkIfAdmin(user.getId())) {
-            answer.setText("Количество юзеров: " + subscriberService.getUsersCount());
-        } else {
-            answer.setText("Вы не являетесь администратором.");
+        if (subscriberService.checkIfAdmin(userId)) {
+            answer.setText("\uD83E\uDDEE Количество юзеров: " + subscriberService.getUsersCount());
         }
         try {
             absSender.execute(answer);

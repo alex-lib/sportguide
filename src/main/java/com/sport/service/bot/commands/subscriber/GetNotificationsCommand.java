@@ -31,24 +31,20 @@ public class GetNotificationsCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
-        log.info("Call command get_notifications by user: {}", user.getUserName());
-
+        Long userId = user.getId();
         Long chatId = message.getChatId();
-        Long userId = message.getFrom().getId();
-
+        log.info("Call command get_notifications by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
         Subscriber subscriber = subscriberService.findById(userId);
-
         if (subscriber.getGetEvents().equals(Boolean.TRUE)) {
-            answer.setText("Вы уже подписаны на получение уведомлений");
+            answer.setText("Вы уже подписаны на получение уведомлений \uD83D\uDC4C");
         } else {
             subscriber.setGetEvents(Boolean.TRUE);
             subscriberService.updateSubscriber(subscriber, user.getId());
-            answer.setText("Теперь вы будете получать уведомление при создании события");
+            answer.setText("Теперь вы будете получать уведомление при создании события ✅");
         }
-
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

@@ -34,20 +34,17 @@ public class GetUpcomingEventsCommand implements IBotCommand {
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
-        log.info("Call command get_upcoming_events by user: {}", user.getUserName());
-
-        List<Event> events = eventService.findAll();
-
+        Long chatId = message.getChatId();
+        Long userId = user.getId();
+        log.info("Call command get_upcoming_events by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
-        answer.setChatId(message.getChatId());
-
+        answer.setChatId(chatId);
+        List<Event> events = eventService.findAll();
         try {
-
             if (events.isEmpty()) {
-                answer.setText("Ближайших событий нет");
+                answer.setText("Ближайших событий нет \uD83E\uDD37\u200D♂\uFE0F");
                 absSender.execute(answer);
             } else {
-
                 for (Event event : events) {
                     answer.setText(createEventMessage(event));
                     absSender.execute(answer);
@@ -59,13 +56,13 @@ public class GetUpcomingEventsCommand implements IBotCommand {
     }
 
     private String createEventMessage(Event event){
-        return "Событие: " + event.getName() + "\n" +
-                "Описание: " + event.getDescription() + "\n" +
-                "Дата: " + event.getDate() + "\n" +
-                "Время: " + event.getTime() + "\n" +
-                "Место: " + event.getPlaceName() + "\n" +
-                "Ссылка: " + event.getLink() + "\n" +
-                "Район: " + event.getDistrict() + "\n" +
-                "Адресс: " + event.getAddress();
+        return "✨ Событие: " + event.getName() + "\n" +
+                "\uD83D\uDCDD Описание: " + event.getDescription() + "\n" +
+                "\uD83D\uDCC5 Дата: " + event.getDate() + "\n" +
+                "⌚\uFE0F Время: " + event.getTime() + "\n" +
+                "\uD83D\uDD17 Ссылка: " + event.getLink() + "\n" +
+                "\uD83D\uDCCD Место: " + event.getPlaceName() + "\n" +
+                "\uD83D\uDDFA Район: " + event.getDistrict() + "\n" +
+                "\uD83D\uDCEE Адрес: " + event.getAddress();
     }
 }

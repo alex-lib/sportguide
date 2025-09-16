@@ -34,13 +34,14 @@ public class ContactAdminCommand implements IBotCommand {
 	@Override
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
+        Long userId = user.getId();
+        Long chatId = message.getChatId();
+        log.info("Call command contact_admin by userId={}, username={}", userId, user.getUserName());
 		SendMessage answer = new SendMessage();
-		answer.setChatId(message.getChatId());
+        answer.setChatId(chatId);
 
-		commandStateStore.setCurrentCommand(user.getId(), "contact_admin");
-
+        commandStateStore.setCurrentCommand(userId, "contact_admin");
 		answer.setText("📩 Напишите ваше предложение:");
-
 		try {
 			absSender.execute(answer);
 		} catch (TelegramApiException e) {
@@ -52,33 +53,31 @@ public class ContactAdminCommand implements IBotCommand {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 		User user = message.getFrom();
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
+
 		if (!"contact_admin".equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
-		SendMessage answer = new SendMessage();
-		answer.setChatId(chatId.toString());
+
 		String text = message.getText();
 		log.info("Received text: {}", text);
-
 		eventPublisher.publishEvent(new EventContactAdmin(text, user));
-
 		commandStateStore.clearCurrentCommand(userId);
-
-		answer.setText("Сообщение отправлено админу.");
-
+        answer.setText("Сообщение отправлено админу ✅");
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-			sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз.");
+            sendErrorMessage(absSender, chatId);
 		}
 	}
 
-	private void sendErrorMessage(AbsSender absSender, Long chatId, String message) {
+    private void sendErrorMessage(AbsSender absSender, Long chatId) {
 		try {
 			SendMessage errorMsg = new SendMessage();
 			errorMsg.setChatId(chatId.toString());
-			errorMsg.setText(message);
+            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
 			absSender.execute(errorMsg);
 		} catch (Exception e) {
 			log.error("Error sending error message", e);

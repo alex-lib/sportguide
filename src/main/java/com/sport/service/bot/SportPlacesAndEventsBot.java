@@ -37,299 +37,261 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
 
-	private final CommandStateStore commandStateStore;
+    private final CommandStateStore commandStateStore;
 
-	private final String botUsername;
+    private final String botUsername;
 
-	private final CreatePlaceCommand createPlaceCommand;
+    private final CreatePlaceCommand createPlaceCommand;
 
-	private final GetPlaceCommand getPlaceCommand;
+    private final GetPlaceCommand getPlaceCommand;
 
-	private final DeletePlaceCommand deletePlaceCommand;
+    private final DeletePlaceCommand deletePlaceCommand;
 
-	private final CreateEventCommand createEventCommand;
+    private final CreateEventCommand createEventCommand;
 
-	private final DeleteEventCommand deleteEventCommand;
+    private final DeleteEventCommand deleteEventCommand;
 
-	private final ContactAdminCommand contactAdminCommand;
+    private final ContactAdminCommand contactAdminCommand;
 
-	private final SendMessageToAllUsersCommand sendMessageToAllUsersCommand;
+    private final SendMessageToAllUsersCommand sendMessageToAllUsersCommand;
 
-	private final Map<String, IBotCommand> commands = new HashMap<>();
+    private final Map<String, IBotCommand> commands = new HashMap<>();
 
-	public SportPlacesAndEventsBot(
-			@Value("${telegram.bot.token}") String botToken,
-			@Value("${telegram.bot.username}") String botUsername,
-			List<IBotCommand> commandList,
-			CreatePlaceCommand createPlaceCommand,
-			GetPlaceCommand getPlaceCommand,
-			DeletePlaceCommand deletePlaceCommand,
-			CreateEventCommand createEventCommand,
-			DeleteEventCommand deleteEventCommand,
-			ContactAdminCommand contactAdminCommand,
-			CommandStateStore commandStateStore,
-			SendMessageToAllUsersCommand sendMessageToAllUsersCommand) {
-		super(botToken);
-		this.botUsername = botUsername;
-		this.createPlaceCommand = createPlaceCommand;
-		this.getPlaceCommand = getPlaceCommand;
-		this.deletePlaceCommand = deletePlaceCommand;
-		this.createEventCommand = createEventCommand;
-		this.deleteEventCommand = deleteEventCommand;
-		this.contactAdminCommand = contactAdminCommand;
-		this.commandStateStore = commandStateStore;
-		this.sendMessageToAllUsersCommand = sendMessageToAllUsersCommand;
-		commandList.forEach(this::registerCommand);
-	}
+    public SportPlacesAndEventsBot(
+            @Value("${telegram.bot.token}") String botToken,
+            @Value("${telegram.bot.username}") String botUsername,
+            List<IBotCommand> commandList,
+            CreatePlaceCommand createPlaceCommand,
+            GetPlaceCommand getPlaceCommand,
+            DeletePlaceCommand deletePlaceCommand,
+            CreateEventCommand createEventCommand,
+            DeleteEventCommand deleteEventCommand,
+            ContactAdminCommand contactAdminCommand,
+            CommandStateStore commandStateStore,
+            SendMessageToAllUsersCommand sendMessageToAllUsersCommand) {
+        super(botToken);
+        this.botUsername = botUsername;
+        this.createPlaceCommand = createPlaceCommand;
+        this.getPlaceCommand = getPlaceCommand;
+        this.deletePlaceCommand = deletePlaceCommand;
+        this.createEventCommand = createEventCommand;
+        this.deleteEventCommand = deleteEventCommand;
+        this.contactAdminCommand = contactAdminCommand;
+        this.commandStateStore = commandStateStore;
+        this.sendMessageToAllUsersCommand = sendMessageToAllUsersCommand;
+        commandList.forEach(this::registerCommand);
+    }
 
-	@Value("${telegram.mainAdminId}")
-	private String mainAdminId;
+    @Value("${telegram.mainAdminId}")
+    private String mainAdminId;
 
-	@Override
-	public String getBotUsername() {
-		return botUsername;
-	}
+    @Override
+    public String getBotUsername() {
+        return botUsername;
+    }
 
-	@Override
-	public void processNonCommandUpdate(Update update) {
+    @Override
+    public void processNonCommandUpdate(Update update) {
+        if (update.hasCallbackQuery()) {
+            CallbackQuery callback = update.getCallbackQuery();
+            if (callback == null || callback.getFrom() == null) return;
+            if (callback.getFrom().getIsBot()) return;
 
-		if (update.hasCallbackQuery()) {
-			CallbackQuery callback = update.getCallbackQuery();
-			if (callback == null || callback.getFrom() == null) return;
+            long userId = callback.getFrom().getId();
+            log.info("Callback from user: {}", userId);
 
-			// Ignore bot’s own callbacks
-			if (callback.getFrom().getIsBot()) return;
+            if (!(callback.getMessage() instanceof Message)) return;
 
-			long userId = callback.getFrom().getId();
-			log.info("Callback from user: {}", userId);
-			String data = callback.getData();
-			log.info("Callback data: {}", data);
+            deleteMenuAndMessage((Message) callback.getMessage());
+            String currentCommand = commandStateStore.getCurrentCommand(userId);
 
-			if (!(callback.getMessage() instanceof Message)) return;
-			Message message = (Message) callback.getMessage();
+            if ("get_place".equals(currentCommand)) {
+                getPlaceCommand.processCallback(this, callback);
+                return;
+            } else if ("create_place".equals(currentCommand)) {
+                createPlaceCommand.processCallback(this, callback);
+                return;
+            } else if ("create_event".equals(currentCommand)) {
+                createEventCommand.processCallback(this, callback);
+                return;
+            }
+            return;
+        }
 
-			deleteMenuAndMessage(message);
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            Message message = update.getMessage();
+            long userId = message.getFrom().getId();
+            String text = message.getText();
+            String mappedCommand = ButtonToCommandMapper.mapButtonToCommand(text);
+            if (mappedCommand != null) {
+                commandStateStore.clearCurrentCommand(userId);
+                dispatchCommand(mappedCommand, update);
+                return;
+            }
 
-			String currentCommand = commandStateStore.getCurrentCommand(userId);
-			log.info("currentCommand " + currentCommand);
+            String currentCommand = commandStateStore.getCurrentCommand(userId);
+            if ("create_place".equals(currentCommand)) {
+                createPlaceCommand.processTextInput(this, message);
+                return;
+            }
 
-			if ("get_place".equals(currentCommand)) {
-				if ("BACK".equals(data)) {
-					List<String> selections = commandStateStore.getSelections(userId);
-					if (!selections.isEmpty()) {
-						// Remove last selection to go one step back
-						selections.remove(selections.size() - 1);
-					}
-					// Rebuild selections in store
-					commandStateStore.clearSelections(userId);
-					for (String sel : selections) {
-						commandStateStore.addSelection(userId, sel);
-					}
-					getPlaceCommand.processMessage(this, message, selections.toArray(new String[0]));
-					return;
-				}
+            if ("delete_place".equals(currentCommand)) {
+                deletePlaceCommand.processTextInput(this, message);
+                return;
+            }
 
-				// Regular forward selection
-				commandStateStore.addSelection(userId, data);
-				List<String> args = commandStateStore.getSelections(userId);
-				getPlaceCommand.processMessage(this, message, args.toArray(new String[0]));
-				if (args.size() >= 3) {
-					commandStateStore.clearSelections(userId);
-					commandStateStore.clearCurrentCommand(userId);
-				}
-			} else if ("create_place".equals(currentCommand)) {
-				createPlaceCommand.processCallback(this, callback);
-				return;
-			} else if ("create_event".equals(currentCommand)) {
-				createEventCommand.processCallback(this, callback);
-				return;
-			}
-			return;
-		}
+            if ("create_event".equals(currentCommand)) {
+                createEventCommand.processTextInput(this, message);
+                return;
+            }
 
-		if (update.hasMessage() && update.getMessage().hasText()) {
-			Message message = update.getMessage();
-			long userId = message.getFrom().getId();
-			String text = message.getText();
+            if ("delete_event".equals(currentCommand)) {
+                deleteEventCommand.processTextInput(this, message);
+                return;
+            }
 
-			// Map Russian button labels to original slash commands and dispatch immediately
-			String mappedCommand = ButtonToCommandMapper.mapButtonToCommand(text);
-			if (mappedCommand != null) {
-				// Reset any ongoing stateful flow as user picked a new command via button
-				commandStateStore.clearCurrentCommand(userId);
-				dispatchCommand(mappedCommand, update);
-				return;
-			}
+            if ("contact_admin".equals(currentCommand)) {
+                contactAdminCommand.processTextInput(this, message);
+                return;
+            }
 
-			String currentCommand = commandStateStore.getCurrentCommand(userId);
+            if ("send_message_to_all_users".equals(currentCommand)) {
+                sendMessageToAllUsersCommand.processTextInput(this, message);
+                return;
+            }
+        }
 
-			if ("create_place".equals(currentCommand)) {
-				createPlaceCommand.processTextInput(this, message);
-				return;
-			}
+        if (update.hasMessage() && update.getMessage().hasPhoto()) {
+            Message message = update.getMessage();
+            long userId = message.getFrom().getId();
+            String currentCommand = commandStateStore.getCurrentCommand(userId);
+            if ("create_place".equals(currentCommand)) {
+                createPlaceCommand.processPhotoInput(this, message);
+            }
+        }
+    }
 
-			if ("delete_place".equals(currentCommand)) {
-				deletePlaceCommand.processTextInput(this, message);
-				return;
-			}
+    private void deleteMenuAndMessage(Message message) {
+        try {
+            InlineKeyboardMarkup loadingKeyboard = InlineKeyboardMarkup.builder()
+                    .keyboard(List.of(
+                            List.of(InlineKeyboardButton.builder()
+                                    .text("⏳ Удаление меню...")
+                                    .callbackData("IGNORE")
+                                    .build())
+                    ))
+                    .build();
 
-			if ("create_event".equals(currentCommand)) {
-				createEventCommand.processTextInput(this, message);
-				return;
-			}
+            EditMessageReplyMarkup loadingMarkup = new EditMessageReplyMarkup();
+            loadingMarkup.setChatId(message.getChatId());
+            loadingMarkup.setMessageId(message.getMessageId());
+            loadingMarkup.setReplyMarkup(loadingKeyboard);
+            execute(loadingMarkup);
 
-			if ("delete_event".equals(currentCommand)) {
-				deleteEventCommand.processTextInput(this, message);
-				return;
-			}
+            Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+                try {
+                    DeleteMessage deleteMessage = new DeleteMessage();
+                    deleteMessage.setChatId(message.getChatId());
+                    deleteMessage.setMessageId(message.getMessageId());
+                    execute(deleteMessage);
+                    log.info("The message has been deleted: {}", message.getMessageId());
+                } catch (TelegramApiException e) {
+                    log.error("The message hasn't been deleted {} with id - {}: {}",
+                            message.getText(), message.getMessageId(), e.getMessage());
+                }
+            }, 30, TimeUnit.SECONDS);
+        } catch (TelegramApiException e) {
+            log.error("Error occurred while deleting the message", e);
+        }
+    }
 
-			if ("contact_admin".equals(currentCommand)) {
-				contactAdminCommand.processTextInput(this, message);
-				return;
-			}
+    @EventListener
+    private void sendNotification(EventCreatedEvent event) {
+        try {
+            String notification = createEventNotification(event.getEvent());
+            for (Subscriber subscriber : event.getSubscribers()) {
+                SendMessage sendMessage = SendMessage.builder()
+                        .chatId(subscriber.getId().toString())
+                        .text(notification)
+                        .build();
+                execute(sendMessage);
+            }
+        } catch (TelegramApiException e) {
+            log.error("Failed to send notification of {} to subscribers", event.getEvent());
+        }
+    }
 
-			if ("send_message_to_all_users".equals(currentCommand)) {
-				sendMessageToAllUsersCommand.processTextInput(this, message);
-				return;
-			}
-		}
-
-		if (update.hasMessage() && update.getMessage().hasPhoto()) {
-			Message message = update.getMessage();
-			long userId = message.getFrom().getId();
-			String currentCommand = commandStateStore.getCurrentCommand(userId);
-
-			if ("create_place".equals(currentCommand)) {
-				createPlaceCommand.processPhotoInput(this, message);
-			}
-		}
-	}
-
-	private void deleteMenuAndMessage(Message message) {
-		try {
-			// 1️⃣ Сначала меняем меню на "⏳ Удаление меню..."
-			InlineKeyboardMarkup loadingKeyboard = InlineKeyboardMarkup.builder()
-					.keyboard(List.of(
-							List.of(InlineKeyboardButton.builder()
-									.text("⏳ Удаление меню...")
-									.callbackData("IGNORE") // "пустая" кнопка
-									.build())
-					))
-					.build();
-
-			EditMessageReplyMarkup loadingMarkup = new EditMessageReplyMarkup();
-			loadingMarkup.setChatId(message.getChatId());
-			loadingMarkup.setMessageId(message.getMessageId());
-			loadingMarkup.setReplyMarkup(loadingKeyboard);
-			execute(loadingMarkup);
-
-			// 2️⃣ Через 30 сек удаляем полностью сообщение (и текст, и клавиатуру)
-			Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-				try {
-					DeleteMessage deleteMessage = new DeleteMessage();
-					deleteMessage.setChatId(message.getChatId());
-					deleteMessage.setMessageId(message.getMessageId());
-					execute(deleteMessage);
-					log.info("Сообщение с меню удалено: {}", message.getMessageId());
-				} catch (TelegramApiException e) {
-					log.error("Не удалось удалить сообщение {} с id - {}: {}",
-							message.getText(), message.getMessageId(), e.getMessage());
-				}
-			}, 30, TimeUnit.SECONDS);
-
-		} catch (TelegramApiException e) {
-			log.error("Ошибка при замене клавиатуры", e);
-		}
-	}
-
-	@EventListener
-	private void sendNotification(EventCreatedEvent event) {
-		try {
-			String notification = createEventNotification(event.getEvent());
-			for (Subscriber subscriber : event.getSubscribers()) {
-				SendMessage sendMessage = SendMessage.builder()
-						.chatId(subscriber.getId().toString())
-						.text(notification)
-						.build();
-				execute(sendMessage);
-			}
-		} catch (TelegramApiException e) {
-			log.error("Failed to send notification of {}", event.getEvent());
-		}
-	}
-
-	@EventListener
+    @EventListener
     private void sendMessageToAllUsersCommand(EventSendMessageToAllUsers event) {
-		try {
-			for (Subscriber subscriber : event.getSubscribers()) {
-				SendMessage sendMessage = SendMessage.builder()
-						.chatId(subscriber.getId().toString())
-						.text(event.getText())
-						.build();
-				execute(sendMessage);
-			}
-		} catch (TelegramApiException e) {
-			log.error("Failed to send message to subscribers");
-		}
-	}
+        try {
+            for (Subscriber subscriber : event.getSubscribers()) {
+                SendMessage sendMessage = SendMessage.builder()
+                        .chatId(subscriber.getId().toString())
+                        .text(event.getText())
+                        .build();
+                execute(sendMessage);
+            }
+        } catch (TelegramApiException e) {
+            log.error("Failed to send message to subscribers");
+        }
+    }
 
-	private String createEventNotification(Event event) {
-		return new StringBuilder()
-				.append("Событие: ").append(event.getName()).append("\n")
-				.append("Описание: ").append(event.getDescription()).append("\n")
-				.append("Дата: ").append(event.getDate()).append("\n")
-				.append("Время: ").append(event.getTime()).append("\n")
-				.append("Место: ").append(event.getPlaceName()).append("\n")
-				.append("Ссылка: ").append(event.getLink()).append("\n")
-				.append("Район: ").append(event.getDistrict()).append("\n")
-				.append("Адрес: ").append(event.getAddress()).append("\n")
-				.append("Спасибо за подписку!")
-				.toString();
-	}
+    private String createEventNotification(Event event) {
+        return new StringBuilder()
+                .append("✨ Событие: ").append(event.getName()).append("\n")
+                .append("\uD83D\uDCDD Описание: ").append(event.getDescription()).append("\n")
+                .append("\uD83D\uDCC5 Дата: ").append(event.getDate()).append("\n")
+                .append("⌚\uFE0F Время: ").append(event.getTime()).append("\n")
+                .append("\uD83D\uDD17 Ссылка: ").append(event.getLink()).append("\n")
+                .append("\uD83D\uDCCD Место: ").append(event.getPlaceName()).append("\n")
+                .append("\uD83D\uDDFA Район: ").append(event.getDistrict()).append("\n")
+                .append("\uD83D\uDCEE Адрес: ").append(event.getAddress()).append("\n")
+                .append("Спасибо за подписку \uD83D\uDE4F")
+                .toString();
+    }
 
-	@EventListener
-	private void sendNotificationToAdmin(EventContactAdmin event) {
-		try {
-			String notification = createNotificationForAdmin(event.getText(), event.getUser());
-			SendMessage sendMessage = SendMessage.builder()
-					.chatId(mainAdminId)
-					.text(notification)
-					.build();
-			execute(sendMessage);
-		} catch (TelegramApiException e) {
-			log.error("Failed to send notification of {}", event.getText());
-		}
-	}
+    @EventListener
+    private void sendNotificationToAdmin(EventContactAdmin event) {
+        try {
+            String notification = createNotificationForAdmin(event.getText(), event.getUser());
+            SendMessage sendMessage = SendMessage.builder()
+                    .chatId(mainAdminId)
+                    .text(notification)
+                    .build();
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send notification of {} to admin", event.getText());
+        }
+    }
 
-	private String createNotificationForAdmin(String text, User user) {
-		return new StringBuilder()
-				.append("Пользователь: ")
-				.append(user.getUserName())
-				.append(" c id: ")
-				.append(user.getId())
-				.append(" написал вам:\n")
-				.append(text)
-				.toString();
-	}
+    private String createNotificationForAdmin(String text, User user) {
+        return new StringBuilder()
+                .append("\uD83D\uDC64 Пользователь: ")
+                .append(user.getUserName())
+                .append(" c id: ")
+                .append(user.getId())
+                .append(" написал вам:\n")
+                .append(text)
+                .toString();
+    }
 
-	private void registerCommand(IBotCommand command) {
-		commands.put("/" + command.getCommandIdentifier(), command);
-	}
+    private void registerCommand(IBotCommand command) {
+        commands.put("/" + command.getCommandIdentifier(), command);
+    }
 
-	private void dispatchCommand(String commandText, Update update) {
-		String[] parts = commandText.split(" ");
-		String command = parts[0];
-		String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
-
-		IBotCommand cmd = commands.get(command);
-		if (cmd != null) {
-			try {
-				cmd.processMessage(this, update.getMessage(), args);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("Команда не найдена: " + command);
-		}
-	}
+    private void dispatchCommand(String commandText, Update update) {
+        String[] parts = commandText.split(" ");
+        String command = parts[0];
+        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
+        IBotCommand cmd = commands.get(command);
+        if (cmd != null) {
+            try {
+                cmd.processMessage(this, update.getMessage(), args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            log.warn("Unknown command: " + command);
+        }
+    }
 }

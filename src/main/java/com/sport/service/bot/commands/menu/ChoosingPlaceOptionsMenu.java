@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.menu;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
@@ -7,7 +8,8 @@ import java.util.List;
 
 public abstract class ChoosingPlaceOptionsMenu {
 
-    public static InlineKeyboardMarkup createDistrictKeyboardForGettingPlace() {
+    public static InlineKeyboardMarkup createDistrictKeyboardForGetting(SendMessage answer) {
+        answer.setText("\uD83D\uDDFA Выберите район Воронежа:");
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Железнодорожный", "ZHELEZNODOROZHNYY"),
                 createButtonRow("Центральный", "CENTRALNYY"),
@@ -21,7 +23,8 @@ public abstract class ChoosingPlaceOptionsMenu {
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 
-    public static InlineKeyboardMarkup createDistrictKeyboardForCreatingPlace() {
+    public static InlineKeyboardMarkup createDistrictKeyboardForCreating(SendMessage answer) {
+        answer.setText("\uD83D\uDDFA Выберите район Воронежа:");
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Железнодорожный", "ZHELEZNODOROZHNYY"),
                 createButtonRow("Центральный", "CENTRALNYY"),
@@ -34,17 +37,19 @@ public abstract class ChoosingPlaceOptionsMenu {
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 
-    public static InlineKeyboardMarkup createOutdoorKeyboardForGettingPlace() {
+    public static InlineKeyboardMarkup createOutdoorKeyboardForGettingPlace(SendMessage answer) {
+        answer.setText("❔ Место на улице или в помещении?:");
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Улица", "true"),
                 createButtonRow("Помещение", "false"),
-                createButtonRow("Все", "all"),
+                createButtonRow("Оба варианта", "null"),
                 createButtonRow("ВЫБРАТЬ ТИП МЕСТА ЗАНОВО", "BACK")
         );
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 
-    public static InlineKeyboardMarkup createOutdoorKeyboardForCreatingPlace() {
+    public static InlineKeyboardMarkup createOutdoorKeyboardForCreatingPlace(SendMessage answer) {
+        answer.setText("❔ Место на улице или в помещении?:");
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Улица", "true"),
                 createButtonRow("Помещение", "false"),
@@ -53,7 +58,8 @@ public abstract class ChoosingPlaceOptionsMenu {
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 
-    public static InlineKeyboardMarkup createTypeKeyboard() {
+    public static InlineKeyboardMarkup createTypeKeyboard(SendMessage answer) {
+        answer.setText("\uD83E\uDDBE Выберите тип места:");
         List<List<InlineKeyboardButton>> keyboard = List.of(
                 createButtonRow("Открытая уличная спортивная площадка", "SPORT_GROUND"),
                 createButtonRow("Футбольное поле", "FOOTBALL_FIELD"),
