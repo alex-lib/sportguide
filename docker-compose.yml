@@ -31,11 +31,11 @@ services:
     command:
       - -c
       - |
-        echo "Waiting 60 seconds for Postgres..."
-        sleep 60
+        echo "Waiting 120 seconds for Postgres..."
+        sleep 120
         liquibase --url=jdbc:postgresql://postgres:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --changeLogFile=/liquibase/changelog/db.changelog-master.xml --defaultSchemaName=app_schema generateChangeLog
 
-  bot:
+  app:
     build: .
     container_name: app
     depends_on:
