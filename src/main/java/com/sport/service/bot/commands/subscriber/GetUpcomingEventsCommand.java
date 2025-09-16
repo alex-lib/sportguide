@@ -55,14 +55,14 @@ public class GetUpcomingEventsCommand implements IBotCommand {
         }
     }
 
-    private String createEventMessage(Event event){
-        return "✨ Событие: " + event.getName() + "\n" +
-                "\uD83D\uDCDD Описание: " + event.getDescription() + "\n" +
-                "\uD83D\uDCC5 Дата: " + event.getDate() + "\n" +
-                "⌚\uFE0F Время: " + event.getTime() + "\n" +
-                "\uD83D\uDD17 Ссылка: " + event.getLink() + "\n" +
-                "\uD83D\uDCCD Место: " + event.getPlaceName() + "\n" +
-                "\uD83D\uDDFA Район: " + event.getDistrict() + "\n" +
-                "\uD83D\uDCEE Адрес: " + event.getAddress();
+    private String createEventMessage(Event event) {
+        return new StringBuilder().append("✨ Событие: ").append(event.getName()).append("\n")
+                .append("\uD83D\uDCDD Описание: ").append(event.getDescription()).append("\n")
+                .append("\uD83D\uDCC5 Дата: ").append(event.getDate()).append("\n")
+                .append("⌚️ Время: ").append(event.getTime()).append("\n")
+                .append("\uD83D\uDD17 Ссылка: ").append(event.getLink()).append("\n")
+                .append("\uD83D\uDCCD Место: ").append(event.getPlaceName()).append("\n")
+                .append("\uD83D\uDDFA Район: ").append(event.getDistrict()).append("\n")
+                .append("\uD83D\uDCEE Адрес: ").append(event.getAddress()).toString();
     }
 }

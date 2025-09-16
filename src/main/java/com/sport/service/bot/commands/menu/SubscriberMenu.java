@@ -18,30 +18,26 @@ public class SubscriberMenu {
             Доступные команды:
             📍 Выбрать место - выбрать место
             📅 Ближайшие события - получить список грядущих событий
-            🔔 Подписаться на уведомления - подписаться на получение уведомлений о спортивных событиях
-            🚫 Отписаться от уведомлений - отписаться от получения уведомлений о спортивных событиях
+            🔔 Подписаться на уведомления - получать уведомления о спортивных событиях
+            🚫 Отписаться от уведомлений - не получать уведомления о спортивных событиях
             \uD83C\uDFCB\uFE0F\u200D♂\uFE0F Поддержать проект - поддержать проект
-            \uD83E\uDE83 Связаться с админом - предложить админу сотрудничество, создать/скорректировать место или создать грядущее спортивное событие
+            \uD83E\uDE83 Связаться с админом - предложить сотрудничество, создать/скорректировать место или создать грядущее спортивное событие
             \s""";
 
     public void getSubscriberMenu() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add("📍 Выбрать место");
         row1.add("📅 Ближайшие события");
-
         KeyboardRow row2 = new KeyboardRow();
         row2.add("🔔 Подписаться на уведомления");
         row2.add("🚫 Отписаться от уведомлений");
-
         KeyboardRow row3 = new KeyboardRow();
         row3.add("\uD83C\uDFCB\uFE0F\u200D♂\uFE0F Поддержать проект");
         row3.add("\uD83E\uDE83 Связаться с админом");
-
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
         keyboard.add(row3);
-
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(false);
