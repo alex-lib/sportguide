@@ -17,16 +17,16 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,6 +168,9 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
             if ("create_place".equals(currentCommand)) {
                 createPlaceCommand.processPhotoInput(this, message);
             }
+            if ("send_message_to_all_users".equals(currentCommand)) {
+                sendMessageToAllUsersCommand.processPhotoInput(this, message);
+            }
         }
     }
 
@@ -222,14 +225,29 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
     }
 
     @EventListener
-    private void sendMessageToAllUsersCommand(EventSendMessageToAllUsers event) {
+    private void sendMessageToAllUsers(EventSendMessageToAllUsers event) {
         try {
-            for (Subscriber subscriber : event.getSubscribers()) {
-                SendMessage sendMessage = SendMessage.builder()
-                        .chatId(subscriber.getId().toString())
-                        .text(event.getText())
-                        .build();
-                execute(sendMessage);
+            if (event.getPhoto() != null) {
+                SendPhoto photoMessage = new SendPhoto();
+                try (InputStream photoStream = new ByteArrayInputStream(event.getPhoto())) {
+                    photoMessage.setPhoto(new InputFile(photoStream, "place.jpg"));
+                    photoMessage.setCaption(event.getMessage());
+                    photoMessage.setParseMode("Markdown");
+                } catch (Exception e) {
+                    log.error("Failed to send photo for place {}", event.getMessage(), e);
+                }
+                for (Subscriber subscriber : event.getSubscribers()) {
+                    photoMessage.setChatId(subscriber.getId().toString());
+                    execute(photoMessage);
+                }
+            } else {
+                for (Subscriber subscriber : event.getSubscribers()) {
+                    SendMessage sendMessage = SendMessage.builder()
+                            .chatId(subscriber.getId().toString())
+                            .text(event.getMessage())
+                            .build();
+                    execute(sendMessage);
+                }
             }
         } catch (TelegramApiException e) {
             log.error("Failed to send message to subscribers");
