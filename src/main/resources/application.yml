@@ -30,7 +30,7 @@ spring:
       connection-init-sql: CREATE SCHEMA IF NOT EXISTS app_schema
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     defer-datasource-initialization: true
     properties:
       hibernate:
