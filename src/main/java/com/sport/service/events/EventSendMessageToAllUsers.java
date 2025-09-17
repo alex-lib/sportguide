@@ -10,7 +10,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventSendMessageToAllUsers {
 
-    private final String text;
+    private final String message;
+
+    private final byte[] photo;
 
     private final List<Subscriber> subscribers;
 }
