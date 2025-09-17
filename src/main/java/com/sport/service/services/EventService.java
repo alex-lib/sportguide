@@ -12,4 +12,6 @@ public interface EventService {
     List<Event> findAll();
 
     void deleteByExpiredDate();
+
+    boolean existsByName(String eventName);
 }
