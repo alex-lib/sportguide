@@ -212,17 +212,21 @@ public class GetPlaceCommand implements IBotCommand {
 
     private String createCaption(Place place) {
         String caption = String.format(
-                "\uD83D\uDD39 Название: %s\n📍 Адрес: %s\n📝 Описание: %s\n🌐 Ссылка: %s",
+                "\uD83D\uDD39 Название: %s\n📍 Адрес: %s\n📝 Описание: %s",
                 place.getName(),
                 place.getAddress(),
-                place.getDescription() != null ? place.getDescription() : "Описание не указано \uD83E\uDD37\u200D♂\uFE0F",
-                !place.getWebSite().equals("-") ? place.getWebSite() : "Сайт отсутствует \uD83E\uDD37\u200D♂\uFE0F"
+                place.getDescription() != null
+                        ? place.getDescription()
+                        : "Описание не указано \uD83E\uDD37\u200D♂\uFE0F"
         );
+        if (place.getWebSite() != null && !place.getWebSite().equals("-")) {
+            caption += String.format("\n🌐 Ссылка: %s", place.getWebSite());
+        }
         if (!place.getCoordinates().equals("-")) {
             try {
-                String[] coords = place.getCoordinates().split(",");
-                float latitude = Float.parseFloat(coords[0].trim());
-                float longitude = Float.parseFloat(coords[1].trim());
+                String[] coordinates = place.getCoordinates().split(",");
+                float latitude = Float.parseFloat(coordinates[0].trim());
+                float longitude = Float.parseFloat(coordinates[1].trim());
                 String mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
                 caption += String.format("\n🗺️ [Посмотреть местоположение места в Google maps](%s)", mapLink);
             } catch (Exception e) {
