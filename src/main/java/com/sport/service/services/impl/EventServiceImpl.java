@@ -1,4 +1,5 @@
 package com.sport.service.services.impl;
+
 import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.events.EventCreatedEvent;
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,9 +40,9 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void deleteByName(String eventName) {
-        Event event = eventRepository.findByName(eventName);
-        if (event != null) {
-            eventRepository.delete(event);
+        List<Event> events = eventRepository.findAllByName(eventName);
+        if (!events.isEmpty()) {
+            eventRepository.deleteAll(events);
         }
     }
 
@@ -59,5 +61,9 @@ public class EventServiceImpl implements EventService {
                 eventRepository.delete(event);
             }
         }
+    }
+
+    public boolean existsByName(String name) {
+        return eventRepository.existsByName(name);
     }
 }
