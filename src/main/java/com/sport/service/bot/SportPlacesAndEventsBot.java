@@ -164,10 +164,12 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
         if (update.hasMessage() && update.getMessage().hasPhoto()) {
             Message message = update.getMessage();
             long userId = message.getFrom().getId();
+
             String currentCommand = commandStateStore.getCurrentCommand(userId);
             if ("create_place".equals(currentCommand)) {
                 createPlaceCommand.processPhotoInput(this, message);
             }
+
             if ("send_message_to_all_users".equals(currentCommand)) {
                 sendMessageToAllUsersCommand.processPhotoInput(this, message);
             }
