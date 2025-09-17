@@ -165,9 +165,13 @@ public class CreateEventCommand implements IBotCommand {
 
 		switch (dto.getStep()) {
 			case 2 -> {
-				dto.setName(text);
-                answer.setText("\uD83D\uDD8A Введите адрес:");
-				dto.setStep(3);
+				if (!eventService.existsByName(dto.getName())) {
+					dto.setName(text);
+					answer.setText("\uD83D\uDD8A Введите адрес:");
+					dto.setStep(3);
+				} else {
+					answer.setText("\uD83D\uDD8A Такое наименовение события уже существует. Введите наименование события:");
+				}
 			}
 			case 3 -> {
 				dto.setAddress(text);
