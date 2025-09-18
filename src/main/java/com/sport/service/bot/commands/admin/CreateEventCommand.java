@@ -41,9 +41,9 @@ public class CreateEventCommand implements IBotCommand {
     private final Pattern TIME_PATTERN = Pattern.compile(
             "^([01]\\d|2[0-3]):([0-5]\\d)$");
 
-	private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
+	private final String sessionExpired = "Сессия истекла.\nНачните заново \uD83D\uDD04";
 
-	private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
+	private final String unknownStep = "Неизвестный шаг.\nНачните заново \uD83D\uDD04";
 
 	@Override
 	public String getCommandIdentifier() {
@@ -110,7 +110,7 @@ public class CreateEventCommand implements IBotCommand {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error processing callback", e);
-            sendErrorMessage(absSender, chatId, "Произошла ошибка. Попробуйте еще раз \uD83D\uDD04");
+			sendErrorMessage(absSender, chatId, "Произошла ошибка.\nПопробуйте еще раз \uD83D\uDD04");
 		}
 	}
 
@@ -154,7 +154,7 @@ public class CreateEventCommand implements IBotCommand {
 			}
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
+			sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода.\nПопробуйте еще раз \uD83D\uDD04");
 		}
 	}
 
@@ -165,12 +165,12 @@ public class CreateEventCommand implements IBotCommand {
 
 		switch (dto.getStep()) {
 			case 2 -> {
-				if (!eventService.existsByName(dto.getName())) {
+				if (!eventService.existsByName(text)) {
 					dto.setName(text);
 					answer.setText("\uD83D\uDD8A Введите адрес:");
 					dto.setStep(3);
 				} else {
-					answer.setText("\uD83D\uDD8A Такое наименовение события уже существует. Введите наименование события:");
+					answer.setText("\uD83D\uDD8A Такое наименовение события уже существует.\nВведите другое наименование события:");
 				}
 			}
 			case 3 -> {
@@ -199,16 +199,16 @@ public class CreateEventCommand implements IBotCommand {
                     answer.setText("\uD83D\uDD8A Введите время в формате HH:mm:");
 					dto.setStep(8);
 				} else {
-					answer.setText("Неверный формат даты. Введите дату в формате YYYY-MM-DD:");
+					answer.setText("Неверный формат даты.\nВведите дату в формате YYYY-MM-DD:");
 				}
 			}
 			case 8 -> {
 				if (isValidTime(text)) {
 					dto.setTime(text);
-                    answer.setText("Все данные получены. Создаю событие ⏳");
+					answer.setText("Все данные получены.\nСоздаю событие ⏳");
 					dto.setStep(9);
 				} else {
-					answer.setText("Неверный формат времени. Введите время в формате HH:mm:");
+					answer.setText("Неверный формат времени.\nВведите время в формате HH:mm:");
 				}
 			}
             default -> handleUnknownStep(chatId, userId, answer);
