@@ -93,6 +93,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand {
             case 2 -> {
                 if ("-".equals(text)) {
                     eventPublisher.publishEvent(new EventSendMessageToAllUsers(dto.getMessage(), null, subscriberService.findAll()));
+                    log.info("Publishing EventSendMessageToAllUsers: message='{}', subscribers={}", dto.getMessage(), subscriberService.findAll().size());
                     answer.setText("Сообщение отправлено всем пользователям ✅");
                     messageSession.clear(chatId);
                     commandStateStore.clearCurrentCommand(userId);

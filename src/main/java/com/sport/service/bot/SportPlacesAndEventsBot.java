@@ -221,6 +221,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
                         .build();
                 execute(sendMessage);
             }
+            log.info("Notification of event {} sent to subscribers", event.getEvent());
         } catch (TelegramApiException e) {
             log.error("Failed to send notification of {} to subscribers", event.getEvent());
         }
@@ -229,6 +230,8 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
     @EventListener
     private void sendMessageToAllUsers(EventSendMessageToAllUsers event) {
         try {
+            String host = java.net.InetAddress.getLocalHost().getHostName();
+            log.info("Listener invoked on host={} thread={} subs={}", host, Thread.currentThread().getName(), event.getSubscribers().size());
             if (event.getPhoto() != null) {
                 SendPhoto photoMessage = new SendPhoto();
                 try (InputStream photoStream = new ByteArrayInputStream(event.getPhoto())) {
@@ -253,6 +256,7 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
             }
         } catch (TelegramApiException e) {
             log.error("Failed to send message to subscribers");
+        } catch (Exception ignored) {
         }
     }
 
