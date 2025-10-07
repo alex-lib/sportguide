@@ -1,5 +1,8 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.bot.commands.interfaces.CallbackProcessable;
+import com.sport.service.bot.commands.interfaces.PhotoProcessable;
+import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
@@ -30,7 +33,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class CreatePlaceCommand implements IBotCommand {
+public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextProcessable, CallbackProcessable {
 
 	private final PlaceSession placeSession;
 
@@ -84,6 +87,7 @@ public class CreatePlaceCommand implements IBotCommand {
 		}
 	}
 
+	@Override
 	public void processCallback(AbsSender absSender, CallbackQuery callback) {
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
@@ -167,6 +171,7 @@ public class CreatePlaceCommand implements IBotCommand {
 		commandStateStore.clearCurrentCommand(userId);
 	}
 
+	@Override
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
@@ -239,6 +244,7 @@ public class CreatePlaceCommand implements IBotCommand {
 		}
 	}
 
+	@Override
 	public void processPhotoInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();

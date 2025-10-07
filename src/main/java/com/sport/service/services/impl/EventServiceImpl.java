@@ -38,6 +38,7 @@ public class EventServiceImpl implements EventService {
         eventPublisher.publishEvent(new EventCreatedEvent(subscribers, event));
     }
 
+    @Transactional
     @Override
     public void deleteByName(String eventName) {
         List<Event> events = eventRepository.findAllByName(eventName);
@@ -51,6 +52,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAll();
     }
 
+    @Transactional
     @Scheduled(fixedRate = CHECK_INTERVAL_DAYS, timeUnit = TimeUnit.DAYS)
     @Override
     public void deleteByExpiredDate() {
@@ -62,6 +64,17 @@ public class EventServiceImpl implements EventService {
             }
         }
     }
+
+//    @Transactional
+//    @Scheduled(fixedRate = CHECK_INTERVAL_DAYS, timeUnit = TimeUnit.DAYS)
+//    @Override
+//    public void deleteByExpiredDate() {
+//        LocalDate currentDate = LocalDate.now();
+//        eventRepository.deleteByDateBefore(currentDate);
+//    }
+
+//    @Query("DELETE FROM Event e WHERE e.date < :currentDate")
+//    void deleteByDateBefore(@Param("currentDate") LocalDate currentDate);
 
     public boolean existsByName(String name) {
         return eventRepository.existsByName(name);
