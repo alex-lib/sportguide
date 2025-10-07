@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
 
+import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
@@ -28,7 +29,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GetPlaceCommand implements IBotCommand {
+public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     private final PlaceSession placeSession;
 

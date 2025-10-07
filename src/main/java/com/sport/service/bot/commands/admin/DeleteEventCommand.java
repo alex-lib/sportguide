@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.services.EventService;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.CommandStateStore;
@@ -16,7 +17,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class DeleteEventCommand implements IBotCommand {
+public class DeleteEventCommand implements IBotCommand, TextProcessable {
 
 	private final EventSession eventSession;
 
@@ -57,6 +58,7 @@ public class DeleteEventCommand implements IBotCommand {
 		}
 	}
 
+	@Override
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();

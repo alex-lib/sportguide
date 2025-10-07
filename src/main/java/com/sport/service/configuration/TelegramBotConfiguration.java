@@ -1,5 +1,6 @@
 package com.sport.service.configuration;
-import com.sport.service.bot.SportPlacesAndEventsBot;
+
+import com.sport.service.bot.SportGuideBot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +13,10 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class TelegramBotConfiguration {
 
     @Bean
-    TelegramBotsApi telegramBotsApi(SportPlacesAndEventsBot sportPlacesAndEventsBot) throws TelegramApiException {
+    TelegramBotsApi telegramBotsApi(SportGuideBot sportGuideBot) throws TelegramApiException {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
-            botsApi.registerBot(sportPlacesAndEventsBot);
+            botsApi.registerBot(sportGuideBot);
             log.info("Telegram bot has been registered successfully!");
         } catch (TelegramApiException e) {
             log.error("Error occurred while registering Telegram bot!", e);
