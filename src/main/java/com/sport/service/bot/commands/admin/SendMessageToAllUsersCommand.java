@@ -1,5 +1,7 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.bot.commands.interfaces.PhotoProcessable;
+import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.dto.MessageDto;
 import com.sport.service.events.EventSendMessageToAllUsers;
 import com.sport.service.services.SubscriberService;
@@ -27,7 +29,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SendMessageToAllUsersCommand implements IBotCommand {
+public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessable, PhotoProcessable {
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -109,6 +111,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand {
         }
     }
 
+    @Override
     public void processTextInput(AbsSender absSender, Message message) {
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
@@ -139,6 +142,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand {
         }
     }
 
+    @Override
     public void processPhotoInput(AbsSender absSender, Message message) {
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
