@@ -1,8 +1,8 @@
 package com.sport.service.bot;
 
-import com.sport.service.bot.commands.admin.*;
-import com.sport.service.bot.commands.subscriber.ContactAdminCommand;
-import com.sport.service.bot.commands.subscriber.GetPlaceCommand;
+import com.sport.service.bot.commands.interfaces.CallbackProcessable;
+import com.sport.service.bot.commands.interfaces.PhotoProcessable;
+import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.events.EventContactAdmin;
@@ -35,55 +35,28 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
-
+public class SportGuideBot extends TelegramLongPollingCommandBot {
     private final CommandStateStore commandStateStore;
-
     private final String botUsername;
-
-    private final CreatePlaceCommand createPlaceCommand;
-
-    private final GetPlaceCommand getPlaceCommand;
-
-    private final DeletePlaceCommand deletePlaceCommand;
-
-    private final CreateEventCommand createEventCommand;
-
-    private final DeleteEventCommand deleteEventCommand;
-
-    private final ContactAdminCommand contactAdminCommand;
-
-    private final SendMessageToAllUsersCommand sendMessageToAllUsersCommand;
-
     private final Map<String, IBotCommand> commands = new HashMap<>();
 
-    public SportPlacesAndEventsBot(
+    public SportGuideBot(
             @Value("${telegram.bot.token}") String botToken,
             @Value("${telegram.bot.username}") String botUsername,
             List<IBotCommand> commandList,
-            CreatePlaceCommand createPlaceCommand,
-            GetPlaceCommand getPlaceCommand,
-            DeletePlaceCommand deletePlaceCommand,
-            CreateEventCommand createEventCommand,
-            DeleteEventCommand deleteEventCommand,
-            ContactAdminCommand contactAdminCommand,
-            CommandStateStore commandStateStore,
-            SendMessageToAllUsersCommand sendMessageToAllUsersCommand) {
+            CommandStateStore commandStateStore) {
         super(botToken);
         this.botUsername = botUsername;
-        this.createPlaceCommand = createPlaceCommand;
-        this.getPlaceCommand = getPlaceCommand;
-        this.deletePlaceCommand = deletePlaceCommand;
-        this.createEventCommand = createEventCommand;
-        this.deleteEventCommand = deleteEventCommand;
-        this.contactAdminCommand = contactAdminCommand;
         this.commandStateStore = commandStateStore;
-        this.sendMessageToAllUsersCommand = sendMessageToAllUsersCommand;
         commandList.forEach(this::registerCommand);
     }
 
     @Value("${telegram.mainAdminId}")
     private String mainAdminId;
+
+    private void registerCommand(IBotCommand command) {
+        commands.put(command.getCommandIdentifier(), command);
+    }
 
     @Override
     public String getBotUsername() {
@@ -103,18 +76,24 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
             if (!(callback.getMessage() instanceof Message)) return;
 
             deleteMenuAndMessage((Message) callback.getMessage());
-            String currentCommand = commandStateStore.getCurrentCommand(userId);
 
-            if ("get_place".equals(currentCommand)) {
-                getPlaceCommand.processCallback(this, callback);
-                return;
-            } else if ("create_place".equals(currentCommand)) {
-                createPlaceCommand.processCallback(this, callback);
-                return;
-            } else if ("create_event".equals(currentCommand)) {
-                createEventCommand.processCallback(this, callback);
+            String currentCommand = commandStateStore.getCurrentCommand(userId);
+            IBotCommand handler = commands.get(currentCommand);
+
+            if (handler instanceof CallbackProcessable callbackHandler) {
+                callbackHandler.processCallback(this, update.getCallbackQuery());
                 return;
             }
+//            if ("get_place".equals(currentCommand)) {
+//                getPlaceCommand.processCallback(this, callback);
+//                return;
+//            } else if ("create_place".equals(currentCommand)) {
+//                createPlaceCommand.processCallback(this, callback);
+//                return;
+//            } else if ("create_event".equals(currentCommand)) {
+//                createEventCommand.processCallback(this, callback);
+//                return;
+//            }
             return;
         }
 
@@ -130,35 +109,41 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
             }
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            if ("create_place".equals(currentCommand)) {
-                createPlaceCommand.processTextInput(this, message);
-                return;
-            }
+            IBotCommand handler = commands.get(currentCommand);
 
-            if ("delete_place".equals(currentCommand)) {
-                deletePlaceCommand.processTextInput(this, message);
+            if (handler instanceof TextProcessable textHandler) {
+                textHandler.processTextInput(this, update.getMessage());
                 return;
             }
-
-            if ("create_event".equals(currentCommand)) {
-                createEventCommand.processTextInput(this, message);
-                return;
-            }
-
-            if ("delete_event".equals(currentCommand)) {
-                deleteEventCommand.processTextInput(this, message);
-                return;
-            }
-
-            if ("contact_admin".equals(currentCommand)) {
-                contactAdminCommand.processTextInput(this, message);
-                return;
-            }
-
-            if ("send_message_to_all_users".equals(currentCommand)) {
-                sendMessageToAllUsersCommand.processTextInput(this, message);
-                return;
-            }
+//            if ("create_place".equals(currentCommand)) {
+//                createPlaceCommand.processTextInput(this, message);
+//                return;
+//            }
+//
+//            if ("delete_place".equals(currentCommand)) {
+//                deletePlaceCommand.processTextInput(this, message);
+//                return;
+//            }
+//
+//            if ("create_event".equals(currentCommand)) {
+//                createEventCommand.processTextInput(this, message);
+//                return;
+//            }
+//
+//            if ("delete_event".equals(currentCommand)) {
+//                deleteEventCommand.processTextInput(this, message);
+//                return;
+//            }
+//
+//            if ("contact_admin".equals(currentCommand)) {
+//                contactAdminCommand.processTextInput(this, message);
+//                return;
+//            }
+//
+//            if ("send_message_to_all_users".equals(currentCommand)) {
+//                sendMessageToAllUsersCommand.processTextInput(this, message);
+//                return;
+//            }
         }
 
         if (update.hasMessage() && update.getMessage().hasPhoto()) {
@@ -166,26 +151,28 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
             long userId = message.getFrom().getId();
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            if ("create_place".equals(currentCommand)) {
-                createPlaceCommand.processPhotoInput(this, message);
-            }
+            IBotCommand handler = commands.get(currentCommand);
 
-            if ("send_message_to_all_users".equals(currentCommand)) {
-                sendMessageToAllUsersCommand.processPhotoInput(this, message);
+            if (handler instanceof PhotoProcessable photoHandler) {
+                photoHandler.processPhotoInput(this, update.getMessage());
             }
+//            if ("create_place".equals(currentCommand)) {
+//                createPlaceCommand.processPhotoInput(this, message);
+//            }
+//
+//            if ("send_message_to_all_users".equals(currentCommand)) {
+//                sendMessageToAllUsersCommand.processPhotoInput(this, message);
+//            }
         }
     }
 
     private void deleteMenuAndMessage(Message message) {
         try {
             InlineKeyboardMarkup loadingKeyboard = InlineKeyboardMarkup.builder()
-                    .keyboard(List.of(
-                            List.of(InlineKeyboardButton.builder()
+                    .keyboard(List.of(List.of(InlineKeyboardButton.builder()
                                     .text("⏳ Удаление меню...")
                                     .callbackData("IGNORE")
-                                    .build())
-                    ))
-                    .build();
+                            .build()))).build();
 
             EditMessageReplyMarkup loadingMarkup = new EditMessageReplyMarkup();
             loadingMarkup.setChatId(message.getChatId());
@@ -231,7 +218,8 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
     private void sendMessageToAllUsers(EventSendMessageToAllUsers event) {
         try {
             String host = java.net.InetAddress.getLocalHost().getHostName();
-            log.info("Listener invoked on host={} thread={} subs={}", host, Thread.currentThread().getName(), event.getSubscribers().size());
+            log.info("Listener invoked on host={} thread={} subs={}",
+                    host, Thread.currentThread().getName(), event.getSubscribers().size());
             if (event.getPhoto() != null) {
                 SendPhoto photoMessage = new SendPhoto();
                 try (InputStream photoStream = new ByteArrayInputStream(event.getPhoto())) {
@@ -297,10 +285,6 @@ public class SportPlacesAndEventsBot extends TelegramLongPollingCommandBot {
                 .append(" написал вам:\n")
                 .append(text)
                 .toString();
-    }
-
-    private void registerCommand(IBotCommand command) {
-        commands.put("/" + command.getCommandIdentifier(), command);
     }
 
     private void dispatchCommand(String commandText, Update update) {

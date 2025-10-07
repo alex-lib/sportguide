@@ -1,5 +1,7 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.bot.commands.interfaces.CallbackProcessable;
+import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.place.District;
@@ -23,7 +25,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class CreateEventCommand implements IBotCommand {
+public class CreateEventCommand implements IBotCommand, TextProcessable, CallbackProcessable {
 
 	private final EventSession eventSession;
 
@@ -78,6 +80,7 @@ public class CreateEventCommand implements IBotCommand {
 		}
 	}
 
+	@Override
 	public void processCallback(AbsSender absSender, CallbackQuery callback) {
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
@@ -120,6 +123,7 @@ public class CreateEventCommand implements IBotCommand {
         dto.setStep(2);
 	}
 
+	@Override
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
