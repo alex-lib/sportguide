@@ -18,7 +18,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class GetUpcomingEventsCommand implements IBotCommand {
-
     private final EventService eventService;
 
     @Override

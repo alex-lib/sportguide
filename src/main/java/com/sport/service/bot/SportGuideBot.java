@@ -36,9 +36,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class SportGuideBot extends TelegramLongPollingCommandBot {
+    private final Map<String, IBotCommand> commands = new HashMap<>();
     private final CommandStateStore commandStateStore;
     private final String botUsername;
-    private final Map<String, IBotCommand> commands = new HashMap<>();
 
     public SportGuideBot(
             @Value("${telegram.bot.token}") String botToken,
@@ -69,31 +69,19 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             CallbackQuery callback = update.getCallbackQuery();
             if (callback == null || callback.getFrom() == null) return;
             if (callback.getFrom().getIsBot()) return;
+            if (!(callback.getMessage() instanceof Message)) return;
 
             long userId = callback.getFrom().getId();
             log.info("Callback from user: {}", userId);
-
-            if (!(callback.getMessage() instanceof Message)) return;
-
             deleteMenuAndMessage((Message) callback.getMessage());
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand handler = commands.get(currentCommand);
+            IBotCommand command = commands.get(currentCommand);
 
-            if (handler instanceof CallbackProcessable callbackHandler) {
-                callbackHandler.processCallback(this, update.getCallbackQuery());
+            if (command instanceof CallbackProcessable callbackProcessor) {
+                callbackProcessor.processCallback(this, update.getCallbackQuery());
                 return;
             }
-//            if ("get_place".equals(currentCommand)) {
-//                getPlaceCommand.processCallback(this, callback);
-//                return;
-//            } else if ("create_place".equals(currentCommand)) {
-//                createPlaceCommand.processCallback(this, callback);
-//                return;
-//            } else if ("create_event".equals(currentCommand)) {
-//                createEventCommand.processCallback(this, callback);
-//                return;
-//            }
             return;
         }
 
@@ -109,60 +97,23 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             }
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand handler = commands.get(currentCommand);
+            IBotCommand command = commands.get(currentCommand);
 
-            if (handler instanceof TextProcessable textHandler) {
-                textHandler.processTextInput(this, update.getMessage());
+            if (command instanceof TextProcessable textProcessor) {
+                textProcessor.processTextInput(this, update.getMessage());
                 return;
             }
-//            if ("create_place".equals(currentCommand)) {
-//                createPlaceCommand.processTextInput(this, message);
-//                return;
-//            }
-//
-//            if ("delete_place".equals(currentCommand)) {
-//                deletePlaceCommand.processTextInput(this, message);
-//                return;
-//            }
-//
-//            if ("create_event".equals(currentCommand)) {
-//                createEventCommand.processTextInput(this, message);
-//                return;
-//            }
-//
-//            if ("delete_event".equals(currentCommand)) {
-//                deleteEventCommand.processTextInput(this, message);
-//                return;
-//            }
-//
-//            if ("contact_admin".equals(currentCommand)) {
-//                contactAdminCommand.processTextInput(this, message);
-//                return;
-//            }
-//
-//            if ("send_message_to_all_users".equals(currentCommand)) {
-//                sendMessageToAllUsersCommand.processTextInput(this, message);
-//                return;
-//            }
         }
 
         if (update.hasMessage() && update.getMessage().hasPhoto()) {
             Message message = update.getMessage();
             long userId = message.getFrom().getId();
-
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand handler = commands.get(currentCommand);
+            IBotCommand command = commands.get(currentCommand);
 
-            if (handler instanceof PhotoProcessable photoHandler) {
-                photoHandler.processPhotoInput(this, update.getMessage());
+            if (command instanceof PhotoProcessable photoProcessor) {
+                photoProcessor.processPhotoInput(this, update.getMessage());
             }
-//            if ("create_place".equals(currentCommand)) {
-//                createPlaceCommand.processPhotoInput(this, message);
-//            }
-//
-//            if ("send_message_to_all_users".equals(currentCommand)) {
-//                sendMessageToAllUsersCommand.processPhotoInput(this, message);
-//            }
         }
     }
 
@@ -220,6 +171,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             String host = java.net.InetAddress.getLocalHost().getHostName();
             log.info("Listener invoked on host={} thread={} subs={}",
                     host, Thread.currentThread().getName(), event.getSubscribers().size());
+
             if (event.getPhoto() != null) {
                 SendPhoto photoMessage = new SendPhoto();
                 try (InputStream photoStream = new ByteArrayInputStream(event.getPhoto())) {
@@ -288,18 +240,11 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     }
 
     private void dispatchCommand(String commandText, Update update) {
-        String[] parts = commandText.split(" ");
-        String command = parts[0];
-        String[] args = parts.length > 1 ? parts[1].split(" ") : new String[0];
-        IBotCommand cmd = commands.get(command);
-        if (cmd != null) {
-            try {
-                cmd.processMessage(this, update.getMessage(), args);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        IBotCommand command = commands.get(commandText);
+        if (command != null) {
+            command.processMessage(this, update.getMessage(), new String[0]);
         } else {
-            log.warn("Unknown command: " + command);
+            log.warn("Unknown command: {}", commandText);
         }
     }
 }

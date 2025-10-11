@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 
 @RequiredArgsConstructor
 @Service
@@ -18,7 +19,7 @@ public class TestConnection {
     public void testConnection() {
         try (var connection = dataSource.getConnection()) {
             log.info("Connected to DB: " + connection.getMetaData().getURL());
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

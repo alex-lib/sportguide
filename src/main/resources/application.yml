@@ -46,7 +46,7 @@ spring:
       - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
   sql:
     init:
-      mode: always
+      mode: never
       schema-locations: classpath:init.sql
       data-locations: classpath:data.sql
   h2:

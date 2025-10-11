@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageDto {
-
     private String message;
-
     private byte[] photo;
-
     private int step = 0;
 }

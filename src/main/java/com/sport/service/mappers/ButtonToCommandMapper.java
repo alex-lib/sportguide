@@ -3,7 +3,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ButtonToCommandMapper {
-
     private static final Map<String, String> BUTTON_COMMANDS = new HashMap<>();
 
     static {

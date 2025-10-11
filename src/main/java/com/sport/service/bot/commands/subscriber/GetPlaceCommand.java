@@ -30,16 +30,13 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
+    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
+    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
 
     private final PlaceSession placeSession;
-
     private final PlaceService placeService;
 
     private final CommandStateStore commandStateStore;
-
-    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-
-    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
 
     @Override
     public String getCommandIdentifier() {
@@ -179,13 +176,15 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     }
 
     private void handlePlaces(AbsSender absSender, Long chatId, PlaceDto dto) {
-        List<Place> places = placeService.findByDistrict(dto.getDistrict());
-        places = placeService.findByType(places, dto.getType());
-        places = placeService.findByOutdoor(places, dto.getOutdoor());
+        List<Place> places = dto.getOutdoor() != null ?
+                placeService.findByDistrictAndTypeAndOutdoor(dto.getDistrict(), dto.getType(), dto.getOutdoor())
+                : placeService.findByDistrictAndType(dto.getDistrict(), dto.getType());
+
         if (places.isEmpty()) {
             sendText(absSender, chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
             return;
         }
+
         for (Place place : places) {
             sendPlaceInfo(absSender, chatId, place);
         }
@@ -229,7 +228,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                 float latitude = Float.parseFloat(coordinates[0].trim());
                 float longitude = Float.parseFloat(coordinates[1].trim());
                 String mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
-                caption += String.format("\n🗺️ [Посмотреть местоположение места в Google maps](%s)", mapLink);
+                caption += String.format("\n🗺️ [Посмотреть местоположение в Google maps](%s)", mapLink);
             } catch (Exception e) {
                 log.error("Failed to parse coordinates for place {}", place.getName(), e);
                 caption += "\n\uD83E\uDDED Координаты: " + place.getCoordinates();
