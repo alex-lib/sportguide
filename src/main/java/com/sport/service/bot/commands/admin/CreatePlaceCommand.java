@@ -23,8 +23,10 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -83,8 +85,6 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	public void processCallback(AbsSender absSender, CallbackQuery callback) {
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
 
 		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
 			log.warn("User {} not in create_place session", userId);
@@ -101,6 +101,9 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		String data = callback.getData();
 		log.info("Processing callback for create_place: step={}, data={}", dto.getStep(), data);
+
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
 		if ("BACK".equals(data)) {
 			if (dto.getStep() == 2) {
@@ -167,8 +170,6 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
 
 		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
@@ -180,6 +181,9 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
+
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
 		try {
 			handleTextInput(message, dto, answer);
@@ -240,8 +244,6 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	public void processPhotoInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
 
 		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
@@ -253,6 +255,9 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
+
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
 		try {
 			if (message.hasPhoto()) {
@@ -270,7 +275,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 				commandStateStore.clearCurrentCommand(userId);
 			}
 			absSender.execute(answer);
-		} catch (Exception e) {
+        } catch (TelegramApiException e) {
 			log.error("Error processing photo", e);
             sendErrorMessage(absSender, chatId, "Ошибка при создании места ❌");
 		}
@@ -282,16 +287,21 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			errorMsg.setChatId(chatId.toString());
 			errorMsg.setText(message);
 			absSender.execute(errorMsg);
-		} catch (Exception e) {
+        } catch (TelegramApiException e) {
 			log.error("Error sending error message", e);
 		}
 	}
 
-	private byte[] downloadPhoto(AbsSender absSender, String fileId) throws Exception {
+    private byte[] downloadPhoto(AbsSender absSender, String fileId) {
 		GetFile getFileMethod = new GetFile();
 		getFileMethod.setFileId(fileId);
-		org.telegram.telegrambots.meta.api.objects.File file = absSender.execute(getFileMethod);
-		String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
+        org.telegram.telegrambots.meta.api.objects.File file = null;
+        try {
+            file = absSender.execute(getFileMethod);
+        } catch (TelegramApiException e) {
+            log.error("Error download photo", e);
+        }
+        String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
 		log.info("Downloading photo from: {}", fileUrl);
 		try (InputStream inputStream = new URL(fileUrl).openStream();
 		     ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -305,7 +315,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			byte[] result = outputStream.toByteArray();
 			log.info("Successfully downloaded photo: {} bytes", result.length);
 			return result;
-		} catch (Exception e) {
+        } catch (IOException e) {
 			log.error("Failed to download photo from URL: {}", fileUrl, e);
 			throw new RuntimeException("Failed to download photo: " + e.getMessage(), e);
 		}
