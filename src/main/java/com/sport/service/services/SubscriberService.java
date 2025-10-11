@@ -17,7 +17,7 @@ public interface SubscriberService {
 
     void updateSubscriber(Subscriber subscriber, Long id);
 
-    int getUsersCount();
+    long getUsersCount();
 
     int getSubscriptionsCount();
 
