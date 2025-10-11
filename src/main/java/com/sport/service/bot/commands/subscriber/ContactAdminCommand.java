@@ -1,4 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
+
+import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.events.EventContactAdmin;
 import com.sport.service.sessions.CommandStateStore;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ContactAdminCommand implements IBotCommand {
+public class ContactAdminCommand implements IBotCommand, TextProcessable {
 
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -49,6 +51,7 @@ public class ContactAdminCommand implements IBotCommand {
 		}
 	}
 
+    @Override
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();

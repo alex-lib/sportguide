@@ -18,14 +18,11 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @RequiredArgsConstructor
 @Slf4j
 public class DeletePlaceCommand implements IBotCommand, TextProcessable {
-
+	private final SubscriberService subscriberService;
 	private final PlaceService placeService;
 
 	private final PlaceSession placeSession;
-
 	private final CommandStateStore commandStateStore;
-
-	private final SubscriberService subscriberService;
 
 	@Override
 	public String getCommandIdentifier() {

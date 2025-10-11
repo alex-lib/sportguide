@@ -18,13 +18,10 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @Service
 @Slf4j
 public class DeleteEventCommand implements IBotCommand, TextProcessable {
-
+	private final CommandStateStore commandStateStore;
 	private final EventSession eventSession;
 
 	private final EventService eventService;
-
-	private final CommandStateStore commandStateStore;
-
 	private final SubscriberService subscriberService;
 
 	@Override

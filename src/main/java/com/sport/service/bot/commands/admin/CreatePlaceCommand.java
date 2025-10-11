@@ -7,7 +7,6 @@ import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Type;
-import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.services.PlaceService;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.CommandStateStore;
@@ -34,25 +33,18 @@ import java.util.List;
 @Service
 @Slf4j
 public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextProcessable, CallbackProcessable {
-
 	private final PlaceSession placeSession;
-
 	private final PlaceService placeService;
 
 	private final CommandStateStore commandStateStore;
-
-	private final PlaceMapper placeMapper;
-
 	private final SubscriberService subscriberService;
-
-	private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-
-	private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
-
-	private final String unexpectedPhoto = "Неожиданное фото. Начните заново \uD83D\uDD04";
 
 	@Value("${telegram.bot.token}")
 	private String botToken;
+
+	private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
+	private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
+	private final String unexpectedPhoto = "Неожиданное фото. Начните заново \uD83D\uDD04";
 
 	@Override
 	public String getCommandIdentifier() {
@@ -272,7 +264,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 				byte[] photoBytes = downloadPhoto(absSender, fileId);
 				log.info("Downloaded photo: {} bytes", photoBytes.length);
 				dto.setPhoto(photoBytes);
-				placeService.create(placeMapper.placeDtoToPlace(dto));
+				placeService.create(dto);
                 answer.setText("Место создано ✅");
 				placeSession.clear(chatId);
 				commandStateStore.clearCurrentCommand(userId);

@@ -14,7 +14,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @RequiredArgsConstructor
 @Slf4j
 public class GetSubscriptionsCountCommand implements IBotCommand {
-
     private final SubscriberService subscriberService;
 
     @Override
