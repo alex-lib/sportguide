@@ -8,6 +8,7 @@ import com.sport.service.utils.BeanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.List;
@@ -17,9 +18,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class SubscriberServiceImpl implements SubscriberService {
-
     private final SubscriberRepository subscriberRepository;
 
+    @Transactional
     @Override
     public void addSubscriber(User user) {
         Optional<Subscriber> subscriber = subscriberRepository.findById(user.getId());
@@ -60,9 +61,10 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public List<Subscriber> getSubscribersWhoWantGetEvents() {
-        return subscriberRepository.findAll().stream().filter(subscriber -> subscriber.getGetEvents().equals(true)).toList();
+        return findAll().stream().filter(subscriber -> subscriber.getGetEvents().equals(true)).toList();
     }
 
+    @Transactional
     @Override
     public void updateSubscriber(Subscriber subscriber, Long id) {
         Subscriber existedSubscriber = findById(id);
