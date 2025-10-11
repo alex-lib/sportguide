@@ -55,7 +55,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     private String mainAdminId;
 
     private void registerCommand(IBotCommand command) {
-        commands.put("/" + command.getCommandIdentifier(), command);
+        commands.put(command.getCommandIdentifier(), command);
     }
 
     @Override
