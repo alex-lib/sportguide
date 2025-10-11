@@ -18,9 +18,9 @@ INSERT INTO app_schema.subscribers (id, username, first_name, last_name, get_eve
 VALUES (995189732, 'i_sergo_sh', 'sergo', 'sergo', TRUE, 'ADMIN')
 ON CONFLICT DO NOTHING;
 
---INSERT INTO app_schema.subscribers (id, username, first_name, last_name, get_events, role)
---VALUES (1452551234, 'AAlexelAA', 'alex', 'alex', TRUE, 'ADMIN')
---ON CONFLICT DO NOTHING;
+INSERT INTO app_schema.subscribers (id, username, first_name, last_name, get_events, role)
+VALUES (1452551234, 'AAlexelAA', 'alex', 'alex', TRUE, 'ADMIN')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO app_schema.subscribers (id, username, first_name, last_name, get_events, role)
 VALUES (44090028, 'Dr_matei', 'pasha', 'pasha', TRUE, 'ADMIN')
