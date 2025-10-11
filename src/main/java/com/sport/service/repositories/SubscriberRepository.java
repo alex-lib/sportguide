@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface SubscriberRepository extends JpaRepository<Subscriber, Long> {
 
     @Query("SELECT COUNT(s) FROM Subscriber s WHERE s.getEvents = true")
-    int countAll();
+    int countAllSubscribers();
 
     @Query("SELECT COUNT(s) FROM Subscriber s WHERE s.getEvents = true")
     int getSubscriptionsCount();
