@@ -76,7 +76,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             deleteMenuAndMessage((Message) callback.getMessage());
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand command = commands.get(currentCommand);
+            IBotCommand command = commands.get("/" + currentCommand);
 
             if (command instanceof CallbackProcessable callbackProcessor) {
                 callbackProcessor.processCallback(this, update.getCallbackQuery());
@@ -97,7 +97,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             }
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand command = commands.get(currentCommand);
+            IBotCommand command = commands.get("/" + currentCommand);
 
             if (command instanceof TextProcessable textProcessor) {
                 textProcessor.processTextInput(this, update.getMessage());
@@ -109,7 +109,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             Message message = update.getMessage();
             long userId = message.getFrom().getId();
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand command = commands.get(currentCommand);
+            IBotCommand command = commands.get("/" + currentCommand);
 
             if (command instanceof PhotoProcessable photoProcessor) {
                 photoProcessor.processPhotoInput(this, update.getMessage());
