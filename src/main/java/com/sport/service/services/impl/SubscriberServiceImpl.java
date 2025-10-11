@@ -72,7 +72,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public int getUsersCount() {
-        return subscriberRepository.getUsersCount();
+        return subscriberRepository.countAll();
     }
 
     @Override

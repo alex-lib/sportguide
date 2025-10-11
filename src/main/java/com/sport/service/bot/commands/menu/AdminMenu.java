@@ -10,7 +10,6 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class AdminMenu {
-
     private final SendMessage answer;
 
     public static final String ADMIN_MENU = """

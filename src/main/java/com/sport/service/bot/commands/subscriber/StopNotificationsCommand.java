@@ -15,7 +15,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Slf4j
 @RequiredArgsConstructor
 public class StopNotificationsCommand implements IBotCommand {
-
     private final SubscriberService subscriberService;
 
     @Override
