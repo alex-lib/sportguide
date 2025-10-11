@@ -28,7 +28,7 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final ApplicationEventPublisher eventPublisher;
 
-    private static final String cron = "0 0 * * *";
+    private static final String CRON = "0 0 0 * * *";
 
     @Transactional
     @Override
@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    @Scheduled(cron = cron)
+    @Scheduled(cron = CRON)
     @Override
     public void deleteByExpiredDate() {
         LocalDate currentDate = LocalDate.now();
