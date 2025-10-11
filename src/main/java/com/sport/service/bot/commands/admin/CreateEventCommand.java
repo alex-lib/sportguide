@@ -5,7 +5,6 @@ import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.place.District;
-import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.services.EventService;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.CommandStateStore;
@@ -19,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.regex.Pattern;
 
@@ -26,25 +26,17 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class CreateEventCommand implements IBotCommand, TextProcessable, CallbackProcessable {
-
 	private final EventSession eventSession;
-
 	private final EventService eventService;
-
 	private final CommandStateStore commandStateStore;
-
-	private final EventMapper eventMapper;
 
 	private final SubscriberService subscriberService;
 
-    private final Pattern DATE_PATTERN = Pattern.compile(
+	private final Pattern DATE_PATTERN = Pattern.compile(
             "^([1-9]\\d{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$");
-
     private final Pattern TIME_PATTERN = Pattern.compile(
             "^([01]\\d|2[0-3]):([0-5]\\d)$");
-
 	private final String sessionExpired = "Сессия истекла.\nНачните заново \uD83D\uDD04";
-
 	private final String unknownStep = "Неизвестный шаг.\nНачните заново \uD83D\uDD04";
 
 	@Override
@@ -84,8 +76,6 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 	public void processCallback(AbsSender absSender, CallbackQuery callback) {
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
 
 		if (!"create_event".equals(commandStateStore.getCurrentCommand(userId))) {
 			log.warn("User {} not in create_event session", userId);
@@ -102,6 +92,8 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
 		String data = callback.getData();
 		log.info("Processing callback for create_event: step={}, data={}", dto.getStep(), data);
+		SendMessage answer = new SendMessage();
+		answer.setChatId(chatId.toString());
 
 		try {
 			if (dto.getStep() == 1) {
@@ -111,7 +103,8 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 			}
 			eventSession.save(chatId, dto);
 			absSender.execute(answer);
-		} catch (Exception e) {
+		} catch (TelegramApiException e) {
+			eventSession.clear(chatId);
 			log.error("Error processing callback", e);
 			sendErrorMessage(absSender, chatId, "Произошла ошибка.\nПопробуйте еще раз \uD83D\uDD04");
 		}
@@ -147,7 +140,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 			absSender.execute(answer);
 
 			if (dto.getStep() > 8) {
-				eventService.create(eventMapper.eventDtoToEvent(dto));
+				eventService.create(dto);
 				SendMessage successMsg = new SendMessage();
 				successMsg.setChatId(chatId.toString());
                 successMsg.setText("Событие создано ✅");

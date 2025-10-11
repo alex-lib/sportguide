@@ -1,8 +1,10 @@
 package com.sport.service.services.impl;
 
+import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
 import com.sport.service.entities.place.Type;
+import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.services.PlaceService;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +18,13 @@ import java.util.List;
 @Service
 @Slf4j
 public class PlaceServiceImpl implements PlaceService {
-
     private final PlaceRepository placeRepository;
+    private final PlaceMapper placeMapper;
 
     @Transactional
     @Override
-    public void create(Place place) {
-            placeRepository.save(place);
+    public void create(PlaceDto dto) {
+        placeRepository.save(placeMapper.placeDtoToPlace(dto));
     }
 
     @Override
@@ -30,13 +32,21 @@ public class PlaceServiceImpl implements PlaceService {
         return placeRepository.existsByName(name);
     }
 
+    @Override
+    public List<Place> findByDistrictAndTypeAndOutdoor(District district, Type type, Boolean outdoor) {
+        return placeRepository.findByDistrictAndTypeAndOutdoor(district, type, outdoor);
+    }
+
+    @Override
+    public List<Place> findByDistrictAndType(District district, Type type) {
+        return placeRepository.findByDistrictAndType(district, type);
+    }
+
     @Transactional
     @Override
     public void deleteByName(String name) {
         Place place = placeRepository.findByName(name);
-        if (place != null) {
-            placeRepository.delete(place);
-        }
+        if (place != null) placeRepository.delete(place);
     }
 
     @Override

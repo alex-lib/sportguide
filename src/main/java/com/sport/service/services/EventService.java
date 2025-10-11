@@ -1,11 +1,13 @@
 package com.sport.service.services;
+
+import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
 
 import java.util.List;
 
 public interface EventService {
 
-    void create(Event event);
+    void create(EventDto dto);
 
     void deleteByName(String eventName);
 

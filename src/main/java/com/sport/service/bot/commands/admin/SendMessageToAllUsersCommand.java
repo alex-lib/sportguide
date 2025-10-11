@@ -30,20 +30,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessable, PhotoProcessable {
+    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
+    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
+    private final String errorToProcessInput = "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04";
 
+    private final SubscriberService subscriberService;
     private final ApplicationEventPublisher eventPublisher;
 
     private final CommandStateStore commandStateStore;
-
-    private final SubscriberService subscriberService;
-
     private final MessageSession messageSession;
-
-    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-
-    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
-
-    private final String errorToProcessInput = "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04";
 
     @Value("${telegram.bot.token}")
     private String botToken;

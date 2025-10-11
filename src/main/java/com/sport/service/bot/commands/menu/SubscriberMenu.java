@@ -10,7 +10,6 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class SubscriberMenu {
-
     private final SendMessage answer;
 
     public static final String SUBSCRIBER_MENU = """
