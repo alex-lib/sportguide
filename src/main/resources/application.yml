@@ -4,12 +4,17 @@ telegram:
     username: ${BOT_NAME}
   mainAdminId: ${MAIN_ADMIN_ID}
 
+#server:
+#  port: 8081
+#
 logging:
   level:
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
     org.hibernate: WARN
     org.springframework.orm.jpa: WARN
+#  file:
+#    path: ./logs
 
 spring:
   data:
@@ -30,7 +35,7 @@ spring:
       connection-init-sql: CREATE SCHEMA IF NOT EXISTS app_schema
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     defer-datasource-initialization: true
     properties:
       hibernate:
@@ -46,7 +51,7 @@ spring:
       - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
   sql:
     init:
-      mode: never
+      mode: always
       schema-locations: classpath:init.sql
       data-locations: classpath:data.sql
   h2:
@@ -54,6 +59,35 @@ spring:
       enabled: true
   main:
     web-application-type: none
+
+#management:
+#  endpoints:
+#    web:
+#      base-path: /actuator
+#      exposure:
+#        include: health,info,prometheus,metrics,loggers,metricsofusers
+#  metrics:
+#    export:
+#      prometheus:
+#        enabled: true
+#    distribution:
+#      percentiles-histogram:
+#        "[http.server.requests]": true
+#    enable:
+#      jvm: true
+#      tomcat: true
+#      logback: true
+#  endpoint:
+#    health:
+#      show-details: always
+#  server:
+#    port: 8081
+#    address: 127.0.0.1
+#  health:
+#    redis:
+#      enabled: true
+#    db:
+#      enabled: true
 
 app:
   redis:
