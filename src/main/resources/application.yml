@@ -35,7 +35,7 @@ spring:
       connection-init-sql: CREATE SCHEMA IF NOT EXISTS app_schema
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     defer-datasource-initialization: true
     properties:
       hibernate:
@@ -51,7 +51,7 @@ spring:
       - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
   sql:
     init:
-      mode: always
+      mode: never
       schema-locations: classpath:init.sql
       data-locations: classpath:data.sql
   h2:
