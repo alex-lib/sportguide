@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.dto.MessageDto;
@@ -54,6 +55,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
     }
 
     @Override
+    @AdminOnly
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
         Long chatId = message.getChatId();
@@ -62,13 +64,11 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        if (subscriberService.checkIfAdmin(userId)) {
-            MessageDto dto = messageSession.createSession(chatId);
-            dto.setStep(1);
-            messageSession.save(chatId, dto);
-            commandStateStore.setCurrentCommand(userId, "send_message_to_all_users");
-            answer.setText("📩 Напишите, что вы хотите отправить подписчикам:");
-        }
+        MessageDto dto = messageSession.createSession(chatId);
+        dto.setStep(1);
+        messageSession.save(chatId, dto);
+        commandStateStore.setCurrentCommand(userId, "send_message_to_all_users");
+        answer.setText("📩 Напишите, что вы хотите отправить подписчикам:");
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {
@@ -128,7 +128,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             handleTextInput(message, dto, answer, absSender);
             messageSession.save(chatId, dto);
 
-            if (answer.getText() != null && !answer.getText().isEmpty()) {
+            if (!answer.getText().isEmpty()) {
                 absSender.execute(answer);
             }
         } catch (Exception e) {

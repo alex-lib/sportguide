@@ -1,4 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
+
+import com.sport.service.services.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @Slf4j
 @RequiredArgsConstructor
 public class SupportProjectCommand implements IBotCommand {
+    private final WeatherService weatherService;
 
     @Override
     public String getCommandIdentifier() {

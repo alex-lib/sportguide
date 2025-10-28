@@ -13,7 +13,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                 .description(dto.getDescription())
                 .webSite(dto.getWebSite())
                 .outdoor(dto.getOutdoor())
-                .type(dto.getType())
+                .placeType(dto.getPlaceType())
                 .photo(dto.getPhoto())
                 .coordinates(dto.getCoordinates())
                 .build();

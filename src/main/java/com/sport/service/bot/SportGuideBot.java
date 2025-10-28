@@ -7,6 +7,7 @@ import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.events.EventContactAdmin;
 import com.sport.service.events.EventCreatedEvent;
+import com.sport.service.events.EventCreatedTodayWeather;
 import com.sport.service.events.EventSendMessageToAllUsers;
 import com.sport.service.mappers.ButtonToCommandMapper;
 import com.sport.service.sessions.CommandStateStore;
@@ -55,7 +56,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     private String mainAdminId;
 
     private void registerCommand(IBotCommand command) {
-        commands.put(command.getCommandIdentifier(), command);
+        commands.put("/" + command.getCommandIdentifier(), command);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             deleteMenuAndMessage((Message) callback.getMessage());
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand command = commands.get(currentCommand);
+            IBotCommand command = commands.get("/" + currentCommand);
 
             if (command instanceof CallbackProcessable callbackProcessor) {
                 callbackProcessor.processCallback(this, update.getCallbackQuery());
@@ -97,7 +98,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             }
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand command = commands.get(currentCommand);
+            IBotCommand command = commands.get("/" + currentCommand);
 
             if (command instanceof TextProcessable textProcessor) {
                 textProcessor.processTextInput(this, update.getMessage());
@@ -109,7 +110,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             Message message = update.getMessage();
             long userId = message.getFrom().getId();
             String currentCommand = commandStateStore.getCurrentCommand(userId);
-            IBotCommand command = commands.get(currentCommand);
+            IBotCommand command = commands.get("/" + currentCommand);
 
             if (command instanceof PhotoProcessable photoProcessor) {
                 photoProcessor.processPhotoInput(this, update.getMessage());
@@ -149,6 +150,22 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     }
 
     @EventListener
+    private void sendWeatherNotification(EventCreatedTodayWeather event) {
+        String notification = event.getMessage();
+        for (Subscriber subscriber : event.getSubscribers()) {
+            SendMessage sendMessage = SendMessage.builder()
+                    .chatId(subscriber.getId().toString())
+                    .text(notification)
+                    .build();
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                log.error("Failed to send weather forecast notification of {} to subscribers", event.getMessage());
+            }
+        }
+    }
+
+    @EventListener
     private void sendNotification(EventCreatedEvent event) {
         try {
             String notification = createEventNotification(event.getEvent());
@@ -161,7 +178,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             }
             log.info("Notification of event {} sent to subscribers", event.getEvent());
         } catch (TelegramApiException e) {
-            log.error("Failed to send notification of {} to subscribers", event.getEvent());
+            log.error("Failed to send event notification of {} to subscribers", event.getEvent());
         }
     }
 
@@ -211,6 +228,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
                 .append("\uD83D\uDDFA Район: ").append(event.getDistrict()).append("\n")
                 .append("\uD83D\uDCEE Адрес: ").append(event.getAddress()).append("\n")
                 .append("Спасибо за подписку \uD83D\uDE4F")
+                .append("#событие")
                 .toString();
     }
 

@@ -19,7 +19,7 @@ public interface SubscriberService {
 
     long getUsersCount();
 
-    int getSubscriptionsCount();
+    long getSubscriptionsCount();
 
     List<Subscriber> findAll();
 }
