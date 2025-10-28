@@ -17,7 +17,7 @@ services:
   redis:
     image: redis:7.0.12
     container_name: redis
-    command: [ "redis-server", "--appendonly", "yes", "--replicaof", "no", "one" ]
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
     ports:
       - "6379:6379"
 
@@ -37,7 +37,11 @@ services:
         liquibase --url=jdbc:postgresql://postgres:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --changeLogFile=/liquibase/changelog/db.changelog-master.xml --defaultSchemaName=app_schema generateChangeLog
 
   app:
+    volumes:
+      - ./logs:/app/logs
     build: .
+    ports:
+      - "8081:8081"
     container_name: app
     depends_on:
       - postgres
@@ -45,6 +49,7 @@ services:
     env_file:
       - .env
     environment:
+      SERVER_PORT: 8081
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=app_schema
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}

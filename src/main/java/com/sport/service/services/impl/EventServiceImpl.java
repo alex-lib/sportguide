@@ -54,7 +54,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    @Scheduled(cron = CRON)
+    @Scheduled(cron = CRON, zone = "Europe/Moscow")
     @Override
     public void deleteByExpiredDate() {
         LocalDate currentDate = LocalDate.now();

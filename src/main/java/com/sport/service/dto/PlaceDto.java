@@ -1,6 +1,6 @@
 package com.sport.service.dto;
 import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.Type;
+import com.sport.service.entities.place.PlaceType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PlaceDto {
     private District district;
-    private Type type;
+    private PlaceType placeType;
     private Boolean outdoor;
     private String name;
     private String address;

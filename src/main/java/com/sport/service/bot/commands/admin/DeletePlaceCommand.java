@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.services.PlaceService;
 import com.sport.service.services.SubscriberService;
@@ -35,6 +36,7 @@ public class DeletePlaceCommand implements IBotCommand, TextProcessable {
 	}
 
 	@Override
+    @AdminOnly
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
 		Long chatId = message.getChatId();
@@ -43,11 +45,9 @@ public class DeletePlaceCommand implements IBotCommand, TextProcessable {
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId);
 
-        if (subscriberService.checkIfAdmin(userId)) {
-            commandStateStore.setCurrentCommand(userId, "delete_place");
-			answer.setText("Удалить место можно только по точному имени ранее сохраненного места. " +
-					"Напишите название места, которое хотите удалить:");
-		}
+        commandStateStore.setCurrentCommand(userId, "delete_place");
+        answer.setText("Удалить место можно только по точному имени ранее сохраненного места. " +
+                "Напишите название места, которое хотите удалить:");
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {

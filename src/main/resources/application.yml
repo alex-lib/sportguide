@@ -11,6 +11,9 @@ logging:
     org.hibernate: WARN
     org.springframework.orm.jpa: WARN
 
+server:
+  port: 8081
+
 spring:
   data:
     redis:
@@ -48,12 +51,40 @@ spring:
     init:
       mode: never
       schema-locations: classpath:init.sql
-      data-locations: classpath:data.sql
   h2:
     console:
       enabled: true
   main:
-    web-application-type: none
+    web-application-type: servlet
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,prometheus,metrics,loggers,metricsofusers
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+    enable:
+      jvm: true
+      tomcat: true
+      logback: true
+  endpoint:
+    health:
+      show-details: always
+  server:
+    port: 8081
+    address: 127.0.0.1
+  health:
+    redis:
+      enabled: true
+    db:
+      enabled: true
 
 app:
   redis:

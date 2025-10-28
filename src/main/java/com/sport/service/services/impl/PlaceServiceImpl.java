@@ -3,7 +3,7 @@ package com.sport.service.services.impl;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.Type;
+import com.sport.service.entities.place.PlaceType;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.services.PlaceService;
@@ -33,13 +33,13 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public List<Place> findByDistrictAndTypeAndOutdoor(District district, Type type, Boolean outdoor) {
-        return placeRepository.findByDistrictAndTypeAndOutdoor(district, type, outdoor);
+    public List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findByDistrictAndPlaceTypeAndOutdoor(district, placeType, outdoor);
     }
 
     @Override
-    public List<Place> findByDistrictAndType(District district, Type type) {
-        return placeRepository.findByDistrictAndType(district, type);
+    public List<Place> findByDistrictAndPlaceType(District district, PlaceType placeType) {
+        return placeRepository.findByDistrictAndPlaceType(district, placeType);
     }
 
     @Transactional
@@ -59,9 +59,9 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public List<Place> findByType(List<Place> places, Type type) {
+    public List<Place> findByType(List<Place> places, PlaceType placeType) {
         return places.stream()
-                .filter(place -> place.getType() == type)
+                .filter(place -> place.getPlaceType() == placeType)
                 .toList();
     }
 
