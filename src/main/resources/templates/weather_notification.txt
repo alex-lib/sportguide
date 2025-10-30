@@ -1,0 +1,15 @@
+Доброго утра🙏
+
+🌍 Погода в Воронеже на сегодня ([[${date}]]):
+🌡️ Сейчас: [[${currentDescription}]] ~ [[${currentTemperature}]]°C
+📊 Экстремумы: макс. ~ [[${maxTemperature}]]°C, мин. ~ [[${minTemperature}]]°C
+
+⏱️ По времени:
+9:00: [[${time9Description}]] ~ [[${time9Temperature}]]°C, вероя-ть осадков: [[${time9Precipitation}]]%
+12:00: [[${time12Description}]] ~ [[${time12Temperature}]]°C, вероя-ть осадков: [[${time12Precipitation}]]%
+15:00: [[${time15Description}]] ~ [[${time15Temperature}]]°C, вероя-ть осадков: [[${time15Precipitation}]]%
+18:00: [[${time18Description}]] ~ [[${time18Temperature}]]°C, вероя-ть осадков: [[${time18Precipitation}]]%
+21:00: [[${time21Description}]] ~ [[${time21Temperature}]]°C, вероя-ть осадков: [[${time21Precipitation}]]%
+
+У природы нет, для тренировки, плохой погоды!
+#погода

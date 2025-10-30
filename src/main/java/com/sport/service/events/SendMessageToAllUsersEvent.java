@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class EventSendMessageToAllUsers {
+public class SendMessageToAllUsersEvent {
     private final String message;
     private final byte[] photo;
     private final List<Subscriber> subscribers;

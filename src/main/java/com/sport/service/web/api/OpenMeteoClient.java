@@ -1,4 +1,4 @@
-package com.sport.service.api;
+package com.sport.service.web.api;
 
 import com.sport.service.web.models.OpenMeteoResponse;
 import org.springframework.cloud.openfeign.FeignClient;

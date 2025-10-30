@@ -34,7 +34,6 @@ public class AdminOnlyAspect {
                 command = ButtonToCommandMapper.mapButtonToCommand(message.getText());
                 User user = message.getFrom();
                 userId = user.getId();
-                break;
             }
         }
 

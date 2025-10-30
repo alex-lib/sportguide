@@ -1,4 +1,4 @@
-package com.sport.service.actuator;
+package com.sport.service.web.actuator;
 
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;

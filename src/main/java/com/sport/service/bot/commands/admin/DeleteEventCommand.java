@@ -45,7 +45,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId);
 
-        commandStateStore.setCurrentCommand(userId, "delete_event");
+        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
         answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
                 "Напишите название события, которое хотите удалить:");
 		try {
@@ -62,7 +62,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId.toString());
 
-        if (!"delete_event".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
 

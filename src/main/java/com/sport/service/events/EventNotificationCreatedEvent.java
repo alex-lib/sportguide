@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class EventCreatedTodayWeather {
+public class EventNotificationCreatedEvent {
     private final List<Subscriber> subscribers;
-    private final String message;
+    private final String notification;
 }
