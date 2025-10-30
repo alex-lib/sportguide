@@ -77,9 +77,9 @@ management:
   endpoint:
     health:
       show-details: always
-  server:
-    port: 8081
-    address: 127.0.0.1
+  #  server:
+  #    port: 8081
+  #    address: 127.0.0.1
   health:
     redis:
       enabled: true

@@ -71,7 +71,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			PlaceDto dto = placeSession.createSession(chatId);
 			dto.setStep(1);
 			placeSession.save(chatId, dto);
-            commandStateStore.setCurrentCommand(userId, "create_place");
+            commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
             answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
 		}
 		try {
@@ -86,7 +86,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
 
-		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			log.warn("User {} not in create_place session", userId);
 			return;
 		}
@@ -171,7 +171,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
 
@@ -245,7 +245,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
 

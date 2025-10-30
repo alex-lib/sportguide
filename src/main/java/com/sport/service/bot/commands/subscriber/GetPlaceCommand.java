@@ -58,7 +58,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         PlaceDto dto = placeSession.createSession(chatId);
         dto.setStep(1);
         placeSession.save(chatId, dto);
-        commandStateStore.setCurrentCommand(userId, "get_place");
+        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
         showStepMenu(absSender, chatId, dto, userId);
     }
 
@@ -68,7 +68,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        if (!"get_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             log.warn("User {} not in get_place session", userId);
             return;
         }

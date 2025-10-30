@@ -60,7 +60,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         EventDto dto = eventSession.createSession(chatId);
         dto.setStep(1);
         eventSession.save(chatId, dto);
-        commandStateStore.setCurrentCommand(userId, "create_event");
+        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
         answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
 
         try {
@@ -75,7 +75,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         Long chatId = callback.getMessage().getChatId();
         Long userId = callback.getFrom().getId();
 
-        if (!"create_event".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             log.warn("User {} not in create_event session", userId);
             return;
         }
@@ -121,7 +121,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        if (!"create_event".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
 

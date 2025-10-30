@@ -3,12 +3,11 @@ package com.sport.service.bot;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
-import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
-import com.sport.service.events.EventContactAdmin;
-import com.sport.service.events.EventCreatedEvent;
-import com.sport.service.events.EventCreatedTodayWeather;
-import com.sport.service.events.EventSendMessageToAllUsers;
+import com.sport.service.events.EventNotificationCreatedEvent;
+import com.sport.service.events.SendMessageToAllUsersEvent;
+import com.sport.service.events.SubscriberSentToAdminMessageNotificationCreatedEvent;
+import com.sport.service.events.WeatherNotificationCreatedEvent;
 import com.sport.service.mappers.ButtonToCommandMapper;
 import com.sport.service.sessions.CommandStateStore;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
-import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -150,7 +152,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     }
 
     @EventListener
-    private void sendWeatherNotification(EventCreatedTodayWeather event) {
+    private void sendWeatherNotification(WeatherNotificationCreatedEvent event) {
         String notification = event.getMessage();
         for (Subscriber subscriber : event.getSubscribers()) {
             SendMessage sendMessage = SendMessage.builder()
@@ -166,9 +168,9 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     }
 
     @EventListener
-    private void sendNotification(EventCreatedEvent event) {
+    private void sendNotification(EventNotificationCreatedEvent event) {
         try {
-            String notification = createEventNotification(event.getEvent());
+            String notification = event.getNotification();
             for (Subscriber subscriber : event.getSubscribers()) {
                 SendMessage sendMessage = SendMessage.builder()
                         .chatId(subscriber.getId().toString())
@@ -176,14 +178,14 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
                         .build();
                 execute(sendMessage);
             }
-            log.info("Notification of event {} sent to subscribers", event.getEvent());
+            log.info("Notification of event {} sent to subscribers", event.getNotification());
         } catch (TelegramApiException e) {
-            log.error("Failed to send event notification of {} to subscribers", event.getEvent());
+            log.error("Failed to send event notification of {} to subscribers", event.getNotification());
         }
     }
 
     @EventListener
-    private void sendMessageToAllUsers(EventSendMessageToAllUsers event) {
+    private void sendMessageToAllUsers(SendMessageToAllUsersEvent event) {
         try {
             String host = java.net.InetAddress.getLocalHost().getHostName();
             log.info("Listener invoked on host={} thread={} subs={}",
@@ -217,44 +219,18 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
         }
     }
 
-    private String createEventNotification(Event event) {
-        return new StringBuilder()
-                .append("✨ Событие: ").append(event.getName()).append("\n")
-                .append("\uD83D\uDCDD Описание: ").append(event.getDescription()).append("\n")
-                .append("\uD83D\uDCC5 Дата: ").append(event.getDate()).append("\n")
-                .append("⌚\uFE0F Время: ").append(event.getTime()).append("\n")
-                .append("\uD83D\uDD17 Ссылка: ").append(event.getLink()).append("\n")
-                .append("\uD83D\uDCCD Место: ").append(event.getPlaceName()).append("\n")
-                .append("\uD83D\uDDFA Район: ").append(event.getDistrict()).append("\n")
-                .append("\uD83D\uDCEE Адрес: ").append(event.getAddress()).append("\n")
-                .append("Спасибо за подписку \uD83D\uDE4F")
-                .append("#событие")
-                .toString();
-    }
-
     @EventListener
-    private void sendNotificationToAdmin(EventContactAdmin event) {
+    private void sendNotificationToAdmin(SubscriberSentToAdminMessageNotificationCreatedEvent event) {
         try {
-            String notification = createNotificationForAdmin(event.getText(), event.getUser());
+            String notification = event.getNotification();
             SendMessage sendMessage = SendMessage.builder()
                     .chatId(mainAdminId)
                     .text(notification)
                     .build();
             execute(sendMessage);
         } catch (TelegramApiException e) {
-            log.error("Failed to send notification of {} to admin", event.getText());
+            log.error("Failed to send notification of {} to admin", event.getNotification());
         }
-    }
-
-    private String createNotificationForAdmin(String text, User user) {
-        return new StringBuilder()
-                .append("\uD83D\uDC64 Пользователь: ")
-                .append(user.getUserName())
-                .append(" c id: ")
-                .append(user.getId())
-                .append(" написал вам:\n")
-                .append(text)
-                .toString();
     }
 
     private void dispatchCommand(String commandText, Update update) {

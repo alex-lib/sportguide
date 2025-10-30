@@ -1,23 +1,54 @@
 package com.sport.service.mappers;
 
-public class WeatherCodeMapper {
+import java.util.HashMap;
+import java.util.Map;
 
-    public static String getWeatherDescription(int code) {
-        if (code == 0) return "Ясно☀️";
-        if (code == 1) return "Преимущественно ясно🌤️";
-        if (code == 2) return "Переменная облачность⛅";
-        if (code == 3) return "Пасмурно☁️";
-        if (code == 45 || code == 48) return "Туман🌫️";
-        if (code >= 51 && code <= 55) return "Морось🌧️";
-        if (code == 56 || code == 57) return "Ледяная морось🌧️";
-        if (code >= 61 && code <= 65) return "Дождь🌧️";
-        if (code == 66 || code == 67) return "Ледяной дождь🌧️";
-        if (code >= 71 && code <= 75) return "Снег❄️";
-        if (code == 77) return "Град🌨️";
-        if (code >= 80 && code <= 82) return "Ливни⛈️";
-        if (code == 85 || code == 86) return "Снегопад🌨️";
-        if (code == 95) return "Гроза⛈️";
-        if (code == 96 || code == 99) return "Гроза с градом⛈️";
-        return "Неизвестно";
+public class WeatherCodeMapper {
+    private static final Map<Integer, String> WEATHER_DESCRIPTIONS = new HashMap<>();
+
+    static {
+        WEATHER_DESCRIPTIONS.put(0, "Ясно☀️");
+        WEATHER_DESCRIPTIONS.put(1, "Преимущественно ясно🌤️");
+        WEATHER_DESCRIPTIONS.put(2, "Переменная облачность⛅");
+        WEATHER_DESCRIPTIONS.put(3, "Пасмурно☁️");
+
+        WEATHER_DESCRIPTIONS.put(45, "Туман🌫️");
+        WEATHER_DESCRIPTIONS.put(48, "Туман🌫️");
+
+        for (int code = 51; code <= 55; code++) {
+            WEATHER_DESCRIPTIONS.put(code, "Морось🌧️");
+        }
+
+        WEATHER_DESCRIPTIONS.put(56, "Ледяная морось🌧️");
+        WEATHER_DESCRIPTIONS.put(57, "Ледяная морось🌧️");
+
+        for (int code = 61; code <= 65; code++) {
+            WEATHER_DESCRIPTIONS.put(code, "Дождь🌧️");
+        }
+
+        WEATHER_DESCRIPTIONS.put(66, "Ледяной дождь🌧️");
+        WEATHER_DESCRIPTIONS.put(67, "Ледяной дождь🌧️");
+
+        for (int code = 71; code <= 75; code++) {
+            WEATHER_DESCRIPTIONS.put(code, "Снег❄️");
+        }
+
+        WEATHER_DESCRIPTIONS.put(77, "Град🌨️");
+
+        WEATHER_DESCRIPTIONS.put(80, "Ливни⛈️");
+        WEATHER_DESCRIPTIONS.put(81, "Ливни⛈️");
+        WEATHER_DESCRIPTIONS.put(82, "Ливни⛈️");
+
+        WEATHER_DESCRIPTIONS.put(85, "Снегопад🌨️");
+        WEATHER_DESCRIPTIONS.put(86, "Снегопад🌨️");
+
+        WEATHER_DESCRIPTIONS.put(95, "Гроза⛈️");
+
+        WEATHER_DESCRIPTIONS.put(96, "Гроза с градом⛈️");
+        WEATHER_DESCRIPTIONS.put(99, "Гроза с градом⛈️");
+    }
+
+    public static String mapCodeToWeatherDescription(int code) {
+        return WEATHER_DESCRIPTIONS.getOrDefault(code, "Неизвестно");
     }
 }
