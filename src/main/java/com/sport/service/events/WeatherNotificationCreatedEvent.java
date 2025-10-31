@@ -10,5 +10,5 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WeatherNotificationCreatedEvent {
     private final List<Subscriber> subscribers;
-    private final String message;
+    private final String notification;
 }

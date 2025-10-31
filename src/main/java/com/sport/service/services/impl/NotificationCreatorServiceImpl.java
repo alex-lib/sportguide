@@ -9,6 +9,9 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationCreatorServiceImpl implements NotificationCreatorService {
@@ -24,26 +27,17 @@ public class NotificationCreatorServiceImpl implements NotificationCreatorServic
         context.setVariable("maxTemperature", String.format("%.1f", weather.getDaily().getMaxTemperature()));
         context.setVariable("minTemperature", String.format("%.1f", weather.getDaily().getMinTemperature()));
 
-        context.setVariable("time9Description", weather.getHourlyForecast().get(9).getDescription());
-        context.setVariable("time9Temperature", String.format("%.1f", weather.getHourlyForecast().get(9).getTemperature()));
-        context.setVariable("time9Precipitation", weather.getHourlyForecast().get(9).getPrecipitationProbability());
+        List<String[]> weatherHourlyInfo = new ArrayList<>();
+        for (int i = 9; i <= 21; i = i + 3) {
+            String[] weatherDataOfSpecificHour = new String[4];
+            weatherDataOfSpecificHour[0] = i + ":00";
+            weatherDataOfSpecificHour[1] = weather.getHourlyForecast().get(i).getDescription();
+            weatherDataOfSpecificHour[2] = String.format("%.1f", weather.getHourlyForecast().get(i).getTemperature());
+            weatherDataOfSpecificHour[3] = String.valueOf(weather.getHourlyForecast().get(i).getPrecipitationProbability());
+            weatherHourlyInfo.add(weatherDataOfSpecificHour);
+        }
 
-        context.setVariable("time12Description", weather.getHourlyForecast().get(12).getDescription());
-        context.setVariable("time12Temperature", String.format("%.1f", weather.getHourlyForecast().get(12).getTemperature()));
-        context.setVariable("time12Precipitation", weather.getHourlyForecast().get(12).getPrecipitationProbability());
-
-        context.setVariable("time15Description", weather.getHourlyForecast().get(15).getDescription());
-        context.setVariable("time15Temperature", String.format("%.1f", weather.getHourlyForecast().get(15).getTemperature()));
-        context.setVariable("time15Precipitation", weather.getHourlyForecast().get(15).getPrecipitationProbability());
-
-        context.setVariable("time18Description", weather.getHourlyForecast().get(18).getDescription());
-        context.setVariable("time18Temperature", String.format("%.1f", weather.getHourlyForecast().get(18).getTemperature()));
-        context.setVariable("time18Precipitation", weather.getHourlyForecast().get(18).getPrecipitationProbability());
-
-        context.setVariable("time21Description", weather.getHourlyForecast().get(21).getDescription());
-        context.setVariable("time21Temperature", String.format("%.1f", weather.getHourlyForecast().get(21).getTemperature()));
-        context.setVariable("time21Precipitation", weather.getHourlyForecast().get(21).getPrecipitationProbability());
-
+        context.setVariable("weatherHourlyInfo", weatherHourlyInfo);
         return templateEngine.process("weather_notification.txt", context);
     }
 
@@ -59,7 +53,6 @@ public class NotificationCreatorServiceImpl implements NotificationCreatorServic
         context.setVariable("eventAddress", event.getAddress());
         context.setVariable("eventPlaceName", event.getPlaceName());
         context.setVariable("eventLink", event.getLink());
-
         return templateEngine.process("event_notification.txt", context);
     }
 
@@ -70,7 +63,6 @@ public class NotificationCreatorServiceImpl implements NotificationCreatorServic
         context.setVariable("username", user.getUserName());
         context.setVariable("userId", user.getId());
         context.setVariable("message", text);
-
         return templateEngine.process("subscriber_sent_message_to_admin_notification.txt", context);
     }
 }

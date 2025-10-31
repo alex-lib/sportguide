@@ -152,39 +152,6 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     }
 
     @EventListener
-    private void sendWeatherNotification(WeatherNotificationCreatedEvent event) {
-        String notification = event.getMessage();
-        for (Subscriber subscriber : event.getSubscribers()) {
-            SendMessage sendMessage = SendMessage.builder()
-                    .chatId(subscriber.getId().toString())
-                    .text(notification)
-                    .build();
-            try {
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                log.error("Failed to send weather forecast notification of {} to subscribers", event.getMessage());
-            }
-        }
-    }
-
-    @EventListener
-    private void sendNotification(EventNotificationCreatedEvent event) {
-        try {
-            String notification = event.getNotification();
-            for (Subscriber subscriber : event.getSubscribers()) {
-                SendMessage sendMessage = SendMessage.builder()
-                        .chatId(subscriber.getId().toString())
-                        .text(notification)
-                        .build();
-                execute(sendMessage);
-            }
-            log.info("Notification of event {} sent to subscribers", event.getNotification());
-        } catch (TelegramApiException e) {
-            log.error("Failed to send event notification of {} to subscribers", event.getNotification());
-        }
-    }
-
-    @EventListener
     private void sendMessageToAllUsers(SendMessageToAllUsersEvent event) {
         try {
             String host = java.net.InetAddress.getLocalHost().getHostName();
@@ -220,16 +187,41 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     }
 
     @EventListener
-    private void sendNotificationToAdmin(SubscriberSentToAdminMessageNotificationCreatedEvent event) {
+    private void weatherNotificationCreatedEventListener(WeatherNotificationCreatedEvent event) {
+        sendNotification(event.getNotification(), event.getSubscribers());
+    }
+
+    @EventListener
+    private void eventNotificationCreatedEventListener(EventNotificationCreatedEvent event) {
+        sendNotification(event.getNotification(), event.getSubscribers());
+    }
+
+    @EventListener
+    private void subscriberSentToAdminMessageNotificationCreatedEventListener(SubscriberSentToAdminMessageNotificationCreatedEvent event) {
+        sendNotification(event.getNotification(), null);
+    }
+
+    private void sendNotification(String notification, List<Subscriber> list) {
+        SendMessage sendMessage;
         try {
-            String notification = event.getNotification();
-            SendMessage sendMessage = SendMessage.builder()
-                    .chatId(mainAdminId)
-                    .text(notification)
-                    .build();
-            execute(sendMessage);
+            if (list == null) {
+                sendMessage = SendMessage.builder()
+                        .chatId(mainAdminId)
+                        .text(notification)
+                        .build();
+                execute(sendMessage);
+            } else {
+                for (Subscriber subscriber : list) {
+                    sendMessage = SendMessage.builder()
+                            .chatId(subscriber.getId().toString())
+                            .text(notification)
+                            .build();
+                    execute(sendMessage);
+                }
+            }
+            log.info("Notification: {} sent to subscribers", notification);
         } catch (TelegramApiException e) {
-            log.error("Failed to send notification of {} to admin", event.getNotification());
+            log.error("Failed to send notification: {} to subscribers", notification);
         }
     }
 
