@@ -3,7 +3,7 @@ package com.sport.service.services;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.Type;
+import com.sport.service.entities.place.PlaceType;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public interface PlaceService {
 
     List<Place> findByDistrict(District district);
 
-    List<Place> findByType(List<Place> places, Type type);
+    List<Place> findByType(List<Place> places, PlaceType placeType);
 
     List<Place> findByOutdoor(List<Place> places, Boolean outdoor);
 
@@ -21,7 +21,7 @@ public interface PlaceService {
 
     boolean existsByName(String name);
 
-    List<Place> findByDistrictAndTypeAndOutdoor(District district, Type type, Boolean outdoor);
+    List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor);
 
-    List<Place> findByDistrictAndType(District district, Type type);
+    List<Place> findByDistrictAndPlaceType(District district, PlaceType placeType);
 }

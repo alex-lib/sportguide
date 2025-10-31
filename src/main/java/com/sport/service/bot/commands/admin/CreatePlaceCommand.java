@@ -6,7 +6,7 @@ import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.Type;
+import com.sport.service.entities.place.PlaceType;
 import com.sport.service.services.PlaceService;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.CommandStateStore;
@@ -71,7 +71,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			PlaceDto dto = placeSession.createSession(chatId);
 			dto.setStep(1);
 			placeSession.save(chatId, dto);
-            commandStateStore.setCurrentCommand(userId, "create_place");
+            commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
             answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
 		}
 		try {
@@ -86,7 +86,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
 
-		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			log.warn("User {} not in create_place session", userId);
 			return;
 		}
@@ -107,7 +107,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		if ("BACK".equals(data)) {
 			if (dto.getStep() == 2) {
-				dto.setType(null);
+                dto.setPlaceType(null);
                 answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
 				dto.setStep(1);
 			} else if (dto.getStep() == 3) {
@@ -149,7 +149,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	}
 
 	private void handleTypeStep(PlaceDto dto, String data, SendMessage answer) {
-        dto.setType(Type.valueOf(data));
+        dto.setPlaceType(PlaceType.valueOf(data));
         answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForCreatingPlace(answer));
         dto.setStep(3);
 	}
@@ -171,7 +171,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
 
@@ -245,7 +245,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		if (!"create_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
 

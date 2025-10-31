@@ -3,10 +3,11 @@ package com.sport.service.services.impl;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.subscriber.Subscriber;
-import com.sport.service.events.EventCreatedEvent;
+import com.sport.service.events.EventNotificationCreatedEvent;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.services.EventService;
+import com.sport.service.services.NotificationCreatorService;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final SubscriberService subscriberService;
+    private final NotificationCreatorService notificationCreatorService;
 
     private final EventMapper eventMapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -36,7 +38,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.eventDtoToEvent(dto);
         eventRepository.save(event);
         List<Subscriber> subscribers = subscriberService.getSubscribersWhoWantGetEvents();
-        eventPublisher.publishEvent(new EventCreatedEvent(subscribers, event));
+        String notification = notificationCreatorService.createEventNotification(event);
+        eventPublisher.publishEvent(new EventNotificationCreatedEvent(subscribers, notification));
     }
 
     @Transactional
@@ -54,13 +57,14 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    @Scheduled(cron = CRON)
+    @Scheduled(cron = CRON, zone = "Europe/Moscow")
     @Override
     public void deleteByExpiredDate() {
         LocalDate currentDate = LocalDate.now();
         eventRepository.deleteByDateBefore(currentDate);
     }
 
+    @Override
     public boolean existsByName(String name) {
         return eventRepository.existsByName(name);
     }

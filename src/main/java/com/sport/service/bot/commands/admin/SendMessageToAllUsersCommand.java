@@ -1,9 +1,10 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.dto.MessageDto;
-import com.sport.service.events.EventSendMessageToAllUsers;
+import com.sport.service.events.SendMessageToAllUsersEvent;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.sessions.MessageSession;
@@ -54,6 +55,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
     }
 
     @Override
+    @AdminOnly
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
         Long chatId = message.getChatId();
@@ -62,13 +64,11 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        if (subscriberService.checkIfAdmin(userId)) {
-            MessageDto dto = messageSession.createSession(chatId);
-            dto.setStep(1);
-            messageSession.save(chatId, dto);
-            commandStateStore.setCurrentCommand(userId, "send_message_to_all_users");
-            answer.setText("📩 Напишите, что вы хотите отправить подписчикам:");
-        }
+        MessageDto dto = messageSession.createSession(chatId);
+        dto.setStep(1);
+        messageSession.save(chatId, dto);
+        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
+        answer.setText("📩 Напишите, что вы хотите отправить подписчикам:");
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {
@@ -89,7 +89,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             }
             case 2 -> {
                 if ("-".equals(text)) {
-                    eventPublisher.publishEvent(new EventSendMessageToAllUsers(dto.getMessage(), null, subscriberService.findAll()));
+                    eventPublisher.publishEvent(new SendMessageToAllUsersEvent(dto.getMessage(), null, subscriberService.findAll()));
                     log.info("Publishing EventSendMessageToAllUsers: message='{}', subscribers={}", dto.getMessage(), subscriberService.findAll().size());
                     answer.setText("Сообщение отправлено всем пользователям ✅");
                     messageSession.clear(chatId);
@@ -111,7 +111,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
 
-        if (!"send_message_to_all_users".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
 
@@ -128,7 +128,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             handleTextInput(message, dto, answer, absSender);
             messageSession.save(chatId, dto);
 
-            if (answer.getText() != null && !answer.getText().isEmpty()) {
+            if (!answer.getText().isEmpty()) {
                 absSender.execute(answer);
             }
         } catch (Exception e) {
@@ -142,7 +142,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
 
-        if (!"send_message_to_all_users".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
 
@@ -165,7 +165,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 byte[] photoBytes = downloadPhoto(absSender, fileId);
                 log.info("Downloaded photo: {} bytes", photoBytes.length);
                 dto.setPhoto(photoBytes);
-                eventPublisher.publishEvent(new EventSendMessageToAllUsers(dto.getMessage(), dto.getPhoto(), subscriberService.findAll()));
+                eventPublisher.publishEvent(new SendMessageToAllUsersEvent(dto.getMessage(), dto.getPhoto(), subscriberService.findAll()));
                 answer.setText("Сообщение отправлено всем пользователям ✅");
                 messageSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
