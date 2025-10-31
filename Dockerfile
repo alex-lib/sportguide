@@ -9,5 +9,4 @@ RUN groupadd -r spring && useradd -r -g spring spring
 USER spring
 
 #CMD ["java", "-jar", "app.jar"]
-RUN mkdir -p /app/logs && chmod -R 777 /app/logs
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=docker"]
