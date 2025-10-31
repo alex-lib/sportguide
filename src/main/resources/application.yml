@@ -4,17 +4,12 @@ telegram:
     username: ${BOT_NAME}
   mainAdminId: ${MAIN_ADMIN_ID}
 
-#server:
-#  port: 8081
-#
 logging:
   level:
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
     org.hibernate: WARN
     org.springframework.orm.jpa: WARN
-#  file:
-#    path: ./logs
 
 server:
   port: 8081
@@ -90,35 +85,6 @@ management:
       enabled: true
     db:
       enabled: true
-
-#management:
-#  endpoints:
-#    web:
-#      base-path: /actuator
-#      exposure:
-#        include: health,info,prometheus,metrics,loggers,metricsofusers
-#  metrics:
-#    export:
-#      prometheus:
-#        enabled: true
-#    distribution:
-#      percentiles-histogram:
-#        "[http.server.requests]": true
-#    enable:
-#      jvm: true
-#      tomcat: true
-#      logback: true
-#  endpoint:
-#    health:
-#      show-details: always
-#  server:
-#    port: 8081
-#    address: 127.0.0.1
-#  health:
-#    redis:
-#      enabled: true
-#    db:
-#      enabled: true
 
 app:
   redis:
