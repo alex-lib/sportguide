@@ -39,7 +39,7 @@ public class Place {
     private Boolean outdoor;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "placeType", nullable = false)
+    @Column(name = "place_type", nullable = false)
     private PlaceType placeType;
 
     @Lob
