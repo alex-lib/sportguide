@@ -5,7 +5,7 @@ import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.Type;
+import com.sport.service.entities.place.PlaceType;
 import com.sport.service.services.PlaceService;
 import com.sport.service.sessions.CommandStateStore;
 import com.sport.service.sessions.PlaceSession;
@@ -58,7 +58,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         PlaceDto dto = placeSession.createSession(chatId);
         dto.setStep(1);
         placeSession.save(chatId, dto);
-        commandStateStore.setCurrentCommand(userId, "get_place");
+        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
         showStepMenu(absSender, chatId, dto, userId);
     }
 
@@ -68,7 +68,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        if (!"get_place".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             log.warn("User {} not in get_place session", userId);
             return;
         }
@@ -85,7 +85,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
         if ("BACK".equals(data)) {
             if (dto.getStep() == 2) {
-                dto.setType(null);
+                dto.setPlaceType(null);
                 answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
                 dto.setStep(1);
             } else if (dto.getStep() == 3) {
@@ -114,7 +114,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     showStepMenu(absSender, chatId, dto, userId);
                 }
                 case 2 -> {
-                    dto.setType(Type.valueOf(data));
+                    dto.setPlaceType(PlaceType.valueOf(data));
                     if (needsOutdoorStep(data)) {
                         dto.setStep(3);
                         placeSession.save(chatId, dto);
@@ -177,8 +177,8 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     private void handlePlaces(AbsSender absSender, Long chatId, PlaceDto dto) {
         List<Place> places = dto.getOutdoor() != null ?
-                placeService.findByDistrictAndTypeAndOutdoor(dto.getDistrict(), dto.getType(), dto.getOutdoor())
-                : placeService.findByDistrictAndType(dto.getDistrict(), dto.getType());
+                placeService.findByDistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getPlaceType(), dto.getOutdoor())
+                : placeService.findByDistrictAndPlaceType(dto.getDistrict(), dto.getPlaceType());
 
         if (places.isEmpty()) {
             sendText(absSender, chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
