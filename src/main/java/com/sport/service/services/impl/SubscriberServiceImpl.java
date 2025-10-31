@@ -78,7 +78,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public int getSubscriptionsCount() {
+    public long getSubscriptionsCount() {
         return subscriberRepository.getSubscriptionsCount();
     }
 

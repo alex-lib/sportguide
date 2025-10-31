@@ -39,8 +39,8 @@ public class Place {
     private Boolean outdoor;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private Type type;
+    @Column(name = "placeType", nullable = false)
+    private PlaceType placeType;
 
     @Lob
     @JdbcTypeCode(SqlTypes.BINARY)

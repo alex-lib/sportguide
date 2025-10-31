@@ -8,11 +8,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class EventSendMessageToAllUsers {
-
-    private final String message;
-
-    private final byte[] photo;
-
+public class WeatherNotificationCreatedEvent {
     private final List<Subscriber> subscribers;
+    private final String notification;
 }
