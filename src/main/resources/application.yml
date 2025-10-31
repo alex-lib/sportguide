@@ -10,6 +10,8 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
     org.hibernate: WARN
     org.springframework.orm.jpa: WARN
+  file:
+    name: /app/logs/spring-boot-app.log
 
 server:
   port: 8081

@@ -40,7 +40,6 @@ services:
     build: .
     volumes:
       - ./logs:/app/logs
-
     container_name: app
     depends_on:
       - postgres
