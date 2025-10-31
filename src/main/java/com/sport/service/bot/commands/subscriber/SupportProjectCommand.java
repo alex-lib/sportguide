@@ -1,5 +1,5 @@
 package com.sport.service.bot.commands.subscriber;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class SupportProjectCommand implements IBotCommand {
 
     @Override

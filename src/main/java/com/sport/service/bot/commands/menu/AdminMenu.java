@@ -44,17 +44,13 @@ public class AdminMenu {
         row4.add("➕ Создать событие");
         row4.add("❌ Удалить событие");
         KeyboardRow row5 = new KeyboardRow();
-        row5.add("🔎 Получить кол-во юзеров");
-        row5.add("🔎 Получить кол-во подписавшихся юзеров");
-        KeyboardRow row6 = new KeyboardRow();
-        row6.add("✉\uFE0F Отправить сообщение всем пользователям");
+        row5.add("✉\uFE0F Отправить сообщение всем пользователям");
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
         keyboard.add(row3);
         keyboard.add(row4);
         keyboard.add(row5);
-        keyboard.add(row6);
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setResizeKeyboard(true);
         keyboardMarkup.setOneTimeKeyboard(false);

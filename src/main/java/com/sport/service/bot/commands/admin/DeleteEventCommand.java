@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.services.EventService;
 import com.sport.service.services.SubscriberService;
@@ -35,6 +36,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	}
 
 	@Override
+    @AdminOnly
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
 		Long chatId = message.getChatId();
@@ -43,11 +45,9 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId);
 
-        if (subscriberService.checkIfAdmin(userId)) {
-            commandStateStore.setCurrentCommand(userId, "delete_event");
-			answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
-					"Напишите название события, которое хотите удалить:");
-		}
+        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
+        answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
+                "Напишите название события, которое хотите удалить:");
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {
@@ -62,7 +62,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 		SendMessage answer = new SendMessage();
 		answer.setChatId(chatId.toString());
 
-        if (!"delete_event".equals(commandStateStore.getCurrentCommand(userId))) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
 
