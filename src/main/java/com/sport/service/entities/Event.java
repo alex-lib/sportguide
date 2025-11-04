@@ -1,7 +1,9 @@
 package com.sport.service.entities;
+
 import com.sport.service.entities.place.District;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 
 @Entity

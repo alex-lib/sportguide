@@ -1,5 +1,6 @@
 package com.sport.service.services.impl;
 
+import com.sport.service.dto.WeatherDataAtSpecificHourDto;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.TodayWeather;
 import com.sport.service.services.NotificationCreatorService;
@@ -27,14 +28,15 @@ public class NotificationCreatorServiceImpl implements NotificationCreatorServic
         context.setVariable("maxTemperature", String.format("%.1f", weather.getDaily().getMaxTemperature()));
         context.setVariable("minTemperature", String.format("%.1f", weather.getDaily().getMinTemperature()));
 
-        List<String[]> weatherHourlyInfo = new ArrayList<>();
+        List<WeatherDataAtSpecificHourDto> weatherHourlyInfo = new ArrayList<>();
         for (int i = 9; i <= 21; i = i + 3) {
-            String[] weatherDataOfSpecificHour = new String[4];
-            weatherDataOfSpecificHour[0] = i + ":00";
-            weatherDataOfSpecificHour[1] = weather.getHourlyForecast().get(i).getDescription();
-            weatherDataOfSpecificHour[2] = String.format("%.1f", weather.getHourlyForecast().get(i).getTemperature());
-            weatherDataOfSpecificHour[3] = String.valueOf(weather.getHourlyForecast().get(i).getPrecipitationProbability());
-            weatherHourlyInfo.add(weatherDataOfSpecificHour);
+            WeatherDataAtSpecificHourDto weatherDataAtSpecificHourDto = WeatherDataAtSpecificHourDto.builder()
+                    .time(i + ":00")
+                    .description(weather.getHourlyForecast().get(i).getDescription())
+                    .temperature(String.format("%.1f", weather.getHourlyForecast().get(i).getTemperature()))
+                    .precipitationProbability(weather.getHourlyForecast().get(i).getPrecipitationProbability())
+                    .build();
+            weatherHourlyInfo.add(weatherDataAtSpecificHourDto);
         }
 
         context.setVariable("weatherHourlyInfo", weatherHourlyInfo);

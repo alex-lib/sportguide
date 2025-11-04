@@ -6,7 +6,7 @@ public enum District {
     KOMINTERNOVSKYY,
     LENINSKYY,
     SOVETSKYY,
-    LEVOBEREZNYY,
+    LEVOBEREZHNYY,
     BEHIND_OF_CITY,
     ALL_DISTRICTS
 }

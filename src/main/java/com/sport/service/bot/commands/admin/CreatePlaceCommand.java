@@ -7,10 +7,11 @@ import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.PlaceType;
+import com.sport.service.entities.place.Subdistrict;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
 import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.PlaceSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,22 +107,37 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
         answer.setChatId(chatId.toString());
 
 		if ("BACK".equals(data)) {
-			if (dto.getStep() == 2) {
-                dto.setPlaceType(null);
-                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
-				dto.setStep(1);
-			} else if (dto.getStep() == 3) {
-				dto.setOutdoor(null);
-                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard(answer));
-				dto.setStep(2);
-			} else {
-                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
-				dto.setStep(1);
-			}
 			try {
+				switch (dto.getStep()) {
+					case 2 -> {
+						dto.setSubdistrict(null);
+						dto.setDistrict(null);
+						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+						dto.setStep(1);
+					}
+					case 3 -> {
+						dto.setPlaceType(null);
+						if (dto.getDistrict() != null &&
+								dto.getDistrict() != District.ALL_DISTRICTS &&
+								dto.getDistrict() != District.BEHIND_OF_CITY &&
+								dto.getDistrict() != District.LENINSKYY) {
+							ChoosingPlaceOptionsMenu.chooseSubdistrictsMenuForSpecificDistrict(dto.getDistrict(), answer);
+						} else {
+							answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+							dto.setStep(1);
+							break;
+						}
+						dto.setStep(2);
+					}
+					case 4 -> {
+						dto.setOutdoor(null);
+						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
+						dto.setStep(3);
+					}
+				}
 				placeSession.save(chatId, dto);
 				absSender.execute(answer);
-			} catch (Exception e) {
+			} catch (TelegramApiException e) {
 				log.error("Error sending back step", e);
 			}
 			return;
@@ -130,13 +146,14 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		try {
 			switch (dto.getStep()) {
 				case 1 -> handleDistrictStep(dto, data, answer);
-				case 2 -> handleTypeStep(dto, data, answer);
-				case 3 -> handleOutdoorStep(dto, data, answer);
+				case 2 -> handleSubdistrictStep(dto, data, answer);
+				case 3 -> handlePlaceTypeStep(dto, data, answer);
+				case 4 -> handleOutdoorStep(dto, data, answer);
 				default -> handleUnknownStep(chatId, userId, answer);
 			}
 			placeSession.save(chatId, dto);
 			absSender.execute(answer);
-		} catch (Exception e) {
+		} catch (TelegramApiException e) {
 			log.error("Error processing callback", e);
             sendErrorMessage(absSender, chatId, "Произошла ошибка. Попробуйте еще раз \uD83D\uDD04");
 		}
@@ -144,20 +161,38 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 	private void handleDistrictStep(PlaceDto dto, String data, SendMessage answer) {
         dto.setDistrict(District.valueOf(data));
-        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard(answer));
+
+		boolean hasSubdistricts = switch (dto.getDistrict()) {
+			case ZHELEZNODOROZHNYY, LEVOBEREZHNYY, CENTRALNYY, SOVETSKYY, KOMINTERNOVSKYY -> true;
+			default -> false;
+		};
+
+		if (hasSubdistricts) {
+			ChoosingPlaceOptionsMenu.chooseSubdistrictsMenuForSpecificDistrict(dto.getDistrict(), answer);
+		} else {
+			dto.setSubdistrict(null);
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
+			dto.setStep(3);
+		}
         dto.setStep(2);
 	}
 
-	private void handleTypeStep(PlaceDto dto, String data, SendMessage answer) {
+	private void handleSubdistrictStep(PlaceDto dto, String data, SendMessage answer) {
+		dto.setSubdistrict(Subdistrict.valueOf(data));
+		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
+		dto.setStep(3);
+	}
+
+	private void handlePlaceTypeStep(PlaceDto dto, String data, SendMessage answer) {
         dto.setPlaceType(PlaceType.valueOf(data));
         answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForCreatingPlace(answer));
-        dto.setStep(3);
+		dto.setStep(4);
 	}
 
 	private void handleOutdoorStep(PlaceDto dto, String data, SendMessage answer) {
 		dto.setOutdoor(Boolean.parseBoolean(data));
         answer.setText("\uD83D\uDD8A Введите название места:");
-		dto.setStep(4);
+		dto.setStep(5);
 	}
 
 	private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
@@ -190,7 +225,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			placeSession.save(chatId, dto);
 			absSender.execute(answer);
 
-		} catch (Exception e) {
+		} catch (TelegramApiException e) {
 			log.error("Error processing text input", e);
             sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
 		}
@@ -202,36 +237,36 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		String text = message.getText();
 
 		switch (dto.getStep()) {
-			case 4 -> {
+			case 5 -> {
 				if (!placeService.existsByName(text)) {
 					dto.setName(text);
                     answer.setText("\uD83D\uDD8A Введите адрес:");
-					dto.setStep(5);
+					dto.setStep(6);
 				} else {
                     answer.setText("Место с таким названием уже существует❗" + "\n" + "Попробуйте еще раз:");
 				}
 			}
-			case 5 -> {
+			case 6 -> {
 				dto.setAddress(text);
                 answer.setText("\uD83D\uDD8A Введите описание:");
-				dto.setStep(6);
-			}
-			case 6 -> {
-				dto.setDescription(text);
-                answer.setText("\uD83D\uDD8A Введите сайт (или '-' если его нет):");
 				dto.setStep(7);
 			}
 			case 7 -> {
-				dto.setWebSite(text);
-                answer.setText("\uD83D\uDCCD Введите координаты места, например их можно взять из Google maps (пример данных: 51.672628201614216, 39.261582161907924 или '-' если их нет):");
+				dto.setDescription(text);
+				answer.setText("\uD83D\uDD8A Введите сайт (или '-' если его нет):");
 				dto.setStep(8);
 			}
 			case 8 -> {
+				dto.setWebSite(text);
+				answer.setText("\uD83D\uDCCD Введите координаты места, например их можно взять из Google maps (пример данных: 51.672628201614216, 39.261582161907924 или '-' если их нет):");
+				dto.setStep(9);
+			}
+			case 9 -> {
                 dto.setCoordinates(text);
                 answer.setText("\uD83D\uDDBC Отправьте фото:");
-                dto.setStep(8);
+				dto.setStep(10);
 			}
-            case 9 -> answer.setText("\uD83D\uDDBC Пожалуйста, отправьте фото:");
+			case 10 -> answer.setText("\uD83D\uDDBC Пожалуйста, отправьте фото:");
 			default -> {
                 answer.setText(unknownStep);
 				placeSession.clear(chatId);
@@ -250,7 +285,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		}
 
 		PlaceDto dto = placeSession.getIfExists(chatId);
-		if (dto == null || dto.getStep() != 8) {
+		if (dto == null || dto.getStep() != 10) {
             sendErrorMessage(absSender, chatId, unexpectedPhoto);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
@@ -277,7 +312,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
         } catch (TelegramApiException e) {
 			log.error("Error processing photo", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при создании места ❌");
+			sendErrorMessage(absSender, chatId, "Ошибка при создании места");
 		}
 	}
 
