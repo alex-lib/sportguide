@@ -17,7 +17,11 @@ services:
   redis:
     image: redis:7.0.12
     container_name: redis
-    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    command: redis-server --replicaof no one --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     ports:
       - "6379:6379"
 

@@ -2,10 +2,10 @@ package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.EventSession;
 import com.sport.service.services.EventService;
 import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.EventSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

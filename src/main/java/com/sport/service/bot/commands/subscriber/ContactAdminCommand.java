@@ -1,12 +1,12 @@
 package com.sport.service.bot.commands.subscriber;
 
 import com.sport.service.bot.commands.interfaces.TextProcessable;
-import com.sport.service.events.SubscriberSentToAdminMessageNotificationCreatedEvent;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.services.NotificationCreatorService;
-import com.sport.service.sessions.CommandStateStore;
+import com.sport.service.services.NotificationSenderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,10 +20,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @RequiredArgsConstructor
 public class ContactAdminCommand implements IBotCommand, TextProcessable {
 	private final NotificationCreatorService notificationCreatorService;
-
-	private final ApplicationEventPublisher eventPublisher;
+    private final NotificationSenderService notificationSenderService;
 
 	private final CommandStateStore commandStateStore;
+
+    @Value("${telegram.mainAdminId}")
+    private String mainAdminId;
 
 	@Override
 	public String getCommandIdentifier() {
@@ -45,7 +47,7 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
         answer.setChatId(chatId);
 
 		commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-		answer.setText("📩 Напишите ваше предложение:");
+        answer.setText("📩 Напишите ваше предложение (ТОЛЬКО ТЕКСТ):");
 		try {
 			absSender.execute(answer);
 		} catch (TelegramApiException e) {
@@ -70,7 +72,7 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
 		log.info("Received text: {}", text);
 
 		String notification = notificationCreatorService.createSubscriberSentMessageToAdminNotification(text, user);
-		eventPublisher.publishEvent(new SubscriberSentToAdminMessageNotificationCreatedEvent(notification));
+        notificationSenderService.sendSubscriberToAdminNotification(notification, Long.valueOf(mainAdminId));
 		commandStateStore.clearCurrentCommand(userId);
         answer.setText("Сообщение отправлено админу ✅");
 		try {

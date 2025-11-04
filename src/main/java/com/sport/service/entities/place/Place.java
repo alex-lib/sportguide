@@ -26,6 +26,10 @@ public class Place {
     @Column(name = "district", nullable = false)
     private District district;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "subdistrict", nullable = true)
+    private Subdistrict subdistrict;
+
     @Column(name = "address")
     private String address;
 

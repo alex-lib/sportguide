@@ -4,14 +4,14 @@ import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.dto.MessageDto;
-import com.sport.service.events.SendMessageToAllUsersEvent;
+import com.sport.service.entities.subscriber.Subscriber;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.MessageSession;
+import com.sport.service.services.NotificationSenderService;
 import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.MessageSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
@@ -36,7 +36,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
     private final String errorToProcessInput = "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04";
 
     private final SubscriberService subscriberService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final NotificationSenderService notificationSenderService;
 
     private final CommandStateStore commandStateStore;
     private final MessageSession messageSession;
@@ -81,6 +81,11 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         Long userId = message.getFrom().getId();
         String text = message.getText();
 
+        List<Long> subscriberIds = subscriberService.findAll()
+                .stream()
+                .map(Subscriber::getId)
+                .toList();
+
         switch (dto.getStep()) {
             case 1 -> {
                 dto.setMessage(text);
@@ -89,7 +94,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             }
             case 2 -> {
                 if ("-".equals(text)) {
-                    eventPublisher.publishEvent(new SendMessageToAllUsersEvent(dto.getMessage(), null, subscriberService.findAll()));
+                    notificationSenderService.sendAdminToSubscriberNotification(dto.getMessage(), null, subscriberIds);
                     log.info("Publishing EventSendMessageToAllUsers: message='{}', subscribers={}", dto.getMessage(), subscriberService.findAll().size());
                     answer.setText("Сообщение отправлено всем пользователям ✅");
                     messageSession.clear(chatId);
@@ -153,6 +158,11 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             return;
         }
 
+        List<Long> subscriberIds = subscriberService.findAll()
+                .stream()
+                .map(Subscriber::getId)
+                .toList();
+
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
         try {
@@ -165,7 +175,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 byte[] photoBytes = downloadPhoto(absSender, fileId);
                 log.info("Downloaded photo: {} bytes", photoBytes.length);
                 dto.setPhoto(photoBytes);
-                eventPublisher.publishEvent(new SendMessageToAllUsersEvent(dto.getMessage(), dto.getPhoto(), subscriberService.findAll()));
+                notificationSenderService.sendAdminToSubscriberNotification(dto.getMessage(), dto.getPhoto(), subscriberIds);
                 answer.setText("Сообщение отправлено всем пользователям ✅");
                 messageSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
