@@ -41,11 +41,9 @@ services:
         liquibase --url=jdbc:postgresql://postgres:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --changeLogFile=/liquibase/changelog/db.changelog-master.xml --defaultSchemaName=app_schema generateChangeLog
 
   app:
+    build: .
     volumes:
       - ./logs:/app/logs
-    build: .
-    ports:
-      - "8081:8081"
     container_name: app
     depends_on:
       - postgres
@@ -53,7 +51,6 @@ services:
     env_file:
       - .env
     environment:
-      SERVER_PORT: 8081
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}?currentSchema=app_schema
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
