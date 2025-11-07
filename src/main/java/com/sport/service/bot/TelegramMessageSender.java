@@ -15,10 +15,10 @@ import java.io.InputStream;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TelegramNotificationSender {
+public class TelegramMessageSender {
     private final SportGuideBot bot;
 
-    public void sendNotificationWithoutPhoto(Long userId, String message) {
+    public void sendMessageWithoutPhoto(Long userId, String message) {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(userId)
                 .text(message)
@@ -30,7 +30,7 @@ public class TelegramNotificationSender {
         }
     }
 
-    public void sendNotificationWithPhoto(Long userId, byte[] photo, String message) {
+    public void sendMessageWithPhoto(Long userId, byte[] photo, String message) {
         SendPhoto photoMessage = new SendPhoto();
         try (InputStream photoStream = new ByteArrayInputStream(photo)) {
             photoMessage.setPhoto(new InputFile(photoStream, "place.jpg"));

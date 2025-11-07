@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
 
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
@@ -24,6 +25,8 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
     private final NotificationSenderService notificationSenderService;
 
 	private final CommandStateStore commandStateStore;
+
+	private final TelegramMessageSender sender;
 
     @Value("${telegram.mainAdminId}")
     private String mainAdminId;
@@ -80,18 +83,7 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId);
-		}
-	}
-
-    private void sendErrorMessage(AbsSender absSender, Long chatId) {
-		try {
-			SendMessage errorMsg = new SendMessage();
-			errorMsg.setChatId(chatId.toString());
-			errorMsg.setText(ErrorConstants.ENTERING_ERROR);
-			absSender.execute(errorMsg);
-		} catch (Exception e) {
-			log.error("Error sending error message", e);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.ErrorConstants;
@@ -39,6 +40,8 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
     private final SubscriberService subscriberService;
     private final NotificationSenderService notificationSenderService;
 
+    private final TelegramMessageSender sender;
+
     @Value("${telegram.bot.token}")
     private String botToken;
 
@@ -71,7 +74,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             absSender.execute(answer);
         } catch (TelegramApiException e) {
             log.error("Error occurred in /send_message_to_all_users command", e);
-            sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -121,7 +124,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
 
         MessageDto dto = messageSession.getIfExists(chatId);
         if (dto == null) {
-            sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -137,7 +140,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -152,7 +155,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
 
         MessageDto dto = messageSession.getIfExists(chatId);
         if (dto == null || dto.getStep() != 2) {
-            sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -184,7 +187,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             absSender.execute(answer);
         } catch (TelegramApiException e) {
             log.error("Error processing photo", e);
-            sendErrorMessage(absSender, chatId, ErrorConstants.UNEXPECTED_PHOTO);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.UNEXPECTED_PHOTO);
         }
     }
 
@@ -210,17 +213,6 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         } catch (Exception e) {
             log.error("Failed to download photo from URL: {}", fileUrl, e);
             throw new RuntimeException("Failed to download photo: " + e.getMessage(), e);
-        }
-    }
-
-    private void sendErrorMessage(AbsSender absSender, Long chatId, String message) {
-        try {
-            SendMessage errorMsg = new SendMessage();
-            errorMsg.setChatId(chatId.toString());
-            errorMsg.setText(message);
-            absSender.execute(errorMsg);
-        } catch (Exception e) {
-            log.error("Error sending error message", e);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
@@ -30,6 +31,8 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
     private final EventSession eventSession;
     private final EventService eventService;
     private final CommandStateStore commandStateStore;
+
+    private final TelegramMessageSender sender;
 
     private final Pattern DATE_PATTERN = Pattern.compile(
             "^([1-9]\\d{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$");
@@ -67,7 +70,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
             absSender.execute(answer);
         } catch (Exception e) {
             log.error("Error sending initial message", e);
-            sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -84,7 +87,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         EventDto dto = eventSession.getIfExists(chatId);
         if (dto == null) {
             log.warn("No session found for chatId: {}", chatId);
-            sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -105,7 +108,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         } catch (TelegramApiException e) {
             eventSession.clear(chatId);
             log.error("Error processing callback", e);
-            sendErrorMessage(absSender, chatId, ErrorConstants.ERROR_HAPPENED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
@@ -128,7 +131,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
         EventDto dto = eventSession.getIfExists(chatId);
         if (dto == null) {
-            sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -150,7 +153,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода.\nПопробуйте еще раз \uD83D\uDD04");
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -208,17 +211,6 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
                 }
             }
             default -> handleUnknownStep(chatId, userId, answer);
-        }
-    }
-
-    private void sendErrorMessage(AbsSender absSender, Long chatId, String message) {
-        try {
-            SendMessage errorMsg = new SendMessage();
-            errorMsg.setChatId(chatId.toString());
-            errorMsg.setText(message);
-            absSender.execute(errorMsg);
-        } catch (Exception e) {
-            log.error("Error sending error message", e);
         }
     }
 
