@@ -4,6 +4,8 @@ import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.ErrorConstants;
+import com.sport.service.bot.constants.MenuConstants;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.PlaceType;
@@ -45,10 +47,6 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	@Value("${telegram.bot.token}")
 	private String botToken;
 
-	private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-	private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
-	private final String unexpectedPhoto = "Неожиданное фото. Начните заново \uD83D\uDD04";
-
 	@Override
 	public String getCommandIdentifier() {
 		return "create_place";
@@ -73,12 +71,14 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			dto.setStep(1);
 			placeSession.save(chatId, dto);
             commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+			answer.setText("creating");
+			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
 		}
 		try {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error sending initial message", e);
+			sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		PlaceDto dto = placeSession.getIfExists(chatId);
 		if (dto == null) {
 			log.warn("No session found for chatId: {}", chatId);
-            sendErrorMessage(absSender, chatId, sessionExpired);
+			sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
@@ -106,30 +106,27 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-		if ("BACK".equals(data)) {
+		if (MenuConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
+			answer.setText("creating");
 			try {
 				switch (dto.getStep()) {
-					case 2 -> {
+					case 2 -> { //If user chose in subdistricts menu to choose district again
 						dto.setSubdistrict(null);
 						dto.setDistrict(null);
-						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
 						dto.setStep(1);
 					}
-					case 3 -> {
+					case 3 -> { //If user chose in types of place menu to choose district/subdistrict again
 						dto.setPlaceType(null);
-						if (dto.getDistrict() != null &&
-								dto.getDistrict() != District.ALL_DISTRICTS &&
-								dto.getDistrict() != District.BEHIND_OF_CITY &&
-								dto.getDistrict() != District.LENINSKYY) {
-							ChoosingPlaceOptionsMenu.chooseSubdistrictsMenuForSpecificDistrict(dto.getDistrict(), answer);
+						if (dto.getDistrict().hasSubdistricts()) {
+							answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
+							dto.setStep(2);
 						} else {
-							answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+							answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
 							dto.setStep(1);
-							break;
 						}
-						dto.setStep(2);
 					}
-					case 4 -> {
+					case 4 -> { //If user chose in outdoor/inside places menu to choose type of place again
 						dto.setOutdoor(null);
 						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
 						dto.setStep(3);
@@ -142,8 +139,8 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			}
 			return;
 		}
-
 		try {
+			answer.setText("creating");
 			switch (dto.getStep()) {
 				case 1 -> handleDistrictStep(dto, data, answer);
 				case 2 -> handleSubdistrictStep(dto, data, answer);
@@ -155,26 +152,20 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
 		} catch (TelegramApiException e) {
 			log.error("Error processing callback", e);
-            sendErrorMessage(absSender, chatId, "Произошла ошибка. Попробуйте еще раз \uD83D\uDD04");
+			sendErrorMessage(absSender, chatId, ErrorConstants.ERROR_HAPPENED);
 		}
 	}
 
 	private void handleDistrictStep(PlaceDto dto, String data, SendMessage answer) {
         dto.setDistrict(District.valueOf(data));
-
-		boolean hasSubdistricts = switch (dto.getDistrict()) {
-			case ZHELEZNODOROZHNYY, LEVOBEREZHNYY, CENTRALNYY, SOVETSKYY, KOMINTERNOVSKYY -> true;
-			default -> false;
-		};
-
-		if (hasSubdistricts) {
-			ChoosingPlaceOptionsMenu.chooseSubdistrictsMenuForSpecificDistrict(dto.getDistrict(), answer);
+		if (dto.getDistrict().hasSubdistricts()) {
+			answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
+			dto.setStep(2);
 		} else {
 			dto.setSubdistrict(null);
 			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
 			dto.setStep(3);
 		}
-        dto.setStep(2);
 	}
 
 	private void handleSubdistrictStep(PlaceDto dto, String data, SendMessage answer) {
@@ -185,7 +176,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 	private void handlePlaceTypeStep(PlaceDto dto, String data, SendMessage answer) {
         dto.setPlaceType(PlaceType.valueOf(data));
-        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForCreatingPlace(answer));
+		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboard(answer));
 		dto.setStep(4);
 	}
 
@@ -196,7 +187,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	}
 
 	private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
-        answer.setText(unknownStep);
+		answer.setText(ErrorConstants.UNKNOWN_STEP);
 		placeSession.clear(chatId);
 		commandStateStore.clearCurrentCommand(userId);
 	}
@@ -212,7 +203,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		PlaceDto dto = placeSession.getIfExists(chatId);
 		if (dto == null) {
-            sendErrorMessage(absSender, chatId, sessionExpired);
+			sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
@@ -224,10 +215,9 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			handleTextInput(message, dto, answer);
 			placeSession.save(chatId, dto);
 			absSender.execute(answer);
-
 		} catch (TelegramApiException e) {
 			log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
+			sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 
@@ -268,7 +258,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			}
 			case 10 -> answer.setText("\uD83D\uDDBC Пожалуйста, отправьте фото:");
 			default -> {
-                answer.setText(unknownStep);
+				answer.setText(ErrorConstants.UNKNOWN_STEP);
 				placeSession.clear(chatId);
 				commandStateStore.clearCurrentCommand(userId);
 			}
@@ -286,7 +276,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		PlaceDto dto = placeSession.getIfExists(chatId);
 		if (dto == null || dto.getStep() != 10) {
-            sendErrorMessage(absSender, chatId, unexpectedPhoto);
+			sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
@@ -312,7 +302,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
         } catch (TelegramApiException e) {
 			log.error("Error processing photo", e);
-			sendErrorMessage(absSender, chatId, "Ошибка при создании места");
+			sendErrorMessage(absSender, chatId, ErrorConstants.UNEXPECTED_PHOTO);
 		}
 	}
 

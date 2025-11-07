@@ -3,6 +3,7 @@ package com.sport.service.bot.commands.admin;
 import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.dto.MessageDto;
 import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -31,15 +33,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessable, PhotoProcessable {
-    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
-    private final String errorToProcessInput = "Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04";
+    private final CommandStateStore commandStateStore;
+    private final MessageSession messageSession;
 
     private final SubscriberService subscriberService;
     private final NotificationSenderService notificationSenderService;
-
-    private final CommandStateStore commandStateStore;
-    private final MessageSession messageSession;
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -73,6 +71,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             absSender.execute(answer);
         } catch (TelegramApiException e) {
             log.error("Error occurred in /send_message_to_all_users command", e);
+            sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -104,7 +103,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 }
             }
             default -> {
-                answer.setText(unknownStep);
+                answer.setText(ErrorConstants.UNKNOWN_STEP);
                 messageSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
             }
@@ -122,7 +121,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
 
         MessageDto dto = messageSession.getIfExists(chatId);
         if (dto == null) {
-            sendErrorMessage(absSender, chatId, sessionExpired);
+            sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -138,7 +137,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, errorToProcessInput);
+            sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -153,7 +152,7 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
 
         MessageDto dto = messageSession.getIfExists(chatId);
         if (dto == null || dto.getStep() != 2) {
-            sendErrorMessage(absSender, chatId, sessionExpired);
+            sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -183,16 +182,21 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 answer.setText("\uD83D\uDDBC Пожалуйста, отправьте фото (или - если картинки/фото нет):");
             }
             absSender.execute(answer);
-        } catch (Exception e) {
+        } catch (TelegramApiException e) {
             log.error("Error processing photo", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при обработке фото ❌");
+            sendErrorMessage(absSender, chatId, ErrorConstants.UNEXPECTED_PHOTO);
         }
     }
 
-    private byte[] downloadPhoto(AbsSender absSender, String fileId) throws Exception {
+    private byte[] downloadPhoto(AbsSender absSender, String fileId) {
         GetFile getFileMethod = new GetFile();
         getFileMethod.setFileId(fileId);
-        org.telegram.telegrambots.meta.api.objects.File file = absSender.execute(getFileMethod);
+        File file = null;
+        try {
+            file = absSender.execute(getFileMethod);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
         String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
         log.info("Downloading photo from: {}", fileUrl);
         try (InputStream inputStream = new URL(fileUrl).openStream();

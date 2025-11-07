@@ -2,10 +2,10 @@ package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.EventSession;
 import com.sport.service.services.EventService;
-import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,6 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	private final EventSession eventSession;
 
 	private final EventService eventService;
-	private final SubscriberService subscriberService;
 
 	@Override
 	public String getCommandIdentifier() {
@@ -84,7 +83,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 		try {
 			SendMessage errorMsg = new SendMessage();
 			errorMsg.setChatId(chatId.toString());
-            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
+            errorMsg.setText(ErrorConstants.ENTERING_ERROR);
 			absSender.execute(errorMsg);
 		} catch (Exception e) {
 			log.error("Error sending error message", e);
