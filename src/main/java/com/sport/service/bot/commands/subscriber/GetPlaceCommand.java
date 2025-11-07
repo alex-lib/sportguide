@@ -2,6 +2,8 @@ package com.sport.service.bot.commands.subscriber;
 
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.ErrorConstants;
+import com.sport.service.bot.constants.MenuConstants;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
@@ -33,13 +35,10 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
-    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
-
-    private final PlaceSession placeSession;
-    private final PlaceService placeService;
-
     private final CommandStateStore commandStateStore;
+    private final PlaceSession placeSession;
+
+    private final PlaceService placeService;
 
     @Override
     public String getCommandIdentifier() {
@@ -78,7 +77,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
         PlaceDto dto = placeSession.getIfExists(chatId);
         if (dto == null) {
-            sendError(absSender, chatId, sessionExpired);
+            sendError(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -86,30 +85,27 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         String data = callback.getData();
         log.info("Processing callback for get_place: step={}, data={}", dto.getStep(), data);
 
-        if ("BACK".equals(data)) {
+        if (MenuConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
+            answer.setText("getting");
             try {
                 switch (dto.getStep()) {
-                    case 2 -> {
+                    case 2 -> { //If user chose in subdistricts menu to choose district again
                         dto.setSubdistrict(null);
                         dto.setDistrict(null);
-                        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGetting(answer));
+                        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
                         dto.setStep(1);
                     }
-                    case 3 -> {
+                    case 3 -> { //If user chose in types of place menu to choose district/subdistrict again
                         dto.setPlaceType(null);
-                        if (dto.getDistrict() != null &&
-                                dto.getDistrict() != District.ALL_DISTRICTS &&
-                                dto.getDistrict() != District.BEHIND_OF_CITY &&
-                                dto.getDistrict() != District.LENINSKYY) {
-                            ChoosingPlaceOptionsMenu.chooseSubdistrictsMenuForSpecificDistrict(dto.getDistrict(), answer);
+                        if (dto.getDistrict().hasSubdistricts()) {
+                            answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
+                            dto.setStep(2);
                         } else {
-                            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGetting(answer));
+                            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
                             dto.setStep(1);
-                            break;
                         }
-                        dto.setStep(2);
                     }
-                    case 4 -> {
+                    case 4 -> { //If user chose in outdoor/inside places menu to choose type of place again
                         dto.setOutdoor(null);
                         answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
                         dto.setStep(3);
@@ -128,12 +124,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                 case 1 -> {
                     District district = District.valueOf(data);
                     dto.setDistrict(district);
-
-                    boolean hasSubdistricts = switch (district) {
-                        case ZHELEZNODOROZHNYY, LEVOBEREZHNYY, CENTRALNYY, SOVETSKYY, KOMINTERNOVSKYY -> true;
-                        default -> false;
-                    };
-
+                    boolean hasSubdistricts = district.hasSubdistricts();
                     if (hasSubdistricts) {
                         dto.setStep(2);
                         placeSession.save(chatId, dto);
@@ -142,8 +133,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                         dto.setSubdistrict(null);
                         dto.setStep(3);
                         placeSession.save(chatId, dto);
-                        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
-                        absSender.execute(answer);
+                        showStepMenu(absSender, chatId, dto, userId);
                     }
                 }
                 case 2 -> {
@@ -167,7 +157,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     }
                 }
                 case 4 -> {
-                    if (data.equals("null")) {
+                    if (data.equals(MenuConstants.NULL)) {
                         dto.setOutdoor(null);
                     } else {
                         dto.setOutdoor(Boolean.parseBoolean(data));
@@ -178,13 +168,13 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     cleanupSession(chatId, userId);
                 }
                 default -> {
-                    sendError(absSender, chatId, unknownStep);
+                    sendError(absSender, chatId, ErrorConstants.UNKNOWN_STEP);
                     cleanupSession(chatId, userId);
                 }
             }
         } catch (Exception e) {
             log.error("Error processing callback in get_place", e);
-            sendError(absSender, chatId, "Ошибка. Попробуйте снова \uD83D\uDD04");
+            sendError(absSender, chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
@@ -196,12 +186,13 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private void showStepMenu(AbsSender absSender, Long chatId, PlaceDto dto, Long userId) {
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
+        answer.setText("getting");
         try {
             switch (dto.getStep()) {
-                case 1 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGetting(answer));
-                case 2 -> ChoosingPlaceOptionsMenu.chooseSubdistrictsMenuForSpecificDistrict(dto.getDistrict(), answer);
+                case 1 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+                case 2 -> answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
                 case 3 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
-                case 4 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForGettingPlace(answer));
+                case 4 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboard(answer));
                 default -> handleUnknownStep(chatId, userId, answer);
             }
             absSender.execute(answer);
@@ -211,7 +202,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     }
 
     private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
-        answer.setText(unknownStep);
+        answer.setText(ErrorConstants.UNKNOWN_STEP);
         cleanupSession(chatId, userId);
     }
 

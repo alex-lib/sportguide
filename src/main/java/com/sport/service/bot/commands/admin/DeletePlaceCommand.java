@@ -2,10 +2,10 @@ package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
-import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,10 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @RequiredArgsConstructor
 @Slf4j
 public class DeletePlaceCommand implements IBotCommand, TextProcessable {
-    private final SubscriberService subscriberService;
-    private final PlaceService placeService;
-
     private final PlaceSession placeSession;
     private final CommandStateStore commandStateStore;
+
+    private final PlaceService placeService;
 
     @Override
     public String getCommandIdentifier() {
@@ -84,7 +83,7 @@ public class DeletePlaceCommand implements IBotCommand, TextProcessable {
         try {
             SendMessage errorMsg = new SendMessage();
             errorMsg.setChatId(chatId.toString());
-            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
+            errorMsg.setText(ErrorConstants.ENTERING_ERROR);
             absSender.execute(errorMsg);
         } catch (Exception e) {
             log.error("Error sending error message", e);

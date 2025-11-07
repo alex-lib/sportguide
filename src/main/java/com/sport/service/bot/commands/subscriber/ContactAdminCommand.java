@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.subscriber;
 
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.services.NotificationCreatorService;
 import com.sport.service.services.NotificationSenderService;
@@ -87,7 +88,7 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
 		try {
 			SendMessage errorMsg = new SendMessage();
 			errorMsg.setChatId(chatId.toString());
-            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
+			errorMsg.setText(ErrorConstants.ENTERING_ERROR);
 			absSender.execute(errorMsg);
 		} catch (Exception e) {
 			log.error("Error sending error message", e);
