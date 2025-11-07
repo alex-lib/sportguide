@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
@@ -21,6 +22,8 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	private final CommandStateStore commandStateStore;
 	private final EventSession eventSession;
+
+	private final TelegramMessageSender sender;
 
 	private final EventService eventService;
 
@@ -75,18 +78,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId);
-		}
-	}
-
-    private void sendErrorMessage(AbsSender absSender, Long chatId) {
-		try {
-			SendMessage errorMsg = new SendMessage();
-			errorMsg.setChatId(chatId.toString());
-            errorMsg.setText(ErrorConstants.ENTERING_ERROR);
-			absSender.execute(errorMsg);
-		} catch (Exception e) {
-			log.error("Error sending error message", e);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 package com.sport.service.redis_store.notifications_broker;
 
-import com.sport.service.bot.TelegramNotificationSender;
+import com.sport.service.bot.TelegramMessageSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,7 +18,7 @@ public class NotificationListener implements MessageListener {
     @Qualifier("notificationRedisTemplate")
     private final RedisTemplate<String, Object> notificationRedisTemplate;
 
-    private final TelegramNotificationSender telegramNotificationSender;
+    private final TelegramMessageSender telegramMessageSender;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -44,9 +44,9 @@ public class NotificationListener implements MessageListener {
         byte[] photo = notification.getPhoto();
 
         if (photo != null) {
-            telegramNotificationSender.sendNotificationWithPhoto(userId, photo, message);
+            telegramMessageSender.sendMessageWithPhoto(userId, photo, message);
         } else {
-            telegramNotificationSender.sendNotificationWithoutPhoto(userId, message);
+            telegramMessageSender.sendMessageWithoutPhoto(userId, message);
         }
     }
 }

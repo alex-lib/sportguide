@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
 
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.bot.constants.ErrorConstants;
@@ -40,6 +41,8 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     private final PlaceService placeService;
 
+    private final TelegramMessageSender sender;
+
     @Override
     public String getCommandIdentifier() {
         return "get_place";
@@ -77,7 +80,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
         PlaceDto dto = placeSession.getIfExists(chatId);
         if (dto == null) {
-            sendError(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -168,13 +171,13 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     cleanupSession(chatId, userId);
                 }
                 default -> {
-                    sendError(absSender, chatId, ErrorConstants.UNKNOWN_STEP);
+                    sender.sendMessageWithoutPhoto(chatId, ErrorConstants.UNKNOWN_STEP);
                     cleanupSession(chatId, userId);
                 }
             }
         } catch (Exception e) {
             log.error("Error processing callback in get_place", e);
-            sendError(absSender, chatId, ErrorConstants.ERROR_HAPPENED);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
@@ -295,10 +298,6 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private void cleanupSession(Long chatId, Long userId) {
         placeSession.clear(chatId);
         commandStateStore.clearCurrentCommand(userId);
-    }
-
-    private void sendError(AbsSender absSender, Long chatId, String msg) {
-        sendText(absSender, chatId, msg);
     }
 
     private void sendText(AbsSender absSender, Long chatId, String text) {

@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.admin;
 
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
@@ -44,6 +45,8 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	private final CommandStateStore commandStateStore;
 	private final SubscriberService subscriberService;
 
+	private final TelegramMessageSender sender;
+
 	@Value("${telegram.bot.token}")
 	private String botToken;
 
@@ -78,7 +81,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error sending initial message", e);
-			sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 
@@ -95,7 +98,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		PlaceDto dto = placeSession.getIfExists(chatId);
 		if (dto == null) {
 			log.warn("No session found for chatId: {}", chatId);
-			sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
@@ -152,7 +155,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
 		} catch (TelegramApiException e) {
 			log.error("Error processing callback", e);
-			sendErrorMessage(absSender, chatId, ErrorConstants.ERROR_HAPPENED);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
 		}
 	}
 
@@ -203,7 +206,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		PlaceDto dto = placeSession.getIfExists(chatId);
 		if (dto == null) {
-			sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
@@ -217,7 +220,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
 		} catch (TelegramApiException e) {
 			log.error("Error processing text input", e);
-			sendErrorMessage(absSender, chatId, ErrorConstants.ENTERING_ERROR);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 
@@ -276,7 +279,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		PlaceDto dto = placeSession.getIfExists(chatId);
 		if (dto == null || dto.getStep() != 10) {
-			sendErrorMessage(absSender, chatId, ErrorConstants.SESSION_EXPIRED);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
 			commandStateStore.clearCurrentCommand(userId);
 			return;
 		}
@@ -302,18 +305,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 			absSender.execute(answer);
         } catch (TelegramApiException e) {
 			log.error("Error processing photo", e);
-			sendErrorMessage(absSender, chatId, ErrorConstants.UNEXPECTED_PHOTO);
-		}
-	}
-
-	private void sendErrorMessage(AbsSender absSender, Long chatId, String message) {
-		try {
-			SendMessage errorMsg = new SendMessage();
-			errorMsg.setChatId(chatId.toString());
-			errorMsg.setText(message);
-			absSender.execute(errorMsg);
-        } catch (TelegramApiException e) {
-			log.error("Error sending error message", e);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.UNEXPECTED_PHOTO);
 		}
 	}
 
