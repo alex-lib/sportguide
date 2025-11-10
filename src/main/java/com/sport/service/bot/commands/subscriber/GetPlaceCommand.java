@@ -1,14 +1,18 @@
 package com.sport.service.bot.commands.subscriber;
 
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.ErrorConstants;
+import com.sport.service.bot.constants.MenuConstants;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
 import com.sport.service.entities.place.PlaceType;
+import com.sport.service.entities.place.Subdistrict;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.PlaceSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,20 +27,21 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
-    private final String sessionExpired = "Сессия истекла. Начните заново \uD83D\uDD04";
-    private final String unknownStep = "Неизвестный шаг. Начните заново \uD83D\uDD04";
-
+    private final CommandStateStore commandStateStore;
     private final PlaceSession placeSession;
+
     private final PlaceService placeService;
 
-    private final CommandStateStore commandStateStore;
+    private final TelegramMessageSender sender;
 
     @Override
     public String getCommandIdentifier() {
@@ -75,7 +80,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
         PlaceDto dto = placeSession.getIfExists(chatId);
         if (dto == null) {
-            sendError(absSender, chatId, sessionExpired);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -83,23 +88,35 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         String data = callback.getData();
         log.info("Processing callback for get_place: step={}, data={}", dto.getStep(), data);
 
-        if ("BACK".equals(data)) {
-            if (dto.getStep() == 2) {
-                dto.setPlaceType(null);
-                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
-                dto.setStep(1);
-            } else if (dto.getStep() == 3) {
-                dto.setOutdoor(null);
-                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard(answer));
-                dto.setStep(2);
-            } else {
-                answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
-                dto.setStep(1);
-            }
+        if (MenuConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
+            answer.setText("getting");
             try {
+                switch (dto.getStep()) {
+                    case 2 -> { //If user chose in subdistricts menu to choose district again
+                        dto.setSubdistrict(null);
+                        dto.setDistrict(null);
+                        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+                        dto.setStep(1);
+                    }
+                    case 3 -> { //If user chose in types of place menu to choose district/subdistrict again
+                        dto.setPlaceType(null);
+                        if (dto.getDistrict().hasSubdistricts()) {
+                            answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
+                            dto.setStep(2);
+                        } else {
+                            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+                            dto.setStep(1);
+                        }
+                    }
+                    case 4 -> { //If user chose in outdoor/inside places menu to choose type of place again
+                        dto.setOutdoor(null);
+                        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
+                        dto.setStep(3);
+                    }
+                }
                 placeSession.save(chatId, dto);
                 absSender.execute(answer);
-            } catch (Exception e) {
+            } catch (TelegramApiException e) {
                 log.error("Error sending back step", e);
             }
             return;
@@ -108,27 +125,42 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         try {
             switch (dto.getStep()) {
                 case 1 -> {
-                    dto.setDistrict(District.valueOf(data));
-                    dto.setStep(2);
-                    placeSession.save(chatId, dto);
-                    showStepMenu(absSender, chatId, dto, userId);
-                }
-                case 2 -> {
-                    dto.setPlaceType(PlaceType.valueOf(data));
-                    if (needsOutdoorStep(data)) {
-                        dto.setStep(3);
+                    District district = District.valueOf(data);
+                    dto.setDistrict(district);
+                    boolean hasSubdistricts = district.hasSubdistricts();
+                    if (hasSubdistricts) {
+                        dto.setStep(2);
                         placeSession.save(chatId, dto);
                         showStepMenu(absSender, chatId, dto, userId);
                     } else {
+                        dto.setSubdistrict(null);
+                        dto.setStep(3);
+                        placeSession.save(chatId, dto);
+                        showStepMenu(absSender, chatId, dto, userId);
+                    }
+                }
+                case 2 -> {
+                    dto.setSubdistrict(Subdistrict.valueOf(data));
+                    dto.setStep(3);
+                    placeSession.save(chatId, dto);
+                    showStepMenu(absSender, chatId, dto, userId);
+                }
+                case 3 -> {
+                    dto.setPlaceType(PlaceType.valueOf(data));
+                    if (needsOutdoorStep(data)) {
                         dto.setStep(4);
+                        placeSession.save(chatId, dto);
+                        showStepMenu(absSender, chatId, dto, userId);
+                    } else {
+                        dto.setStep(5);
                         dto.setOutdoor(null);
                         placeSession.save(chatId, dto);
                         handlePlaces(absSender, chatId, dto);
                         cleanupSession(chatId, userId);
                     }
                 }
-                case 3 -> {
-                    if (data.equals("null")) {
+                case 4 -> {
+                    if (data.equals(MenuConstants.NULL)) {
                         dto.setOutdoor(null);
                     } else {
                         dto.setOutdoor(Boolean.parseBoolean(data));
@@ -139,13 +171,13 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     cleanupSession(chatId, userId);
                 }
                 default -> {
-                    sendError(absSender, chatId, unknownStep);
+                    sender.sendMessageWithoutPhoto(chatId, ErrorConstants.UNKNOWN_STEP);
                     cleanupSession(chatId, userId);
                 }
             }
         } catch (Exception e) {
             log.error("Error processing callback in get_place", e);
-            sendError(absSender, chatId, "Ошибка. Попробуйте снова \uD83D\uDD04");
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
@@ -157,28 +189,52 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private void showStepMenu(AbsSender absSender, Long chatId, PlaceDto dto, Long userId) {
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
+        answer.setText("getting");
         try {
             switch (dto.getStep()) {
-                case 1 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForGetting(answer));
-                case 2 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createTypeKeyboard(answer));
-                case 3 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboardForGettingPlace(answer));
+                case 1 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+                case 2 -> answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
+                case 3 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
+                case 4 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboard(answer));
                 default -> handleUnknownStep(chatId, userId, answer);
             }
             absSender.execute(answer);
-        } catch (Exception e) {
+        } catch (TelegramApiException e) {
             log.error("Error showing step menu", e);
         }
     }
 
     private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
-        answer.setText(unknownStep);
+        answer.setText(ErrorConstants.UNKNOWN_STEP);
         cleanupSession(chatId, userId);
     }
 
     private void handlePlaces(AbsSender absSender, Long chatId, PlaceDto dto) {
-        List<Place> places = dto.getOutdoor() != null ?
-                placeService.findByDistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getPlaceType(), dto.getOutdoor())
-                : placeService.findByDistrictAndPlaceType(dto.getDistrict(), dto.getPlaceType());
+        List<Place> places = new ArrayList<>();
+
+        if (dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getOutdoor() == null) {
+            places = placeService.findAllByPlaceType(dto.getPlaceType());
+        }
+
+        if (dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getOutdoor() != null) {
+            places = placeService.findAllByPlaceTypeAndOutdoor(dto.getPlaceType(), dto.getOutdoor());
+        }
+
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() != null) {
+            places = placeService.findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType(), dto.getOutdoor());
+        }
+
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() == null) {
+            places = placeService.findByDistrictAndSubdistrictAndPlaceType(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType());
+        }
+
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() != null) {
+            places = placeService.findByDistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getPlaceType(), dto.getOutdoor());
+        }
+
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() == null) {
+            places = placeService.findByDistrictAndPlaceType(dto.getDistrict(), dto.getPlaceType());
+        }
 
         if (places.isEmpty()) {
             sendText(absSender, chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
@@ -201,7 +257,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                 photoMessage.setCaption(caption);
                 photoMessage.setParseMode("Markdown");
                 absSender.execute(photoMessage);
-            } catch (Exception e) {
+            } catch (TelegramApiException | IOException e) {
                 log.error("Failed to send photo for place {}", place.getName(), e);
                 sendText(absSender, chatId, caption);
             }
@@ -242,10 +298,6 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private void cleanupSession(Long chatId, Long userId) {
         placeSession.clear(chatId);
         commandStateStore.clearCurrentCommand(userId);
-    }
-
-    private void sendError(AbsSender absSender, Long chatId, String msg) {
-        sendText(absSender, chatId, "⚠️ " + msg);
     }
 
     private void sendText(AbsSender absSender, Long chatId, String text) {

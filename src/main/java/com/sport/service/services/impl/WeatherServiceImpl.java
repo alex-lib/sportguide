@@ -2,15 +2,14 @@ package com.sport.service.services.impl;
 
 import com.sport.service.entities.TodayWeather;
 import com.sport.service.entities.subscriber.Subscriber;
-import com.sport.service.events.WeatherNotificationCreatedEvent;
 import com.sport.service.mappers.WeatherCodeMapper;
 import com.sport.service.services.NotificationCreatorService;
+import com.sport.service.services.NotificationSenderService;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.services.WeatherService;
 import com.sport.service.web.api.OpenMeteoClient;
 import com.sport.service.web.models.OpenMeteoResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,8 @@ public class WeatherServiceImpl implements WeatherService {
     private static final String CRON = "0 0 6 * * *";
 
     private final OpenMeteoClient openMeteoClient;
-    private final ApplicationEventPublisher eventPublisher;
+
+    private final NotificationSenderService notificationSenderService;
     private final SubscriberService subscriberService;
     private final NotificationCreatorService notificationCreatorService;
 
@@ -46,8 +46,11 @@ public class WeatherServiceImpl implements WeatherService {
     public String createWeatherNotification() {
         TodayWeather weather = getTodayWeather();
         String message = notificationCreatorService.createWeatherNotification(weather);
-        List<Subscriber> subscribers = subscriberService.getSubscribersWhoWantGetEvents();
-        eventPublisher.publishEvent(new WeatherNotificationCreatedEvent(subscribers, message));
+        List<Long> subscriberIds = subscriberService.getSubscribersWhoWantGetEvents()
+                .stream()
+                .map(Subscriber::getId)
+                .toList();
+        notificationSenderService.sendWeatherNotification(message, subscriberIds);
         return message;
     }
 

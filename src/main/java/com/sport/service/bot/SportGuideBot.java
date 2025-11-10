@@ -3,33 +3,22 @@ package com.sport.service.bot;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
-import com.sport.service.entities.subscriber.Subscriber;
-import com.sport.service.events.EventNotificationCreatedEvent;
-import com.sport.service.events.SendMessageToAllUsersEvent;
-import com.sport.service.events.SubscriberSentToAdminMessageNotificationCreatedEvent;
-import com.sport.service.events.WeatherNotificationCreatedEvent;
 import com.sport.service.mappers.ButtonToCommandMapper;
-import com.sport.service.sessions.CommandStateStore;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +42,6 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
         this.commandStateStore = commandStateStore;
         commandList.forEach(this::registerCommand);
     }
-
-    @Value("${telegram.mainAdminId}")
-    private String mainAdminId;
 
     private void registerCommand(IBotCommand command) {
         commands.put("/" + command.getCommandIdentifier(), command);
@@ -148,80 +134,6 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             }, 30, TimeUnit.SECONDS);
         } catch (TelegramApiException e) {
             log.error("Error occurred while deleting the message", e);
-        }
-    }
-
-    @EventListener
-    private void sendMessageToAllUsers(SendMessageToAllUsersEvent event) {
-        try {
-            String host = java.net.InetAddress.getLocalHost().getHostName();
-            log.info("Listener invoked on host={} thread={} subs={}",
-                    host, Thread.currentThread().getName(), event.getSubscribers().size());
-
-            if (event.getPhoto() != null) {
-                SendPhoto photoMessage = new SendPhoto();
-                try (InputStream photoStream = new ByteArrayInputStream(event.getPhoto())) {
-                    photoMessage.setPhoto(new InputFile(photoStream, "place.jpg"));
-                    photoMessage.setCaption(event.getMessage());
-                    photoMessage.setParseMode("Markdown");
-                } catch (Exception e) {
-                    log.error("Failed to send photo for place {}", event.getMessage(), e);
-                }
-                for (Subscriber subscriber : event.getSubscribers()) {
-                    photoMessage.setChatId(subscriber.getId().toString());
-                    execute(photoMessage);
-                }
-            } else {
-                for (Subscriber subscriber : event.getSubscribers()) {
-                    SendMessage sendMessage = SendMessage.builder()
-                            .chatId(subscriber.getId().toString())
-                            .text(event.getMessage())
-                            .build();
-                    execute(sendMessage);
-                }
-            }
-        } catch (TelegramApiException e) {
-            log.error("Failed to send message to subscribers");
-        } catch (Exception ignored) {
-        }
-    }
-
-    @EventListener
-    private void weatherNotificationCreatedEventListener(WeatherNotificationCreatedEvent event) {
-        sendNotification(event.getNotification(), event.getSubscribers());
-    }
-
-    @EventListener
-    private void eventNotificationCreatedEventListener(EventNotificationCreatedEvent event) {
-        sendNotification(event.getNotification(), event.getSubscribers());
-    }
-
-    @EventListener
-    private void subscriberSentToAdminMessageNotificationCreatedEventListener(SubscriberSentToAdminMessageNotificationCreatedEvent event) {
-        sendNotification(event.getNotification(), null);
-    }
-
-    private void sendNotification(String notification, List<Subscriber> list) {
-        SendMessage sendMessage;
-        try {
-            if (list == null) {
-                sendMessage = SendMessage.builder()
-                        .chatId(mainAdminId)
-                        .text(notification)
-                        .build();
-                execute(sendMessage);
-            } else {
-                for (Subscriber subscriber : list) {
-                    sendMessage = SendMessage.builder()
-                            .chatId(subscriber.getId().toString())
-                            .text(notification)
-                            .build();
-                    execute(sendMessage);
-                }
-            }
-            log.info("Notification: {} sent to subscribers", notification);
-        } catch (TelegramApiException e) {
-            log.error("Failed to send notification: {} to subscribers", notification);
         }
     }
 

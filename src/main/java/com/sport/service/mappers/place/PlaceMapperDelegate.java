@@ -9,6 +9,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
         return Place.builder()
                 .name(dto.getName())
                 .district(dto.getDistrict())
+                .subdistrict(dto.getSubdistrict())
                 .address(dto.getAddress())
                 .description(dto.getDescription())
                 .webSite(dto.getWebSite())

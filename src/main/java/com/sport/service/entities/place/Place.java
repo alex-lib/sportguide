@@ -26,6 +26,10 @@ public class Place {
     @Column(name = "district", nullable = false)
     private District district;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "subdistrict", nullable = true)
+    private Subdistrict subdistrict;
+
     @Column(name = "address")
     private String address;
 
@@ -39,7 +43,7 @@ public class Place {
     private Boolean outdoor;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "placeType", nullable = false)
+    @Column(name = "place_type", nullable = false)
     private PlaceType placeType;
 
     @Lob

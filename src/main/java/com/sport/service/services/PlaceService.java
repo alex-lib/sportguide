@@ -4,22 +4,25 @@ import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.place.District;
 import com.sport.service.entities.place.Place;
 import com.sport.service.entities.place.PlaceType;
+import com.sport.service.entities.place.Subdistrict;
 
 import java.util.List;
 
 public interface PlaceService {
-
-    List<Place> findByDistrict(District district);
-
-    List<Place> findByType(List<Place> places, PlaceType placeType);
-
-    List<Place> findByOutdoor(List<Place> places, Boolean outdoor);
 
     void create(PlaceDto dto);
 
     void deleteByName(String name);
 
     boolean existsByName(String name);
+
+    List<Place> findAllByPlaceType(PlaceType placeType);
+
+    List<Place> findAllByPlaceTypeAndOutdoor(PlaceType placeType, Boolean outdoor);
+
+    List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, Subdistrict subdistrict, PlaceType placeType, Boolean outdoor);
+
+    List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, Subdistrict subdistrict, PlaceType placeType);
 
     List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor);
 
