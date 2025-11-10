@@ -1,14 +1,16 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.place.District;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.EventSession;
 import com.sport.service.services.EventService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.EventSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,12 +32,12 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
     private final EventService eventService;
     private final CommandStateStore commandStateStore;
 
+    private final TelegramMessageSender sender;
+
     private final Pattern DATE_PATTERN = Pattern.compile(
             "^([1-9]\\d{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$");
     private final Pattern TIME_PATTERN = Pattern.compile(
             "^([01]\\d|2[0-3]):([0-5]\\d)$");
-    private final String sessionExpired = "Сессия истекла.\nНачните заново \uD83D\uDD04";
-    private final String unknownStep = "Неизвестный шаг.\nНачните заново \uD83D\uDD04";
 
     @Override
     public String getCommandIdentifier() {
@@ -61,12 +63,14 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         dto.setStep(1);
         eventSession.save(chatId, dto);
         commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboardForCreating(answer));
+        answer.setText("creating");
+        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
 
         try {
             absSender.execute(answer);
         } catch (Exception e) {
             log.error("Error sending initial message", e);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -83,7 +87,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         EventDto dto = eventSession.getIfExists(chatId);
         if (dto == null) {
             log.warn("No session found for chatId: {}", chatId);
-            sendErrorMessage(absSender, chatId, sessionExpired);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -104,7 +108,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         } catch (TelegramApiException e) {
             eventSession.clear(chatId);
             log.error("Error processing callback", e);
-            sendErrorMessage(absSender, chatId, "Произошла ошибка.\nПопробуйте еще раз \uD83D\uDD04");
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
@@ -127,7 +131,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
         EventDto dto = eventSession.getIfExists(chatId);
         if (dto == null) {
-            sendErrorMessage(absSender, chatId, sessionExpired);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
             commandStateStore.clearCurrentCommand(userId);
             return;
         }
@@ -149,7 +153,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId, "Ошибка при обработке ввода.\nПопробуйте еще раз \uD83D\uDD04");
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
@@ -210,19 +214,8 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         }
     }
 
-    private void sendErrorMessage(AbsSender absSender, Long chatId, String message) {
-        try {
-            SendMessage errorMsg = new SendMessage();
-            errorMsg.setChatId(chatId.toString());
-            errorMsg.setText(message);
-            absSender.execute(errorMsg);
-        } catch (Exception e) {
-            log.error("Error sending error message", e);
-        }
-    }
-
     private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
-        answer.setText(unknownStep);
+        answer.setText(ErrorConstants.UNKNOWN_STEP);
         eventSession.clear(chatId);
         commandStateStore.clearCurrentCommand(userId);
     }

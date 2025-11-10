@@ -1,18 +1,17 @@
-package com.sport.service.sessions;
+package com.sport.service.redis_store.commands_store.sessions;
 
 import com.sport.service.dto.MessageDto;
+import com.sport.service.redis_store.commands_store.RedisCrud;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MessageSession {
-
     private static final String KEY_PREFIX = "session:message:";
-
     private static final long TTL_SECONDS = 300;
 
-    private final RedisSessionStore store;
+    private final RedisCrud store;
 
-    public MessageSession(RedisSessionStore store) {
+    public MessageSession(RedisCrud store) {
         this.store = store;
     }
 
