@@ -1,7 +1,8 @@
 package com.sport.service.dto;
-import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.PlaceType;
-import com.sport.service.entities.place.Subdistrict;
+
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package com.sport.service.services.impl;
 
+import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TodayWeather;
-import com.sport.service.entities.subscriber.Subscriber;
 import com.sport.service.mappers.WeatherCodeMapper;
 import com.sport.service.services.NotificationCreatorService;
 import com.sport.service.services.NotificationSenderService;

@@ -1,4 +1,4 @@
-package com.sport.service.entities.place;
+package com.sport.service.entities.enums.place;
 
 public enum Subdistrict {
     //ZHELEZNODOROZHNYY

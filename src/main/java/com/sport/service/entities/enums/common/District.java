@@ -1,4 +1,4 @@
-package com.sport.service.entities.place;
+package com.sport.service.entities.enums.common;
 
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;

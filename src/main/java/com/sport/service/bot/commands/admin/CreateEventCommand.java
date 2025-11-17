@@ -5,9 +5,10 @@ import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.dto.EventDto;
-import com.sport.service.entities.place.District;
+import com.sport.service.entities.enums.common.District;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.EventSession;
 import com.sport.service.services.EventService;
@@ -41,12 +42,12 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
     @Override
     public String getCommandIdentifier() {
-        return "create_event";
+        return CommandsConstants.CREATE_EVENT;
     }
 
     @Override
     public String getDescription() {
-        return "Let admin create a new event";
+        return CommandsConstants.CREATE_EVENT_DESCRIPTION;
     }
 
     @Override
