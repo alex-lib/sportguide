@@ -3,6 +3,7 @@ package com.sport.service.bot.commands.admin;
 import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
@@ -29,12 +30,12 @@ public class DeletePlaceCommand implements IBotCommand, TextProcessable {
 
     @Override
     public String getCommandIdentifier() {
-        return "delete_place";
+        return CommandsConstants.DELETE_PLACE;
     }
 
     @Override
     public String getDescription() {
-        return "Let admin to delete a created place";
+        return CommandsConstants.DELETE_PLACE_DESCRIPTION;
     }
 
     @Override

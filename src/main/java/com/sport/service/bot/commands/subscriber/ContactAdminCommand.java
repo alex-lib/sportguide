@@ -2,6 +2,7 @@ package com.sport.service.bot.commands.subscriber;
 
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.services.NotificationCreatorService;
@@ -33,12 +34,12 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
 
 	@Override
 	public String getCommandIdentifier() {
-		return "contact_admin";
+		return CommandsConstants.CONTACT_ADMIN;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Let subscriber to contact admin";
+		return CommandsConstants.CONTACT_ADMIN_DESCRIPTION;
 	}
 
 	@Override

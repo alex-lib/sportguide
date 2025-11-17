@@ -1,0 +1,39 @@
+groups:
+  - name: prometheus_alerts
+    rules:
+
+      - alert: ApplicationDown
+        expr: up{job="sportguide-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Приложение недоступно"
+          description: "Приложение {{ $labels.instance }} недоступно более 1 минуты"
+
+      - alert: PrometheusLargeScrape
+        expr: rate(prometheus_target_scrapes_exceeded_sample_limit_total[10m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Большой сбор данных Prometheus"
+          description: "В Prometheus много сборов данных, превышающих лимит выборки. Текущее значение: {{ $value }}"
+
+      - alert: PrometheusHighMemoryUsage
+        expr: process_resident_memory_bytes{job="prometheus"} > 1.5e9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти Prometheus"
+          description: "Prometheus использует более 1.5GB памяти. Текущее значение: {{ $value }} bytes"
+
+      - alert: ApplicationHighMemory
+        expr: process_resident_memory_bytes{job="sportguide-app"} > 1e9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти приложения"
+          description: "Приложение использует более 1GB памяти. Текущее значение: {{ $value }} bytes"

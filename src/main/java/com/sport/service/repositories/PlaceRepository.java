@@ -1,9 +1,9 @@
 package com.sport.service.repositories;
 
-import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.PlaceType;
-import com.sport.service.entities.place.Subdistrict;
+import com.sport.service.entities.Place;
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

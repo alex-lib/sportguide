@@ -3,13 +3,14 @@ package com.sport.service.bot.commands.subscriber;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
-import com.sport.service.bot.constants.MenuConstants;
+import com.sport.service.bot.constants.KeyboardConstants;
 import com.sport.service.dto.PlaceDto;
-import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.PlaceType;
-import com.sport.service.entities.place.Subdistrict;
+import com.sport.service.entities.Place;
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
@@ -45,12 +46,12 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     @Override
     public String getCommandIdentifier() {
-        return "get_place";
+        return CommandsConstants.GET_PLACE;
     }
 
     @Override
     public String getDescription() {
-        return "Let user to get an appropriate sport place";
+        return CommandsConstants.GET_PLACE_DESCRIPTION;
     }
 
     @Override
@@ -88,7 +89,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         String data = callback.getData();
         log.info("Processing callback for get_place: step={}, data={}", dto.getStep(), data);
 
-        if (MenuConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
+        if (KeyboardConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
             answer.setText("getting");
             try {
                 switch (dto.getStep()) {
@@ -160,7 +161,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     }
                 }
                 case 4 -> {
-                    if (data.equals(MenuConstants.NULL)) {
+                    if (data.equals(KeyboardConstants.NULL)) {
                         dto.setOutdoor(null);
                     } else {
                         dto.setOutdoor(Boolean.parseBoolean(data));
@@ -182,8 +183,8 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     }
 
     private boolean needsOutdoorStep(String type) {
-        return !(type.equals("SPORT_GROUND") || type.equals("GYM") ||
-                type.equals("SWIMMING_POOL") || type.equals("MARTIAL_ARTS_HALL"));
+        return !(type.equals(PlaceType.SPORT_GROUND.name()) || type.equals(PlaceType.GYM.name()) ||
+                type.equals(PlaceType.SWIMMING_POOL.name()) || type.equals(PlaceType.MARTIAL_ARTS_HALL.name()));
     }
 
     private void showStepMenu(AbsSender absSender, Long chatId, PlaceDto dto, Long userId) {
@@ -237,7 +238,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         }
 
         if (places.isEmpty()) {
-            sendText(absSender, chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
+            sender.sendMessageWithoutPhoto(chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
             return;
         }
 
@@ -259,10 +260,10 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                 absSender.execute(photoMessage);
             } catch (TelegramApiException | IOException e) {
                 log.error("Failed to send photo for place {}", place.getName(), e);
-                sendText(absSender, chatId, caption);
+                sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
             }
         } else {
-            sendText(absSender, chatId, caption);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
@@ -298,13 +299,5 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private void cleanupSession(Long chatId, Long userId) {
         placeSession.clear(chatId);
         commandStateStore.clearCurrentCommand(userId);
-    }
-
-    private void sendText(AbsSender absSender, Long chatId, String text) {
-        try {
-            absSender.execute(new SendMessage(chatId.toString(), text));
-        } catch (TelegramApiException e) {
-            log.error("Error sending message", e);
-        }
     }
 }

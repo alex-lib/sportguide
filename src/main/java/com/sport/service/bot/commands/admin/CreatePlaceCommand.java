@@ -5,12 +5,13 @@ import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
-import com.sport.service.bot.constants.MenuConstants;
+import com.sport.service.bot.constants.KeyboardConstants;
 import com.sport.service.dto.PlaceDto;
-import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.PlaceType;
-import com.sport.service.entities.place.Subdistrict;
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
@@ -52,12 +53,12 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 	@Override
 	public String getCommandIdentifier() {
-		return "create_place";
+        return CommandsConstants.CREATE_PLACE;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Let admin create a new place";
+        return CommandsConstants.CREATE_PLACE_DESCRIPTION;
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-		if (MenuConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
+        if (KeyboardConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
 			answer.setText("creating");
 			try {
 				switch (dto.getStep()) {

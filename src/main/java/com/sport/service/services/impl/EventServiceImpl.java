@@ -2,7 +2,7 @@ package com.sport.service.services.impl;
 
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
-import com.sport.service.entities.subscriber.Subscriber;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.services.EventService;

@@ -1,10 +1,10 @@
 package com.sport.service.services.impl;
 
 import com.sport.service.dto.PlaceDto;
-import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.PlaceType;
-import com.sport.service.entities.place.Subdistrict;
+import com.sport.service.entities.Place;
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.services.PlaceService;
