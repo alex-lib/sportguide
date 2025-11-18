@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
 
+import com.sport.service.bot.constants.CommandsConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
@@ -15,12 +16,12 @@ public class SupportProjectCommand implements IBotCommand {
 
     @Override
     public String getCommandIdentifier() {
-        return "support_project";
+        return CommandsConstants.SUPPORT_PROJECT;
     }
 
     @Override
     public String getDescription() {
-        return "Give to subscriber info to support project";
+        return CommandsConstants.SUPPORT_PROJECT_DESCRIPTION;
     }
 
     @Override
@@ -31,13 +32,7 @@ public class SupportProjectCommand implements IBotCommand {
         log.info("Call command support_project by userId={}, username={}", userId, user.getUserName());
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId);
-        answer.setText("""
-                \s
-                USDT
-                address: 0x53a43924e55251d4a73023a4ee0e7188ffc978fa
-                network: Arbitrum One
-                THANK YOU🙏
-                \s""");
+        answer.setText(CommandsConstants.SUPPORT_PROJECT_TEXT);
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

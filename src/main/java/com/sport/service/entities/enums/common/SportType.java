@@ -1,0 +1,31 @@
+package com.sport.service.entities.enums.common;
+
+public enum SportType {
+    FOOTBALL,
+    VOLLEYBALL,
+    HOCKEY,
+    MMA,
+    BOXING,
+    BASKETBALL,
+    PADEL,
+    PING_PONG,
+    TENNIS,
+    JIU_JITSU,
+    WRESTLING,
+    FITNESS,
+    SWIMMING,
+    NUTRITIONIST,
+    RUNNING,
+    WORKOUT,
+    SKIING,
+    SCATING,
+    GYMNASTICS,
+    STRETCHING,
+    YOGA,
+    GROUP_TRAININGS,
+    ATHLETICS,
+    POWERLIFTING,
+    RECOVERY,
+    DANCING,
+    CYCLING
+}

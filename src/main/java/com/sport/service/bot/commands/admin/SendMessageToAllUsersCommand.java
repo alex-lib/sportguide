@@ -4,9 +4,10 @@ import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.dto.MessageDto;
-import com.sport.service.entities.subscriber.Subscriber;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.MessageSession;
 import com.sport.service.services.NotificationSenderService;
@@ -47,12 +48,12 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
 
     @Override
     public String getCommandIdentifier() {
-        return "send_message_to_all_users";
+        return CommandsConstants.SEND_MESSAGE_TO_ALL_USERS;
     }
 
     @Override
     public String getDescription() {
-        return "Let admin send message to all users";
+        return CommandsConstants.SEND_MESSAGE_TO_ALL_USERS_DESCRIPTION;
     }
 
     @Override

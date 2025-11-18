@@ -1,6 +1,10 @@
-package com.sport.service.entities.subscriber;
+package com.sport.service.entities;
+
+import com.sport.service.entities.enums.subscriber.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "subscribers")
@@ -9,9 +13,8 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@ToString
+@ToString(exclude = {"coach", "jointTrainings", "payments"})
 public class Subscriber {
-
     @Id
     @Column(name = "id")
     private Long id;
@@ -31,4 +34,13 @@ public class Subscriber {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private RoleType role;
+
+    @OneToOne(mappedBy = "subscriber")
+    private Coach coach;
+
+    @OneToMany(mappedBy = "subscriber", fetch = FetchType.LAZY)
+    private List<JointTraining> jointTrainings;
+
+    @OneToMany(mappedBy = "subscriber", fetch = FetchType.LAZY)
+    private List<Payment> payments;
 }

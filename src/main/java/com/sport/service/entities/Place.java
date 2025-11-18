@@ -1,8 +1,14 @@
-package com.sport.service.entities.place;
+package com.sport.service.entities;
+
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.util.List;
 
 @Entity
 @Table(name = "places", schema = "app_schema")
@@ -13,7 +19,6 @@ import org.hibernate.type.SqlTypes;
 @Builder
 @ToString(exclude = "photo")
 public class Place {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -27,7 +32,7 @@ public class Place {
     private District district;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "subdistrict", nullable = true)
+    @Column(name = "subdistrict")
     private Subdistrict subdistrict;
 
     @Column(name = "address")
@@ -53,4 +58,7 @@ public class Place {
 
     @Column(name = "coordinates")
     private String coordinates;
+
+    @ManyToMany(mappedBy = "workPlaces", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    private List<Coach> coaches;
 }

@@ -1,5 +1,7 @@
 package com.sport.service.bot.commands.subscriber;
-import com.sport.service.entities.subscriber.Subscriber;
+
+import com.sport.service.bot.constants.CommandsConstants;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +21,12 @@ public class GetNotificationsCommand implements IBotCommand {
 
     @Override
     public String getCommandIdentifier() {
-        return "get_notifications";
+        return CommandsConstants.GET_NOTIFICATIONS;
     }
 
     @Override
     public String getDescription() {
-        return "Change variable getEvents to true";
+        return CommandsConstants.GET_NOTIFICATIONS_DESCRIPTION;
     }
 
     @Override
@@ -38,11 +40,11 @@ public class GetNotificationsCommand implements IBotCommand {
 
         Subscriber subscriber = subscriberService.findById(userId);
         if (subscriber.getGetEvents().equals(Boolean.TRUE)) {
-            answer.setText("Вы уже подписаны на получение уведомлений \uD83D\uDC4C");
+            answer.setText(CommandsConstants.GET_NOTIFICATIONS_ALREADY_GET_TEXT);
         } else {
             subscriber.setGetEvents(Boolean.TRUE);
             subscriberService.updateSubscriber(subscriber, user.getId());
-            answer.setText("Теперь вы будете получать уведомление при создании события ✅");
+            answer.setText(CommandsConstants.GET_NOTIFICATIONS_START_TEXT);
         }
         try {
             absSender.execute(answer);
