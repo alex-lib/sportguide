@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.subscriber;
 import com.sport.service.bot.commands.menu.AdminMenu;
 import com.sport.service.bot.commands.menu.SubscriberMenu;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,12 @@ public class MenuCommand implements IBotCommand {
 
     @Override
     public String getCommandIdentifier() {
-        return "menu";
+        return CommandsConstants.MENU;
     }
 
     @Override
     public String getDescription() {
-        return "Show user menu with buttons";
+        return CommandsConstants.MENU_DESCRIPTION;
     }
 
     @Override

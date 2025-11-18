@@ -2,6 +2,7 @@ package com.sport.service.bot;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -16,7 +17,11 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 @Slf4j
 public class TelegramMessageSender {
-    private final SportGuideBot bot;
+    private final ApplicationContext context;
+
+    private SportGuideBot getBot() {
+        return context.getBean(SportGuideBot.class);
+    }
 
     public void sendMessageWithoutPhoto(Long userId, String message) {
         SendMessage sendMessage = SendMessage.builder()
@@ -24,7 +29,7 @@ public class TelegramMessageSender {
                 .text(message)
                 .build();
         try {
-            bot.execute(sendMessage);
+            getBot().execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Failed to send message without photo: {}", message, e);
         }
@@ -41,7 +46,7 @@ public class TelegramMessageSender {
         }
         photoMessage.setChatId(userId);
         try {
-            bot.execute(photoMessage);
+            getBot().execute(photoMessage);
         } catch (TelegramApiException e) {
             log.error("Failed to send message with photo: {}", message, e);
         }

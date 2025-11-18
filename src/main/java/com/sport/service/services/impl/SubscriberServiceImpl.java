@@ -1,7 +1,7 @@
 package com.sport.service.services.impl;
 
-import com.sport.service.entities.subscriber.RoleType;
-import com.sport.service.entities.subscriber.Subscriber;
+import com.sport.service.entities.Subscriber;
+import com.sport.service.entities.enums.subscriber.RoleType;
 import com.sport.service.repositories.SubscriberRepository;
 import com.sport.service.services.SubscriberService;
 import com.sport.service.utils.BeanUtils;
@@ -61,7 +61,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public List<Subscriber> getSubscribersWhoWantGetEvents() {
-        return findAll().stream().filter(subscriber -> subscriber.getGetEvents().equals(true)).toList();
+        return subscriberRepository.findAllByGetEventsTrue();
     }
 
     @Transactional
@@ -79,7 +79,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public long getSubscriptionsCount() {
-        return subscriberRepository.getSubscriptionsCount();
+        return subscriberRepository.countByGetEventsTrue();
     }
 
     @Override

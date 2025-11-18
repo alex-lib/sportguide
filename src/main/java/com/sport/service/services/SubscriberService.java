@@ -1,6 +1,6 @@
 package com.sport.service.services;
 
-import com.sport.service.entities.subscriber.Subscriber;
+import com.sport.service.entities.Subscriber;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.List;
