@@ -1,6 +1,6 @@
 package com.sport.service.mappers.place;
 import com.sport.service.dto.PlaceDto;
-import com.sport.service.entities.place.Place;
+import com.sport.service.entities.Place;
 
 public abstract class PlaceMapperDelegate implements PlaceMapper {
 
@@ -9,6 +9,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
         return Place.builder()
                 .name(dto.getName())
                 .district(dto.getDistrict())
+                .subdistrict(dto.getSubdistrict())
                 .address(dto.getAddress())
                 .description(dto.getDescription())
                 .webSite(dto.getWebSite())

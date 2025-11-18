@@ -1,9 +1,10 @@
 package com.sport.service.services.impl;
 
 import com.sport.service.dto.PlaceDto;
-import com.sport.service.entities.place.District;
-import com.sport.service.entities.place.Place;
-import com.sport.service.entities.place.PlaceType;
+import com.sport.service.entities.Place;
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.place.PlaceType;
+import com.sport.service.entities.enums.place.Subdistrict;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.services.PlaceService;
@@ -32,6 +33,7 @@ public class PlaceServiceImpl implements PlaceService {
         return placeRepository.existsByName(name);
     }
 
+
     @Override
     public List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor) {
         return placeRepository.findByDistrictAndPlaceTypeAndOutdoor(district, placeType, outdoor);
@@ -42,33 +44,30 @@ public class PlaceServiceImpl implements PlaceService {
         return placeRepository.findByDistrictAndPlaceType(district, placeType);
     }
 
+    @Override
+    public List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, Subdistrict subdistrict, PlaceType placeType) {
+        return placeRepository.findByDistrictAndSubdistrictAndPlaceType(district, subdistrict, placeType);
+    }
+
+    @Override
+    public List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, Subdistrict subdistrict, PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(district, subdistrict, placeType, outdoor);
+    }
+
+    @Override
+    public List<Place> findAllByPlaceType(PlaceType placeType) {
+        return placeRepository.findAllByPlaceType(placeType);
+    }
+
+    @Override
+    public List<Place> findAllByPlaceTypeAndOutdoor(PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findAllByPlaceTypeAndOutdoor(placeType, outdoor);
+    }
+
     @Transactional
     @Override
     public void deleteByName(String name) {
         Place place = placeRepository.findByName(name);
         if (place != null) placeRepository.delete(place);
-    }
-
-    @Override
-    public List<Place> findByDistrict(District district) {
-        if (district == District.ALL_DISTRICTS) {
-            return placeRepository.findAll();
-        } else {
-            return placeRepository.findAllByDistrict(district);
-        }
-    }
-
-    @Override
-    public List<Place> findByType(List<Place> places, PlaceType placeType) {
-        return places.stream()
-                .filter(place -> place.getPlaceType() == placeType)
-                .toList();
-    }
-
-    @Override
-    public List<Place> findByOutdoor(List<Place> places, Boolean outdoor) {
-        return outdoor != null ? places.stream()
-                .filter(place -> place.getOutdoor() == outdoor)
-                .toList() : places;
     }
 }

@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.menu;
 
+import com.sport.service.bot.constants.MenuConstants;
 import lombok.RequiredArgsConstructor;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -12,31 +13,26 @@ import java.util.List;
 public class SubscriberMenu {
     private final SendMessage answer;
 
-    public static final String SUBSCRIBER_MENU = """
-            \s
-            Доступные команды:
-            📍 Выбрать место - выбрать место
-            📅 Ближайшие события - получить список грядущих событий
-            🔔 Подписаться на уведомления - получать уведомления о спортивных событиях
-            🚫 Отписаться от уведомлений - не получать уведомления о спортивных событиях
-            \uD83C\uDFCB\uFE0F\u200D♂\uFE0F Поддержать проект - поддержать проект
-            \uD83E\uDE83 Связаться с админом - предложить сотрудничество, создать/скорректировать место или создать грядущее спортивное событие
-            \s""";
+    public static final String SUBSCRIBER_MENU = MenuConstants.SUBSCRIBER_MENU;
 
     public void getSubscriberMenu() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add("📍 Выбрать место");
-        row1.add("📅 Ближайшие события");
+        row1.add(MenuConstants.CHOOSE_PLACE);
+        row1.add(MenuConstants.UPCOMING_EVENTS);
+
         KeyboardRow row2 = new KeyboardRow();
-        row2.add("🔔 Подписаться на уведомления");
-        row2.add("🚫 Отписаться от уведомлений");
+        row2.add(MenuConstants.SUBSCRIBE_TO_NOTIFICATIONS);
+        row2.add(MenuConstants.UNSUBSCRIBE_TO_NOTIFICATIONS);
+
         KeyboardRow row3 = new KeyboardRow();
-        row3.add("\uD83C\uDFCB\uFE0F\u200D♂\uFE0F Поддержать проект");
-        row3.add("\uD83E\uDE83 Связаться с админом");
+        row3.add(MenuConstants.SUPPORT_PROJECT);
+        row3.add(MenuConstants.CONTACT_ADMIN);
+
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
         keyboard.add(row3);
+
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(false);

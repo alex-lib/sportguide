@@ -1,11 +1,13 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.CommandsConstants;
+import com.sport.service.bot.constants.ErrorConstants;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
-import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.PlaceSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,20 +21,21 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @RequiredArgsConstructor
 @Slf4j
 public class DeletePlaceCommand implements IBotCommand, TextProcessable {
-    private final SubscriberService subscriberService;
-    private final PlaceService placeService;
-
     private final PlaceSession placeSession;
     private final CommandStateStore commandStateStore;
 
+    private final TelegramMessageSender sender;
+
+    private final PlaceService placeService;
+
     @Override
     public String getCommandIdentifier() {
-        return "delete_place";
+        return CommandsConstants.DELETE_PLACE;
     }
 
     @Override
     public String getDescription() {
-        return "Let admin to delete a created place";
+        return CommandsConstants.DELETE_PLACE_DESCRIPTION;
     }
 
     @Override
@@ -76,18 +79,7 @@ public class DeletePlaceCommand implements IBotCommand, TextProcessable {
             absSender.execute(answer);
         } catch (Exception e) {
             log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId);
-        }
-    }
-
-    private void sendErrorMessage(AbsSender absSender, Long chatId) {
-        try {
-            SendMessage errorMsg = new SendMessage();
-            errorMsg.setChatId(chatId.toString());
-            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
-            absSender.execute(errorMsg);
-        } catch (Exception e) {
-            log.error("Error sending error message", e);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 }

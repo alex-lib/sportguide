@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.subscriber;
 
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.entities.Event;
 import com.sport.service.services.EventService;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,12 @@ public class GetUpcomingEventsCommand implements IBotCommand {
 
     @Override
     public String getCommandIdentifier() {
-        return "get_upcoming_events";
+        return CommandsConstants.GET_UPCOMING_EVENTS;
     }
 
     @Override
     public String getDescription() {
-        return "Let subscribers get list of upcoming events";
+        return CommandsConstants.GET_UPCOMING_EVENTS_DESCRIPTION;
     }
 
     @Override

@@ -1,7 +1,10 @@
 package com.sport.service.mappers.event;
+
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
+
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public abstract class EventMapperDelegate implements EventMapper {
 
@@ -15,7 +18,7 @@ public abstract class EventMapperDelegate implements EventMapper {
                 .placeName(dto.getPlaceName())
                 .link(dto.getLink())
                 .date(LocalDate.parse(dto.getDate()))
-                .time(dto.getTime())
+                .time(LocalTime.parse(dto.getTime()))
                 .build();
     }
 }

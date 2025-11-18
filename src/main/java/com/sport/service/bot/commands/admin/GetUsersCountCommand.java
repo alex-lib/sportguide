@@ -1,6 +1,7 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,12 @@ public class GetUsersCountCommand implements IBotCommand {
 
     @Override
     public String getCommandIdentifier() {
-        return "get_users_count";
+        return CommandsConstants.GET_USERS_COUNT;
     }
 
     @Override
     public String getDescription() {
-        return "Let admin get count of users";
+        return CommandsConstants.GET_USERS_COUNT_DESCRIPTION;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class GetUsersCountCommand implements IBotCommand {
 
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId);
-        answer.setText("\uD83E\uDDEE Количество юзеров: " + subscriberService.getUsersCount());
+        answer.setText(CommandsConstants.GET_USERS_COUNT_TEXT + subscriberService.getUsersCount());
         try {
             absSender.execute(answer);
         } catch (TelegramApiException e) {

@@ -1,11 +1,13 @@
 package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.CommandsConstants;
+import com.sport.service.bot.constants.ErrorConstants;
+import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.EventSession;
 import com.sport.service.services.EventService;
-import com.sport.service.services.SubscriberService;
-import com.sport.service.sessions.CommandStateStore;
-import com.sport.service.sessions.EventSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,17 +24,18 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	private final CommandStateStore commandStateStore;
 	private final EventSession eventSession;
 
+	private final TelegramMessageSender sender;
+
 	private final EventService eventService;
-	private final SubscriberService subscriberService;
 
 	@Override
 	public String getCommandIdentifier() {
-		return "delete_event";
+        return CommandsConstants.DELETE_EVENT;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Let admin to delete a created event";
+        return CommandsConstants.DELETE_EVENT_DESCRIPTION;
 	}
 
 	@Override
@@ -76,18 +79,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 			absSender.execute(answer);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-            sendErrorMessage(absSender, chatId);
-		}
-	}
-
-    private void sendErrorMessage(AbsSender absSender, Long chatId) {
-		try {
-			SendMessage errorMsg = new SendMessage();
-			errorMsg.setChatId(chatId.toString());
-            errorMsg.setText("Ошибка при обработке ввода. Попробуйте еще раз \uD83D\uDD04");
-			absSender.execute(errorMsg);
-		} catch (Exception e) {
-			log.error("Error sending error message", e);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}
 }
