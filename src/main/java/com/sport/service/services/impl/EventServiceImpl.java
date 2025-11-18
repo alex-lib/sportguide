@@ -2,16 +2,15 @@ package com.sport.service.services.impl;
 
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
-import com.sport.service.entities.subscriber.Subscriber;
-import com.sport.service.events.EventNotificationCreatedEvent;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.services.EventService;
 import com.sport.service.services.NotificationCreatorService;
+import com.sport.service.services.NotificationSenderService;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +23,12 @@ import java.util.List;
 @Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
+
     private final SubscriberService subscriberService;
     private final NotificationCreatorService notificationCreatorService;
+    private final NotificationSenderService notificationSenderService;
 
     private final EventMapper eventMapper;
-    private final ApplicationEventPublisher eventPublisher;
 
     private static final String CRON = "0 0 0 * * *";
 
@@ -37,9 +37,12 @@ public class EventServiceImpl implements EventService {
     public void create(EventDto dto) {
         Event event = eventMapper.eventDtoToEvent(dto);
         eventRepository.save(event);
-        List<Subscriber> subscribers = subscriberService.getSubscribersWhoWantGetEvents();
+        List<Long> subscriberIds = subscriberService.getSubscribersWhoWantGetEvents()
+                .stream()
+                .map(Subscriber::getId)
+                .toList();
         String notification = notificationCreatorService.createEventNotification(event);
-        eventPublisher.publishEvent(new EventNotificationCreatedEvent(subscribers, notification));
+        notificationSenderService.sendEventNotification(notification, subscriberIds);
     }
 
     @Transactional

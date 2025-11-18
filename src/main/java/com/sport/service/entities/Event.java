@@ -1,8 +1,11 @@
 package com.sport.service.entities;
-import com.sport.service.entities.place.District;
+
+import com.sport.service.entities.enums.common.District;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "events")
@@ -13,7 +16,6 @@ import java.time.LocalDate;
 @Builder
 @ToString
 public class Event {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -41,6 +43,9 @@ public class Event {
     @Column(name = "date")
     private LocalDate date;
 
-    @Column(name = "time")
-    private String time;
+    @Column(name = "time", columnDefinition = "TIME")
+    private LocalTime time;
+
+    @Column(name = "coordinates")
+    private String coordinates;
 }
