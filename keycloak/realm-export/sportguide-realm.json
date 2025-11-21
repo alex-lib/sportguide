@@ -2,7 +2,7 @@
   "realm": "sportguide",
   "enabled": true,
   "attributes": {
-    "frontendUrl": "http://localhost:8080"
+    "frontendUrl": "http://keycloak:8080"
   },
   "users": [
     {

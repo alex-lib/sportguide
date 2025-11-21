@@ -1,6 +1,6 @@
 package com.sport.service.entities.enums.place;
 
-public enum Subdistrict {
+public enum SubDistrict {
     //ZHELEZNODOROZHNYY
     PROCESSOR,
     FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM,

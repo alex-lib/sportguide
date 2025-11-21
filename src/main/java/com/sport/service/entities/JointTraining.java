@@ -52,6 +52,9 @@ public class JointTraining {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "approved_by_admin")
     private Boolean approvedByAdmin;
 }

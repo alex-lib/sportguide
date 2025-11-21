@@ -1,4 +1,4 @@
-package com.sport.service.configuration;
+package com.sport.service.configurations;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

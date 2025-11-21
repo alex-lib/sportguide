@@ -1,4 +1,4 @@
-package com.sport.service.configuration;
+package com.sport.service.configurations;
 
 import com.sport.service.bot.SportGuideBot;
 import lombok.extern.slf4j.Slf4j;

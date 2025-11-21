@@ -29,6 +29,9 @@ public class Coach {
     @JoinColumn(name = "subscriber_id")
     private Subscriber subscriber;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "sport_types")
     @Enumerated(EnumType.STRING)
     private List<SportType> sportTypes;
@@ -37,14 +40,14 @@ public class Coach {
     private String description;
 
     @Column(name = "age", columnDefinition = "SMALLINT", nullable = false)
-    private Short age;
+    private Integer age;
 
     @Column(name = "sex", nullable = false)
     @Enumerated(EnumType.STRING)
     private Sex sex;
 
     @Column(name = "years_of_experience", columnDefinition = "SMALLINT")
-    private Short yearsOfExperience;
+    private Integer yearsOfExperience;
 
     @Column(name = "education")
     private String education;
@@ -68,6 +71,9 @@ public class Coach {
 
     @Column(name = "months_for_subscription_to_be_coach", columnDefinition = "SMALLINT")
     private Short monthsForSubscriptionToBeCoach;
+
+    @Column(name = "expired_date_for_subscription_to_be_coach")
+    private LocalDate expiredDateForSubscriptionToBeCoach;
 
     @Column(name = "show_in_web")
     private Boolean showInWeb;

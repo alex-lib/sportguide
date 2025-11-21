@@ -10,7 +10,7 @@ import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
-import com.sport.service.entities.enums.place.Subdistrict;
+import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
@@ -141,7 +141,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                     }
                 }
                 case 2 -> {
-                    dto.setSubdistrict(Subdistrict.valueOf(data));
+                    dto.setSubdistrict(SubDistrict.valueOf(data));
                     dto.setStep(3);
                     placeSession.save(chatId, dto);
                     showStepMenu(absSender, chatId, dto, userId);
@@ -221,19 +221,19 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
             places = placeService.findAllByPlaceTypeAndOutdoor(dto.getPlaceType(), dto.getOutdoor());
         }
 
-        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() != null) {
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() != null) {
             places = placeService.findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType(), dto.getOutdoor());
         }
 
-        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() == null) {
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() == null) {
             places = placeService.findByDistrictAndSubdistrictAndPlaceType(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType());
         }
 
-        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() != null) {
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() != null) {
             places = placeService.findByDistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getPlaceType(), dto.getOutdoor());
         }
 
-        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(Subdistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() == null) {
+        if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() == null) {
             places = placeService.findByDistrictAndPlaceType(dto.getDistrict(), dto.getPlaceType());
         }
 
