@@ -9,6 +9,8 @@ import com.sport.service.services.EventService;
 import com.sport.service.services.NotificationCreatorService;
 import com.sport.service.services.NotificationSenderService;
 import com.sport.service.services.SubscriberService;
+import com.sport.service.specifications.EventSpecification;
+import com.sport.service.web.models.event.EventFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -70,5 +72,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public boolean existsByName(String name) {
         return eventRepository.existsByName(name);
+    }
+
+    @Override
+    public List<Event> findAll(EventFilter filter) {
+        return eventRepository.findAll(EventSpecification.withFilter(filter));
     }
 }

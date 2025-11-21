@@ -11,7 +11,7 @@ import com.sport.service.bot.constants.KeyboardConstants;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
-import com.sport.service.entities.enums.place.Subdistrict;
+import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
@@ -173,7 +173,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 	}
 
 	private void handleSubdistrictStep(PlaceDto dto, String data, SendMessage answer) {
-		dto.setSubdistrict(Subdistrict.valueOf(data));
+        dto.setSubdistrict(SubDistrict.valueOf(data));
 		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
 		dto.setStep(3);
 	}

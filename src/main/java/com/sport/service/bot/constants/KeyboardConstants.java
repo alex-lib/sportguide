@@ -9,7 +9,7 @@ public final class KeyboardConstants {
     public static final String KOMINTERNOVSKYY = "Коминтерновский";
     public static final String LENINSKYY = "Ленинский";
     public static final String BEHIND_OF_CITY = "За городом";
-    public static final String ALL_DISTRICTS = "Все районы";
+    public static final String ALL_DISTRICTS = "ВСЕ РАЙОНЫ";
 
     public static final String CHOOSE_TYPE_OF_PLACE = "\uD83E\uDDBE Выберите тип места:";
     public static final String SPORT_GROUND = "Открытая уличная спортивная площадка";

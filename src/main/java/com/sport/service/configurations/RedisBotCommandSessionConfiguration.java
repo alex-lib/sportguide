@@ -1,4 +1,4 @@
-package com.sport.service.configuration;
+package com.sport.service.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
