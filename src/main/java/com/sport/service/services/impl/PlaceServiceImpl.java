@@ -5,18 +5,14 @@ import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
-import com.sport.service.mappers.DistrictStringMapper;
-import com.sport.service.mappers.OutdoorStringMapper;
-import com.sport.service.mappers.PlaceTypeStringMapper;
-import com.sport.service.mappers.SubDistrictStringMapper;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.services.PlaceService;
 import com.sport.service.specifications.PlaceSpecification;
+import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,16 +48,8 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public List<Place> findAll(PlaceFilter filter) {
-        log.info("logs from findAll methjd from PlaceServiceImpl class");
-        log.info("Filter = {}", filter);
-        log.info("District = {}", DistrictStringMapper.districtStringToDistrictEnum(filter.getDistrict()));
-        log.info("SubDistrict = {}", SubDistrictStringMapper.subDistrictStringToSubDistrictEnum(filter.getSubDistrict()));
-        log.info("Outdoor = {}", OutdoorStringMapper.outdoorStringToOutdoorEnum(filter.getOutdoor()));
-        log.info("PlaceType = {}", PlaceTypeStringMapper.placeTypeStringToPlaceTypeEnum(filter.getPlaceType()));
-        Specification<Place> places = PlaceSpecification.withFilter(filter);
-        log.info("Specification = {}", places);
-        return placeRepository.findAll(PlaceSpecification.withFilter(filter));
+    public ListPlaceResponse findAll(PlaceFilter filter) {
+        return placeMapper.listPlaceToListPlaceResponse(placeRepository.findAll(PlaceSpecification.withFilter(filter)));
     }
 
     @Override

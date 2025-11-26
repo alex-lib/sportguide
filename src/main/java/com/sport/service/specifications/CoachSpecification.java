@@ -3,8 +3,8 @@ package com.sport.service.specifications;
 import com.sport.service.entities.Coach;
 import com.sport.service.entities.enums.coach.Sex;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.mappers.SexStringMapper;
-import com.sport.service.mappers.SportTypeStringMapper;
+import com.sport.service.mappers.string.SexStringMapper;
+import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.web.models.coach.CoachFilter;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -25,10 +25,8 @@ public interface CoachSpecification {
         }
         List<SportType> sportTypes = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(sportTypesStrings);
         return (root, query, cb) -> {
-            if (sportTypes == null) {
-                return cb.conjunction();
-            }
-            //change logic to find coaches if client choose just one sport type
+            if (sportTypes == null) return cb.conjunction();
+//            TODO change logic to find coaches if at least there is one coincidence
             return cb.equal(root.get("sportTypes"), sportTypes);
         };
     }

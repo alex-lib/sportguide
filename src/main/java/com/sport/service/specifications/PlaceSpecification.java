@@ -4,10 +4,10 @@ import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
-import com.sport.service.mappers.DistrictStringMapper;
-import com.sport.service.mappers.OutdoorStringMapper;
-import com.sport.service.mappers.PlaceTypeStringMapper;
-import com.sport.service.mappers.SubDistrictStringMapper;
+import com.sport.service.mappers.string.DistrictStringMapper;
+import com.sport.service.mappers.string.OutdoorStringMapper;
+import com.sport.service.mappers.string.PlaceTypeStringMapper;
+import com.sport.service.mappers.string.SubDistrictStringMapper;
 import com.sport.service.web.models.place.PlaceFilter;
 import org.springframework.data.jpa.domain.Specification;
 

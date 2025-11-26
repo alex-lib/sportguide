@@ -1,4 +1,4 @@
-package com.sport.service.mappers;
+package com.sport.service.mappers.string;
 
 public class OutdoorStringMapper {
 

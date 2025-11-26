@@ -62,8 +62,8 @@ public final class KeyboardConstants {
     public static final String FROM_VGU_TO_SEVERNYY_BRIDGE = "От ВГУ до Северного моста";
 
     public static final String CHOOSE_SUBDISTRICT_OF_KOMINTERNOVSKYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Коминтерновского района:";
-    public static final String FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP = "От ул.45-ой Стрелковой див. до ул.9-ое января и до Московского пр-кта";
-    public static final String QUARTER_IPPODROM_AND_FROM_MP_TO_ROTONDA_AND_TO_URITSKOGO_STREET = "Квартал Ипподром, от Московского пр-кта до ул.Уритского";
+    public static final String FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP = "От 45 Стрелковой див. до 9 января, до Московского пр-кта";
+    public static final String QUARTER_IPPODROM_AND_FROM_MP_TO_ROTONDA_AND_TO_URITSKOGO_STREET = "Квартал Ипподром, от Московского пр-кта до Уритского";
     public static final String PODGORNOE = "Подгорное";
     public static final String SEVERNYY = "Северный";
 

@@ -1,4 +1,4 @@
-package com.sport.service.mappers;
+package com.sport.service.mappers.string;
 
 import com.sport.service.entities.enums.common.SportType;
 

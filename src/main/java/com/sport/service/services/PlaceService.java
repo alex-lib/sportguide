@@ -5,6 +5,7 @@ import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
+import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceFilter;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface PlaceService {
 
     List<Place> findByDistrictAndPlaceType(District district, PlaceType placeType);
 
-    List<Place> findAll(PlaceFilter filter);
+    ListPlaceResponse findAll(PlaceFilter filter);
 
     Place findByName(String name);
 }
