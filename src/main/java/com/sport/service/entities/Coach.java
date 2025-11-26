@@ -27,7 +27,7 @@ public class Coach {
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "subscriber_id")
-    private Subscriber subscriber;
+    public Subscriber subscriber;
 
     @Column(name = "name")
     private String name;

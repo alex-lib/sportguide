@@ -4,6 +4,10 @@ telegram:
     username: ${BOT_NAME}
   mainAdminId: ${MAIN_ADMIN_ID}
 
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 604800000
+
 logging:
   level:
     org.hibernate.SQL: OFF

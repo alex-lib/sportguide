@@ -2,7 +2,7 @@ package com.sport.service.specifications;
 
 import com.sport.service.entities.Event;
 import com.sport.service.entities.enums.common.District;
-import com.sport.service.mappers.DistrictStringMapper;
+import com.sport.service.mappers.string.DistrictStringMapper;
 import com.sport.service.web.models.event.EventFilter;
 import org.springframework.data.jpa.domain.Specification;
 

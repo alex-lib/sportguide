@@ -1,6 +1,6 @@
 package com.sport.service.web.models.coach
 
-class CoachResponse(
+data class CoachResponse(
     val name: String,
     val sportTypes: List<String>?,
     val description: String?,

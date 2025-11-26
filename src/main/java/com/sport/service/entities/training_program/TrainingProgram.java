@@ -5,6 +5,7 @@ import com.sport.service.entities.Payment;
 import com.sport.service.entities.enums.common.SportType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -39,7 +40,8 @@ public class TrainingProgram {
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
-    @Column(name = "created_at")
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
 
     @Column(name = "description", nullable = false)
@@ -50,7 +52,7 @@ public class TrainingProgram {
     private List<SportType> sportTypes;
 
     @Column(name = "program_id_in_mongodb", nullable = false)
-    private String programIdInMongoDB;
+    public String programIdInMongoDB;
 
     @Column(name = "show_in_web")
     private Boolean showInWeb;

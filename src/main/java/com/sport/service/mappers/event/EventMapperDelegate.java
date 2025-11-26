@@ -2,8 +2,9 @@ package com.sport.service.mappers.event;
 
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
-import com.sport.service.mappers.DistrictStringMapper;
+import com.sport.service.mappers.string.DistrictStringMapper;
 import com.sport.service.web.models.event.EventResponse;
+import com.sport.service.web.models.event.ListEventResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,11 +28,13 @@ public abstract class EventMapperDelegate implements EventMapper {
     }
 
     @Override
-    public List<EventResponse> ListEventToListEventResponse(List<Event> events) {
-        List<EventResponse> placeResponses = new ArrayList<>();
+    public ListEventResponse listEventToListEventResponse(List<Event> events) {
+        List<EventResponse> eventResponses = new ArrayList<>();
+
         for (Event event : events) {
             String districtString = DistrictStringMapper.districtEnumToDistrictString(event.getDistrict());
             String coordinates;
+
             if (event.getCoordinates() != null) {
                 String[] coordinatesArray = event.getCoordinates().split(",");
                 float latitude = Float.parseFloat(coordinatesArray[0].trim());
@@ -40,7 +43,8 @@ public abstract class EventMapperDelegate implements EventMapper {
             } else {
                 coordinates = "Координаты места не указаны";
             }
-            placeResponses.add(new EventResponse(
+
+            eventResponses.add(new EventResponse(
                     event.getName(),
                     event.getDescription(),
                     event.getPlaceName(),
@@ -51,6 +55,6 @@ public abstract class EventMapperDelegate implements EventMapper {
                     event.getTime().toString(),
                     coordinates));
         }
-        return placeResponses;
+        return new ListEventResponse(eventResponses);
     }
 }

@@ -1,8 +1,8 @@
 package com.sport.service.mappers.coach;
 
-import com.sport.service.dto.CoachDto;
 import com.sport.service.entities.Coach;
-import com.sport.service.web.models.coach.CoachResponse;
+import com.sport.service.web.models.coach.CreateCoachRequest;
+import com.sport.service.web.models.coach.ListCoachResponse;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -13,7 +13,9 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE) //uses
 public interface CoachMapper {
 
-    Coach coachDtoToCoach(CoachDto dto);
+    Coach createCoachRequestToCoach(CreateCoachRequest request);
 
-    List<CoachResponse> ListCoachToListCoachResponseList(List<Coach> coaches);
+    default ListCoachResponse listCoachToListCoachResponse(List<Coach> coaches) {
+        return null;
+    }
 }

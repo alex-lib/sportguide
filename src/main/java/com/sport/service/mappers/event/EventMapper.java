@@ -2,7 +2,7 @@ package com.sport.service.mappers.event;
 
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
-import com.sport.service.web.models.event.EventResponse;
+import com.sport.service.web.models.event.ListEventResponse;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
@@ -15,5 +15,7 @@ public interface EventMapper {
 
     Event eventDtoToEvent(EventDto dto);
 
-    List<EventResponse> ListEventToListEventResponse(List<Event> events);
+    default ListEventResponse listEventToListEventResponse(List<Event> events) {
+        return null;
+    }
 }

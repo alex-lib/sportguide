@@ -2,10 +2,11 @@ package com.sport.service.mappers.place;
 
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
-import com.sport.service.mappers.DistrictStringMapper;
-import com.sport.service.mappers.OutdoorStringMapper;
-import com.sport.service.mappers.PlaceTypeStringMapper;
-import com.sport.service.mappers.SubDistrictStringMapper;
+import com.sport.service.mappers.string.DistrictStringMapper;
+import com.sport.service.mappers.string.OutdoorStringMapper;
+import com.sport.service.mappers.string.PlaceTypeStringMapper;
+import com.sport.service.mappers.string.SubDistrictStringMapper;
+import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceResponse;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
     }
 
     @Override
-    public List<PlaceResponse> ListPlaceToListPlaceResponse(List<Place> places) {
+    public ListPlaceResponse listPlaceToListPlaceResponse(List<Place> places) {
         List<PlaceResponse> placeResponses = new ArrayList<>();
 
         for (Place place : places) {
@@ -42,6 +43,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
             float latitude = Float.parseFloat(coordinatesArray[0].trim());
             float longitude = Float.parseFloat(coordinatesArray[1].trim());
             String coordinates = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+
             placeResponses.add(new PlaceResponse(
                     place.getName(),
                     districtString,
@@ -54,6 +56,6 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                     place.getPhoto(),
                     coordinates));
         }
-        return placeResponses;
+        return new ListPlaceResponse(placeResponses);
     }
 }
