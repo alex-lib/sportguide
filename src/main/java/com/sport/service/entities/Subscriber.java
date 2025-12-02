@@ -17,23 +17,23 @@ import java.util.List;
 public class Subscriber {
     @Id
     @Column(name = "id")
-    private Long id;
+    public Long id;
 
     @Column(name = "username")
-    private String username;
+    public String username;
 
     @Column(name = "first_name")
-    private String firstName;
+    public String firstName;
 
     @Column(name = "last_name")
-    private String lastName;
+    public String lastName;
 
     @Column(name = "get_events")
     private Boolean getEvents;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private RoleType role;
+    public RoleType role;
 
     @OneToOne(mappedBy = "subscriber")
     private Coach coach;

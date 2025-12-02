@@ -4,9 +4,10 @@ import com.sport.service.entities.enums.payment.PaymentStatus;
 import com.sport.service.entities.training_program.TrainingProgram;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments", uniqueConstraints = {@UniqueConstraint(columnNames = {"subscriber_id", "training_program_id"})})
@@ -16,17 +17,23 @@ import java.time.LocalTime;
 @Setter
 @Builder
 @ToString
+@EntityListeners(AuditingEntityListener.class)
 public class Payment {
+
+    public Payment(PaymentStatus paymentStatus, Subscriber subscriber, TrainingProgram trainingProgram) {
+        this.paymentStatus = paymentStatus;
+        this.subscriber = subscriber;
+        this.trainingProgram = trainingProgram;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "date")
-    private LocalDate date;
-
-    @Column(name = "time", columnDefinition = "TIME")
-    private LocalTime time;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
