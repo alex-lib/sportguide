@@ -4,7 +4,9 @@ import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
-import com.sport.service.entities.enums.place.Subdistrict;
+import com.sport.service.entities.enums.place.SubDistrict;
+import com.sport.service.web.models.place.ListPlaceResponse;
+import com.sport.service.web.models.place.PlaceFilter;
 
 import java.util.List;
 
@@ -20,11 +22,15 @@ public interface PlaceService {
 
     List<Place> findAllByPlaceTypeAndOutdoor(PlaceType placeType, Boolean outdoor);
 
-    List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, Subdistrict subdistrict, PlaceType placeType, Boolean outdoor);
+    List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, SubDistrict subdistrict, PlaceType placeType, Boolean outdoor);
 
-    List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, Subdistrict subdistrict, PlaceType placeType);
+    List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, SubDistrict subdistrict, PlaceType placeType);
 
     List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor);
 
     List<Place> findByDistrictAndPlaceType(District district, PlaceType placeType);
+
+    ListPlaceResponse findAll(PlaceFilter filter);
+
+    Place findByName(String name);
 }

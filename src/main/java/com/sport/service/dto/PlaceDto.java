@@ -2,7 +2,7 @@ package com.sport.service.dto;
 
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
-import com.sport.service.entities.enums.place.Subdistrict;
+import com.sport.service.entities.enums.place.SubDistrict;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public class PlaceDto {
     private District district;
-    private Subdistrict subdistrict;
+    private SubDistrict subdistrict;
     private PlaceType placeType;
     private Boolean outdoor;
     private String name;

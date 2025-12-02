@@ -2,7 +2,7 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
-import com.sport.service.entities.enums.place.Subdistrict;
+import com.sport.service.entities.enums.place.SubDistrict;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -32,8 +32,8 @@ public class Place {
     private District district;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "subdistrict")
-    private Subdistrict subdistrict;
+    @Column(name = "sub_district")
+    private SubDistrict subDistrict;
 
     @Column(name = "address")
     private String address;

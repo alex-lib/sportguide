@@ -9,8 +9,12 @@ import com.sport.service.services.EventService;
 import com.sport.service.services.NotificationCreatorService;
 import com.sport.service.services.NotificationSenderService;
 import com.sport.service.services.SubscriberService;
+import com.sport.service.specifications.EventSpecification;
+import com.sport.service.web.models.event.EventFilter;
+import com.sport.service.web.models.event.ListEventResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@EnableScheduling
 @RequiredArgsConstructor
 @Slf4j
 public class EventServiceImpl implements EventService {
@@ -70,5 +75,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public boolean existsByName(String name) {
         return eventRepository.existsByName(name);
+    }
+
+    @Override
+    public ListEventResponse findAll(EventFilter filter) {
+        return eventMapper.listEventToListEventResponse(eventRepository.findAll(EventSpecification.withFilter(filter)));
     }
 }

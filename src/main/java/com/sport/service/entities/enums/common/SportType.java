@@ -14,7 +14,7 @@ public enum SportType {
     WRESTLING,
     FITNESS,
     SWIMMING,
-    NUTRITIONIST,
+    NUTRITIONOLOGY,
     RUNNING,
     WORKOUT,
     SKIING,

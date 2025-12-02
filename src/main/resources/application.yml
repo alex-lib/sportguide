@@ -4,6 +4,10 @@ telegram:
     username: ${BOT_NAME}
   mainAdminId: ${MAIN_ADMIN_ID}
 
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 604800000
+
 logging:
   level:
     org.hibernate.SQL: OFF
@@ -32,7 +36,7 @@ spring:
         provider:
           keycloak:
             issuer-uri: http://keycloak:8080/realms/sportguide
-            authorization-uri: http://localhost:8080/realms/sportguide/protocol/openid-connect/auth
+            authorization-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
             token-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
             user-info-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
             jwk-set-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/certs
@@ -61,6 +65,7 @@ spring:
       ddl-auto: create
     defer-datasource-initialization: true
     properties:
+      hibernate.default_schema: app_schema
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: app_schema
@@ -76,6 +81,7 @@ spring:
     init:
       mode: always
       schema-locations: classpath:init.sql
+      data-locations: classpath:data.sql
   h2:
     console:
       enabled: true
