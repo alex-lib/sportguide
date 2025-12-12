@@ -1,3 +1,5 @@
+package com.sport.service.services.impl
+
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.sport.service.entities.Subscriber

@@ -1,11 +1,11 @@
-Доброго утра🙏
+<i>Доброго утра🙏</i>
 
-🌍 Погода в Воронеже на сегодня([[${date}]]):
-🌡️ Сейчас(6:00): [[${currentDescription}]] ~ [[${currentTemperature}]]°C
-📊 Экстремумы: макс. ~ [[${maxTemperature}]]°C, мин. ~ [[${minTemperature}]]°C
+🌍 <b>Погода в Воронеже на сегодня([[${date}]]):</b>
+🌡️ <b>Сейчас(6:00):</b> [[${currentDescription}]] ~ [[${currentTemperature}]]°C
+📊 <b>Экстремумы:</b> макс. ~ [[${maxTemperature}]]°C, мин. ~ [[${minTemperature}]]°C
 
-⏱️ По времени: [# th:each="dto : ${weatherHourlyInfo}"]
+⏱️ По времени:</b> [# th:each="dto : ${weatherHourlyInfo}"]
 [[${dto.time}]]: [[${dto.description}]] ~ [[${dto.temperature}]]°C, вероя-ть осадков: [[${dto.precipitationProbability}]]%
 [/]
-У природы нет, для тренировки, плохой погоды!
-#погода
+<i>У природы нет, для тренировки, плохой погоды!</i>
+<i>#погода</i>

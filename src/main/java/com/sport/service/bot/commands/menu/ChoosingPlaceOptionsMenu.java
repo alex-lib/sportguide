@@ -30,6 +30,7 @@ public abstract class ChoosingPlaceOptionsMenu {
     private static List<List<InlineKeyboardButton>> addExtraButtonsIntoDistrictKeyboard(List<List<InlineKeyboardButton>> keyboard, String command) {
         if (command.equals("getting")) {
             keyboard.add(createButton(KeyboardConstants.ALL_DISTRICTS, District.ALL_DISTRICTS.name()));
+            keyboard.add(createButton(KeyboardConstants.CHOOSE_TYPE_OF_PLACE_AGAIN, KeyboardConstants.BACK));
         }
         return keyboard;
     }
@@ -38,11 +39,11 @@ public abstract class ChoosingPlaceOptionsMenu {
         String command = answer.getText();
         answer.setText(KeyboardConstants.CHOOSE_SUBDISTRICT_OF_ZHELEZNODOROZHNYY_DISTRICT);
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>(List.of(
-                createButton(KeyboardConstants.FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM, SubDistrict.FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM.name()),
+                createButton(KeyboardConstants.OTROZHKA_BOROVOE_SOMOVO, SubDistrict.OTROZHKA_BOROVOE_SOMOVO.name()),
                 createButton(KeyboardConstants.FROM_OSTUZHEVO_RING_TO_RAILWAY_BRIDGE, SubDistrict.FROM_OSTUZHEVO_RING_TO_RAILWAY_BRIDGE.name()),
+                createButton(KeyboardConstants.FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM, SubDistrict.FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM.name()),
                 createButton(KeyboardConstants.ELECTRONIKA, SubDistrict.ELECTRONIKA.name()),
-                createButton(KeyboardConstants.PROCESSOR, SubDistrict.PROCESSOR.name()),
-                createButton(KeyboardConstants.OTROZHKA, SubDistrict.OTROZHKA.name())));
+                createButton(KeyboardConstants.PROCESSOR, SubDistrict.PROCESSOR.name())));
         return InlineKeyboardMarkup.builder().keyboard(addExtraButtonsIntoSubdistrictsKeyboard(keyboard, command)).build();
     }
 
@@ -52,10 +53,8 @@ public abstract class ChoosingPlaceOptionsMenu {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>(List.of(
                 createButton(KeyboardConstants.DIMITROVA_STREET, SubDistrict.DIMITROVA_STREET.name()),
                 createButton(KeyboardConstants.FROM_CHERNAVSKYY_BRIDGE_TO_VOGRESOVSKYY_BRIDGE, SubDistrict.FROM_CHERNAVSKYY_BRIDGE_TO_VOGRESOVSKYY_BRIDGE.name()),
-                createButton(KeyboardConstants.VAI_AND_QUARTER_KRASNYY_OKTYABR, SubDistrict.VAI_AND_QUARTER_KRASNYY_OKTYABR.name()),
-                createButton(KeyboardConstants.PESCHANKA_AND_OZERKI_AND_SHINNIK_1, SubDistrict.PESCHANKA_AND_OZERKI_AND_SHINNIK_1.name()),
-                createButton(KeyboardConstants.STARYY_MASHMET, SubDistrict.STARYY_MASHMET.name()),
-                createButton(KeyboardConstants.BAM, SubDistrict.BAM.name())));
+                createButton(KeyboardConstants.VAI_KRASNYY_OKTYABR, SubDistrict.VAI_KRASNYY_OKTYABR.name()),
+                createButton(KeyboardConstants.PESCHANKA_OZERKI_SHINNIK_1_STARYY_MASHMET_BAM_MASHMET, SubDistrict.PESCHANKA_OZERKI_SHINNIK_1_STARYY_MASHMET_BAM_MASHMET.name())));
         return InlineKeyboardMarkup.builder().keyboard(addExtraButtonsIntoSubdistrictsKeyboard(keyboard, command)).build();
     }
 
@@ -64,9 +63,9 @@ public abstract class ChoosingPlaceOptionsMenu {
         answer.setText(KeyboardConstants.CHOOSE_SUBDISTRICT_OF_SOVETSKYY_DISTRICT);
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>(List.of(
                 createButton(KeyboardConstants.FROM_NOVYY_BOMBEY_TO_ARMADA_TO_DEPUTATKA, SubDistrict.FROM_NOVYY_BOMBEY_TO_ARMADA_TO_DEPUTATKA.name()),
-                createButton(KeyboardConstants.PERVOE_MAAY_AND_UGO_ZAPADNYY_AND_ZAPADNYY_POSELOK, SubDistrict.PERVOE_MAAY_AND_UGO_ZAPADNYY_AND_ZAPADNYY_POSELOK.name()),
-                createButton(KeyboardConstants.PRIDONSKOYY_AND_PODKLETNOE, SubDistrict.PRIDONSKOYY_AND_PODKLETNOE.name()),
-                createButton(KeyboardConstants.TENNISTYY_AND_ZAYYMISHE, SubDistrict.TENNISTYY_AND_ZAYYMISHE.name()),
+                createButton(KeyboardConstants.PERVOE_MAAY_UGO_ZAPADNYY_ZAPADNYY_POSELOK, SubDistrict.PERVOE_MAAY_UGO_ZAPADNYY_ZAPADNYY_POSELOK.name()),
+                createButton(KeyboardConstants.PRIDONSKOYY_PODKLETNOE, SubDistrict.PRIDONSKOYY_PODKLETNOE.name()),
+                createButton(KeyboardConstants.TENNISTYY_ZAYYMISHE, SubDistrict.TENNISTYY_ZAYYMISHE.name()),
                 createButton(KeyboardConstants.SHILOVO, SubDistrict.SHILOVO.name())));
         return InlineKeyboardMarkup.builder().keyboard(addExtraButtonsIntoSubdistrictsKeyboard(keyboard, command)).build();
     }
@@ -85,9 +84,9 @@ public abstract class ChoosingPlaceOptionsMenu {
         answer.setText(KeyboardConstants.CHOOSE_SUBDISTRICT_OF_KOMINTERNOVSKYY_DISTRICT);
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>(List.of(
                 createButton(KeyboardConstants.FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP, SubDistrict.FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP.name()),
-                createButton(KeyboardConstants.QUARTER_IPPODROM_AND_FROM_MP_TO_ROTONDA_AND_TO_URITSKOGO_STREET, SubDistrict.QUARTER_IPPODROM_AND_FROM_MP_TO_ROTONDA_AND_TO_URITSKOGO_STREET.name()),
-                createButton(KeyboardConstants.PODGORNOE, SubDistrict.PODGORNOE.name()),
-                createButton(KeyboardConstants.SEVERNYY, SubDistrict.SEVERNYY.name())));
+                createButton(KeyboardConstants.IPPODROM_FROM_MP_TO_ROTONDA_TO_URITSKOGO_STREET, SubDistrict.IPPODROM_FROM_MP_TO_ROTONDA_TO_URITSKOGO_STREET.name()),
+                createButton(KeyboardConstants.SEVERNYY, SubDistrict.SEVERNYY.name()),
+                createButton(KeyboardConstants.PODGORNOE_HVOINYY_ZADONIE, SubDistrict.PODGORNOE_HVOINYY_ZADONIE.name())));
         return InlineKeyboardMarkup.builder().keyboard(addExtraButtonsIntoSubdistrictsKeyboard(keyboard, command)).build();
     }
 
@@ -116,8 +115,7 @@ public abstract class ChoosingPlaceOptionsMenu {
                 createButton(KeyboardConstants.SWIMMING_POOL, PlaceType.SWIMMING_POOL.name()),
                 createButton(KeyboardConstants.RUNNING_PLACE, PlaceType.RUNNING_PLACE.name()),
                 createButton(KeyboardConstants.MARTIAL_ARTS_HALL, PlaceType.MARTIAL_ARTS_HALL.name()),
-                createButton(KeyboardConstants.GYM, PlaceType.GYM.name()),
-                createButton(KeyboardConstants.CHOOSE_DISTRICT_OR_SUBDISTRICT_AGAIN, KeyboardConstants.BACK));
+                createButton(KeyboardConstants.GYM, PlaceType.GYM.name()));
         return InlineKeyboardMarkup.builder().keyboard(keyboard).build();
     }
 

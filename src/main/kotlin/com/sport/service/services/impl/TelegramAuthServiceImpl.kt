@@ -1,11 +1,12 @@
 package com.sport.service.services.impl
 
-import JwtServiceImpl
+import com.sport.service.services.impl.JwtServiceImpl
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.sport.service.dto.SubscriberDto
 import com.sport.service.entities.Subscriber
 import com.sport.service.services.SubscriberService
 import com.sport.service.web.models.auth.JwtResponse
+import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
 import org.telegram.telegrambots.meta.api.objects.User
 import java.net.URLDecoder
@@ -13,11 +14,12 @@ import java.security.MessageDigest
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
+@Service
 class TelegramAuthServiceImpl(
     private val subscriberService: SubscriberService,
     private val jwtServiceImpl: JwtServiceImpl,
     private val objectMapper: ObjectMapper,
-    @Value("\${telegram.bot-token}") private val botToken: String
+    @Value("\${telegram.bot.token}") private val botToken: String
 ) {
 
     private val secretKey: ByteArray = MessageDigest.getInstance("SHA-256").digest(botToken.toByteArray())

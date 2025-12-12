@@ -10,7 +10,7 @@ import com.sport.service.web.models.payment.PaymentLinkResponse
 import com.sport.service.web.models.training_program.CreateTrainingProgramRequest
 import com.sport.service.web.models.training_program.ListTrainingProgramResponse
 import com.sport.service.web.models.training_program.TrainingProgramFilter
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+//import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -38,15 +38,15 @@ class TrainingProgramServiceImpl(
         return trainingProgramMapper.listTrainingProgramToListTrainingProgramResponse(trainingPrograms)
     }
 
-    fun buyTrainingProgram(id: Long, jwt: JwtAuthenticationToken): PaymentLinkResponse {
-        val subscriberId: Long = jwt.token.subject.toLong()
+    fun buyTrainingProgram(id: Long,){ //jwt: JwtAuthenticationToken): PaymentLinkResponse {
+        //val subscriberId: Long = jwt.token.subject.toLong()
         val trainingProgram: TrainingProgram = findById(id)
-        paymentServiceImpl.createPayment(subscriberId, trainingProgram)
+        //paymentServiceImpl.createPayment(subscriberId, trainingProgram)
         val trainingProgramDocument: TrainingProgramDocument =
             trainingProgramDocumentService.findById(trainingProgram.programIdInMongoDB)
         //TODO: generate link and set a payment provider
         //TODO: and if client paid so increment payment count
-        return PaymentLinkResponse("This is a link to pay")
+//        return PaymentLinkResponse("This is a link to pay")
     }
 
     @Transactional

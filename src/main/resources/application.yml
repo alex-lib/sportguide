@@ -14,36 +14,40 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
     org.hibernate: WARN
     org.springframework.orm.jpa: WARN
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.boot.autoconfigure.security: DEBUG
-    org.springframework.web.client.RestTemplate: DEBUG
+#    org.springframework.security: DEBUG
+#    org.springframework.security.oauth2: DEBUG
+#    org.springframework.boot.autoconfigure.security: DEBUG
+#    org.springframework.web.client.RestTemplate: DEBUG
 
 server:
   port: 8081
 
 spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: ${KEYCLOAK_CLIENT_ID}
-            client-secret: ${KEYCLOAK_SECRET}
-            scope: openid,profile,email
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-        provider:
-          keycloak:
-            issuer-uri: http://keycloak:8080/realms/sportguide
-            authorization-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
-            token-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
-            user-info-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
-            jwk-set-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/certs
-            user-name-attribute: preferred_username
-      resourceserver:
-        jwt:
-          issuer-uri: http://keycloak:8080/realms/sportguide
+  cloud:
+    openfeign:
+      oauth2:
+        enabled: false
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          keycloak:
+#            client-id: ${KEYCLOAK_CLIENT_ID}
+#            client-secret: ${KEYCLOAK_SECRET}
+#            scope: openid, profile, email
+#            authorization-grant-type: authorization_code
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#        provider:
+#          keycloak:
+#            issuer-uri: http://keycloak:8080/realms/sportguide
+#            authorization-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
+#            token-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
+#            user-info-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
+#            jwk-set-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/certs
+#            user-name-attribute: preferred_username
+#      resourceserver:
+#        jwt:
+#          issuer-uri: http://keycloak:8080/realms/sportguide
   data:
     redis:
       host: redis
@@ -81,7 +85,6 @@ spring:
     init:
       mode: always
       schema-locations: classpath:init.sql
-      data-locations: classpath:data.sql
   h2:
     console:
       enabled: true
