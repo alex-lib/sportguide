@@ -3,6 +3,7 @@ package com.sport.service.repositories;
 import com.sport.service.entities.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -15,5 +16,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
 
     List<Event> findAllByName(String name);
 
+    @Modifying
     void deleteByDateBefore(LocalDate currentDate);
 }
