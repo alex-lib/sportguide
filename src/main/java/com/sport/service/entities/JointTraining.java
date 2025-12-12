@@ -27,7 +27,7 @@ public class JointTraining {
 
     @ManyToOne
     @JoinColumn(name = "subscriber_id")
-    private Subscriber subscriber;
+    public Subscriber subscriber;
 
     @Column(name = "description")
     private String description;
@@ -52,6 +52,12 @@ public class JointTraining {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "creator_name")
+    private String creatorName;
+
     @Column(name = "approved_by_admin")
-    private Boolean approvedByAdmin;
+    public Boolean approvedByAdmin;
 }

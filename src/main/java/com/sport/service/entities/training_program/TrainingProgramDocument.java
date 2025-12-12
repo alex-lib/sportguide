@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 public class TrainingProgramDocument {
     @Id
     private String id;
-    private String programId;
-    private byte[] fileContent;
+    private byte[] content;
     private Long fileSize;
     private LocalDateTime uploadedAt;
+    private LocalDateTime lastModifiedAt;
 }

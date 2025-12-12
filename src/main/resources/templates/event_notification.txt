@@ -1,9 +1,9 @@
-✨ Событие: [[${eventName}]]
-📝 Описание: [[${eventDescription}]]
-📅 Дата: [[${eventDate}]]
-⌚️ Время: [[${eventTime}]]
-🗺 Район: [[${eventDistrict}]]
-📮 Адрес: [[${eventAddress}]]
-📍 Место: [[${eventPlaceName}]]
-🔗 Ссылка: [[${eventLink}]]
-#событие
+✨ <b>Событие:</b> [[${eventName}]]
+📝 <b>Описание:</b> [[${eventDescription}]]
+📅 <b>Дата:</b> [[${eventDate}]]
+⌚️ <b>Время:</b> [[${eventTime}]]
+🗺 <b>Район:</b> [[${eventDistrict}]]
+📮 <b>Адрес:</b> [[${eventAddress}]]
+📍 <b>Место:</b> [[${eventPlaceName}]]
+🔗 <b>Ссылка:</b> [[${eventLink}]]
+<i>#событие</i>
