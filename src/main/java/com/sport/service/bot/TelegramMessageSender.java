@@ -27,6 +27,7 @@ public class TelegramMessageSender {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(userId)
                 .text(message)
+                .parseMode("HTML")
                 .build();
         try {
             getBot().execute(sendMessage);
@@ -40,11 +41,11 @@ public class TelegramMessageSender {
         try (InputStream photoStream = new ByteArrayInputStream(photo)) {
             photoMessage.setPhoto(new InputFile(photoStream, "place.jpg"));
             photoMessage.setCaption(message);
-            photoMessage.setParseMode("Markdown");
+            photoMessage.setParseMode("HTML");
+            photoMessage.setChatId(userId);
         } catch (IOException e) {
             log.error("Failed to process photo {}", message, e);
         }
-        photoMessage.setChatId(userId);
         try {
             getBot().execute(photoMessage);
         } catch (TelegramApiException e) {

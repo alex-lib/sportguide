@@ -126,7 +126,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
                     deleteMessage.setChatId(message.getChatId());
                     deleteMessage.setMessageId(message.getMessageId());
                     execute(deleteMessage);
-                    log.info("The message @{}@ has been deleted from chat with id: {}", message.getText(), message.getChatId());
+                    //log.info("The message @{}@ has been deleted from chat with id: {}", message.getText(), message.getChatId());
                 } catch (TelegramApiException e) {
                     log.error("The message @{}@ hasn't been deleted from chat with id - {}: {}",
                             message.getText(), message.getChatId(), e.getMessage());
