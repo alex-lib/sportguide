@@ -51,8 +51,8 @@ services:
     ports:
       - "8081:8081"
     build: .
-    volumes:
-      - ./logs:/app/logs
+#    volumes:
+#      - ./logs:/app/logs
     container_name: app
     depends_on:
 #      keycloak:
