@@ -272,7 +272,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                 float latitude = Float.parseFloat(coordinates[0].trim());
                 float longitude = Float.parseFloat(coordinates[1].trim());
                 String mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
-                caption += String.format("\n🗺️ [Посмотреть местоположение в Google maps](%s)", mapLink);
+                caption += String.format("\n🗺️ <a href=\"%s\">Посмотреть местоположение в Google Maps</a>", mapLink);
             } catch (Exception e) {
                 log.error("Failed to parse coordinates for place {}", place.getName(), e);
                 caption += "\n\uD83E\uDDED <b>Координаты:</b> " + place.getCoordinates();
