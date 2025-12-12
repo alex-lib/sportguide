@@ -11,7 +11,7 @@ import com.sport.service.utils.BeanUtils
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest
 import com.sport.service.web.models.joint_training.JointTrainingFilter
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+//import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -31,12 +31,12 @@ class JointTrainingServiceImpl(
     }
 
     @Transactional
-    fun create(request: CreateJointTrainingRequest, jwt: JwtAuthenticationToken) {
-        val subscriberId: Long = jwt.token.subject.toLong()
-        val subscriber = subscriberService.findById(subscriberId)
+    fun create(request: CreateJointTrainingRequest,){ //jwt: JwtAuthenticationToken) {
+//        val subscriberId: Long = jwt.token.subject.toLong()
+//        val subscriber = subscriberService.findById(subscriberId)
 
         val jointTraining: JointTraining = jointTrainingMapper.createJointTrainingRequestToJointTraining(request)
-        jointTraining.subscriber = subscriber
+//        jointTraining.subscriber = subscriber
 
         //TODO: create admin's approval through telegram before saving to DB new joint training
         jointTraining.approvedByAdmin = false
@@ -44,14 +44,14 @@ class JointTrainingServiceImpl(
     }
 
     @Transactional
-    fun update(request: CreateJointTrainingRequest, id: Long, jwt: JwtAuthenticationToken) {
-        val subscriberId: Long = jwt.token.subject.toLong()
-        val subscriber: Subscriber = subscriberService.findById(subscriberId)
+    fun update(request: CreateJointTrainingRequest, id: Long,){ //jwt: JwtAuthenticationToken) {
+       // val subscriberId: Long = jwt.token.subject.toLong()
+        //val subscriber: Subscriber = subscriberService.findById(subscriberId)
         val jointTraining: JointTraining = jointTrainingRepository.findById(id).orElse(null)
 
-        if (jointTraining.subscriber.id != subscriberId && subscriber.role != RoleType.ADMIN) {
-            throw RuntimeException("You don't have permission to update this joint training")
-        }
+        //if (jointTraining.subscriber.id != subscriberId && subscriber.role != RoleType.ADMIN) {
+       //     throw RuntimeException("You don't have permission to update this joint training")
+       // }
 
         val updatedJointTraining: JointTraining = jointTrainingMapper.createJointTrainingRequestToJointTraining(request)
         BeanUtils.copyNonNullProperties(updatedJointTraining, jointTraining)
@@ -61,14 +61,14 @@ class JointTrainingServiceImpl(
     }
 
     @Transactional
-    fun delete(id: Long, jwt: JwtAuthenticationToken) {
-        val subscriberId: Long = jwt.token.subject.toLong()
-        val subscriber: Subscriber = subscriberService.findById(subscriberId)
+    fun delete(id: Long,){ //jwt: JwtAuthenticationToken) {
+        //val subscriberId: Long = jwt.token.subject.toLong()
+       // val subscriber: Subscriber = subscriberService.findById(subscriberId)
         val jointTraining: JointTraining = jointTrainingRepository.findById(id).orElse(null)
 
-        if (jointTraining.subscriber.id != subscriberId && subscriber.role != RoleType.ADMIN) {
-            throw RuntimeException("You don't have permission to update this joint training")
-        }
+       // if (jointTraining.subscriber.id != subscriberId && subscriber.role != RoleType.ADMIN) {
+       //     throw RuntimeException("You don't have permission to update this joint training")
+//}
 
         jointTrainingRepository.deleteById(id)
     }

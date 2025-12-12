@@ -55,8 +55,8 @@ services:
       - ./logs:/app/logs
     container_name: app
     depends_on:
-      keycloak:
-        condition: service_healthy
+#      keycloak:
+#        condition: service_healthy
       redis:
         condition: service_healthy
       postgres:
@@ -72,67 +72,67 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
     command: [ "sh", "-c", "java -jar /app/app.jar" ]
 
-  grafana:
-    container_name: grafana
-    env_file:
-      - .env
-    build: ./config/grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./config/grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
-      - GF_AUTH_GENERIC_OAUTH_NAME=Keycloak
-      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
-      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${KEYCLOAK_SECRET}
-      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email
-      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
-      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
-      - GF_AUTH_GENERIC_OAUTH_API_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
-      - GF_AUTH_SIGNOUT_REDIRECT_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/logout
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
-      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
-    depends_on:
-      - prometheus
+#  grafana:
+#    container_name: grafana
+#    env_file:
+#      - .env
+#    build: ./config/grafana
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ./config/grafana/provisioning:/etc/grafana/provisioning
+#    environment:
+#      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
+#      - GF_AUTH_GENERIC_OAUTH_NAME=Keycloak
+#      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
+#      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${KEYCLOAK_SECRET}
+#      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email
+#      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
+#      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
+#      - GF_AUTH_GENERIC_OAUTH_API_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
+#      - GF_AUTH_SIGNOUT_REDIRECT_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/logout
+#      - GF_AUTH_DISABLE_LOGIN_FORM=true
+#      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
+#    depends_on:
+#      - prometheus
 
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
-      - ./prometheus:/prometheus
+#  prometheus:
+#    container_name: prometheus
+#    image: prom/prometheus
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+#      - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+#      - ./prometheus:/prometheus
+#
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:25.0.1
+#    container_name: keycloak
+#    environment:
+#      - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
+#      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
+#      - KC_HEALTH_ENABLED=true
+#    command: start-dev --import-realm
+#    healthcheck:
+#      test:
+#        [
+#          "CMD-SHELL",
+#          "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep \"200\"'",
+#        ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 60
+#      start_period: 60s
+#    volumes:
+#      - ./keycloak/realm-export:/opt/keycloak/data/import
+#    ports:
+#      - "8080:8080"
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:25.0.1
-    container_name: keycloak
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
-      - KC_HEALTH_ENABLED=true
-    command: start-dev --import-realm
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep \"200\"'",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 60
-      start_period: 60s
-    volumes:
-      - ./keycloak/realm-export:/opt/keycloak/data/import
-    ports:
-      - "8080:8080"
-
-  alertmanager:
-    container_name: alertmanager
-    image: prom/alertmanager:latest
-    ports:
-      - "9093:9093"
-    volumes:
-      - ./config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+#  alertmanager:
+#    container_name: alertmanager
+#    image: prom/alertmanager:latest
+#    ports:
+#      - "9093:9093"
+#    volumes:
+#      - ./config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml

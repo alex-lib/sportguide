@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(exclude = LiquibaseAutoConfiguration.class)
+@SpringBootApplication(exclude = LiquibaseAutoConfiguration.class, scanBasePackages = "com.sport")
 @EnableScheduling
 @EnableFeignClients
 public class ServiceApplication {
