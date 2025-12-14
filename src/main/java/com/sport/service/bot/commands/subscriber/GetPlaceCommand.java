@@ -256,7 +256,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     private String createCaption(Place place) {
         String caption = String.format(
-                "\uD83D\uDD39 <b>Название:</b> %s\n📍 <b>Адрес:</b> %s\n📝 <b>Описание:</b> %s",
+                "\uD83D\uDD39 <b>Название:</b> <i>%s</i>\n📍 <b>Адрес:</b> %s\n📝 <b>Описание:</b> %s",
                 place.getName(),
                 place.getAddress(),
                 place.getDescription() != null
