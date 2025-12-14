@@ -4,7 +4,7 @@
 🌡️ <b>Сейчас(6:00):</b> [[${currentDescription}]] ~ [[${currentTemperature}]]°C
 📊 <b>Экстремумы:</b> макс. ~ [[${maxTemperature}]]°C, мин. ~ [[${minTemperature}]]°C
 
-⏱️ По времени:</b> [# th:each="dto : ${weatherHourlyInfo}"]
+⏱️ <b>По времени:</b> [# th:each="dto : ${weatherHourlyInfo}"]
 [[${dto.time}]]: [[${dto.description}]] ~ [[${dto.temperature}]]°C, вероя-ть осадков: [[${dto.precipitationProbability}]]%
 [/]
 <i>У природы нет, для тренировки, плохой погоды!</i>
