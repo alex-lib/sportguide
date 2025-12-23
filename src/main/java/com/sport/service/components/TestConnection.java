@@ -12,7 +12,6 @@ import java.sql.SQLException;
 @Service
 @Slf4j
 public class TestConnection {
-
     private final DataSource dataSource;
 
     @PostConstruct

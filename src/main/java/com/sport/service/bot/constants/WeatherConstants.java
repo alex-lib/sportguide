@@ -11,7 +11,7 @@ public final class WeatherConstants {
     public static final String RAIN = "Дождь🌧️";
     public static final String FREEZING_RAIN = "Ледяной дождь🌧️";
     public static final String SNOW = "Снег❄️";
-    public static final String HAIL = "Град🌨️";
+    public static final String HAIL = "Возможен град🌨️";
     public static final String SHOWERS = "Ливни⛈️";
     public static final String SNOWFALL = "Снегопад🌨️";
     public static final String THUNDERSTORM = "Гроза⛈️";

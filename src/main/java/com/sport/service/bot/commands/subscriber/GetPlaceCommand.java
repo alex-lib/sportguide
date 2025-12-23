@@ -13,6 +13,7 @@ import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import com.sport.service.redis_store.commands_store.sessions.PlaceSession;
+import com.sport.service.services.NotificationCreatorService;
 import com.sport.service.services.PlaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private final PlaceSession placeSession;
 
     private final PlaceService placeService;
+    private final NotificationCreatorService notificationCreatorService;
 
     private final TelegramMessageSender sender;
 
@@ -65,18 +67,12 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     public void processCallback(AbsSender absSender, CallbackQuery callback) {
         Long chatId = callback.getMessage().getChatId();
         Long userId = callback.getFrom().getId();
+
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
-            log.warn("User {} not in get_place session", userId);
-            return;
-        }
-
         PlaceDto dto = placeSession.getIfExists(chatId);
-        if (dto == null) {
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-            commandStateStore.clearCurrentCommand(userId);
+        if (!ifSessionValid(chatId, dto)) {
             return;
         }
 
@@ -187,7 +183,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private void showStepMenu(AbsSender absSender, Long chatId, PlaceDto dto, Long userId) {
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
-        answer.setText("getting");
+        answer.setText(CommandsConstants.GETTING_TYPE);
         try {
             switch (dto.getStep()) {
                 case 1 -> answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
@@ -235,7 +231,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         }
 
         if (places.isEmpty()) {
-            sender.sendMessageWithoutPhoto(chatId, "По выбранным параметрам места не найдены \uD83E\uDD37\u200D♂\uFE0F");
+            sender.sendMessageWithoutPhoto(chatId, CommandsConstants.NO_PLACES);
             return;
         }
 
@@ -255,37 +251,34 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     }
 
     private String createCaption(Place place) {
-        String caption = String.format(
-                "\uD83D\uDD39 <b>Название:</b> <i>%s</i>\n📍 <b>Адрес:</b> %s\n📝 <b>Описание:</b> %s",
-                place.getName(),
-                place.getAddress(),
-                place.getDescription() != null
-                        ? place.getDescription()
-                        : "Описание не указано \uD83E\uDD37\u200D♂\uFE0F"
-        );
-        if (place.getWebSite() != null && !place.getWebSite().equals("-")) {
-            caption += String.format("\n🌐 <b>Ссылка:</b> %s", place.getWebSite());
-        }
+        String mapLink = null;
         if (!place.getCoordinates().equals("-")) {
-            try {
-                String[] coordinates = place.getCoordinates().split(",");
-                float latitude = Float.parseFloat(coordinates[0].trim());
-                float longitude = Float.parseFloat(coordinates[1].trim());
-                String mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
-                caption += String.format("\n🗺️ <a href=\"%s\">Посмотреть местоположение в Google Maps</a>", mapLink);
-                caption += "\n <i>#место</i>";
-            } catch (Exception e) {
-                log.error("Failed to parse coordinates for place {}", place.getName(), e);
-            }
-        } else {
-            caption += "\n\uD83E\uDDED Координаты отсутствуют \uD83E\uDD37\u200D♂\uFE0F";
-            caption += "\n <i>#место</i>";
+            String[] coordinates = place.getCoordinates().split(",");
+            float latitude = Float.parseFloat(coordinates[0].trim());
+            float longitude = Float.parseFloat(coordinates[1].trim());
+            mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
         }
-        return caption;
+
+       return notificationCreatorService.createPlaceMessage(place, mapLink);
     }
 
     private void cleanupSession(Long chatId, Long userId) {
         placeSession.clear(chatId);
         commandStateStore.clearCurrentCommand(userId);
+    }
+
+    private boolean ifSessionValid(Long chatId, PlaceDto dto) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(chatId))) {
+            log.warn("User {} is not in get_place session", chatId);
+            return false;
+        }
+
+        if (dto == null) {
+            log.warn("No session found for chatId: {}", chatId);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
+            commandStateStore.clearCurrentCommand(chatId);
+            return false;
+        }
+        return true;
     }
 }

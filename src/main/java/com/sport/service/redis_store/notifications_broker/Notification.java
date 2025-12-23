@@ -1,6 +1,10 @@
 package com.sport.service.redis_store.notifications_broker;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.io.Serializable;
 import java.util.UUID;

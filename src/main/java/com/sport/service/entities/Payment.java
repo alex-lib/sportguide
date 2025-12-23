@@ -2,8 +2,25 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.payment.PaymentStatus;
 import com.sport.service.entities.training_program.TrainingProgram;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Column;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.FetchType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.Builder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

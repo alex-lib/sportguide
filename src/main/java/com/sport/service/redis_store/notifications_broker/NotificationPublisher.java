@@ -1,5 +1,6 @@
 package com.sport.service.redis_store.notifications_broker;
 
+import com.sport.service.constants.RestConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -38,16 +39,16 @@ public class NotificationPublisher {
 
     private String getTopic(Notification.NotificationType type) {
         return switch (type) {
-            case EVENT -> "notification:event";
-            case WEATHER -> "notification:weather";
-            case ADMIN_TO_SUBSCRIBER -> "notification:admin_to_subscriber";
-            case SUBSCRIBER_TO_ADMIN -> "notification:subscriber_to_admin";
+            case EVENT -> RestConstants.EVENT_CHANNEL_NAME;
+            case WEATHER -> RestConstants.WEATHER_CHANNEL_NAME;
+            case ADMIN_TO_SUBSCRIBER -> RestConstants.ADMIN_TO_SUBSCRIBER_CHANNEL_NAME;
+            case SUBSCRIBER_TO_ADMIN -> RestConstants.SUBSCRIBER_TO_ADMIN_CHANNEL_NAME;
         };
     }
 
     private String buildKey(Notification notification) {
         return String.format(
-                "notification:%s:%d:%s",
+                RestConstants.KEY_OF_CHANNEL_NAME + "%s:%d:%s",
                 notification.getType().name().toLowerCase(),
                 notification.getUserId(),
                 notification.getId()

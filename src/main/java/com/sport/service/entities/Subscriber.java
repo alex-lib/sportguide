@@ -1,8 +1,21 @@
 package com.sport.service.entities;
 
 import com.sport.service.entities.enums.subscriber.RoleType;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.FetchType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.Builder;
 
 import java.util.List;
 

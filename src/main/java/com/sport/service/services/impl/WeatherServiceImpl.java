@@ -1,5 +1,6 @@
 package com.sport.service.services.impl;
 
+import com.sport.service.constants.RestConstants;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TodayWeather;
 import com.sport.service.mappers.WeatherCodeMapper;
@@ -19,9 +20,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class WeatherServiceImpl implements WeatherService {
-    private final double[] coordinates = {51.694235, 39.227656};
-    private static final String CRON = "0 0 6 * * *";
-
     private final OpenMeteoClient openMeteoClient;
 
     private final NotificationSenderService notificationSenderService;
@@ -31,18 +29,18 @@ public class WeatherServiceImpl implements WeatherService {
     @Override
     public TodayWeather getTodayWeather() {
         OpenMeteoResponse response = openMeteoClient.getTodayWeather(
-                coordinates[0],
-                coordinates[1],
+                RestConstants.COORDINATES[0],
+                RestConstants.COORDINATES[1],
                 "temperature_2m,weathercode,precipitation_probability",
                 "weathercode,temperature_2m_max,temperature_2m_min",
                 "temperature_2m,weathercode",
-                "Europe/Moscow",
+                RestConstants.TIME_ZONE,
                 "1");
         return convertToTodayWeather(response);
     }
 
     @Override
-    @Scheduled(cron = CRON, zone = "Europe/Moscow")
+    @Scheduled(cron = RestConstants.CRON_SEND_WEATHER, zone = RestConstants.TIME_ZONE)
     public String createWeatherNotification() {
         TodayWeather weather = getTodayWeather();
         String message = notificationCreatorService.createWeatherNotification(weather);

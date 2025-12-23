@@ -3,6 +3,7 @@ package com.sport.service.bot;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
+import com.sport.service.bot.constants.KeyboardConstants;
 import com.sport.service.mappers.ButtonToCommandMapper;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
 import lombok.extern.slf4j.Slf4j;
@@ -110,7 +111,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
         try {
             InlineKeyboardMarkup loadingKeyboard = InlineKeyboardMarkup.builder()
                     .keyboard(List.of(List.of(InlineKeyboardButton.builder()
-                                    .text("⏳ Удаление меню...")
+                                    .text(KeyboardConstants.DELETING_MENU)
                                     .callbackData("IGNORE")
                             .build()))).build();
 
@@ -126,7 +127,6 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
                     deleteMessage.setChatId(message.getChatId());
                     deleteMessage.setMessageId(message.getMessageId());
                     execute(deleteMessage);
-                    //log.info("The message @{}@ has been deleted from chat with id: {}", message.getText(), message.getChatId());
                 } catch (TelegramApiException e) {
                     log.error("The message @{}@ hasn't been deleted from chat with id - {}: {}",
                             message.getText(), message.getChatId(), e.getMessage());

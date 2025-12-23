@@ -1,5 +1,6 @@
 package com.sport.service.services.impl;
 
+import com.sport.service.constants.RestConstants;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.Subscriber;
@@ -35,8 +36,6 @@ public class EventServiceImpl implements EventService {
 
     private final EventMapper eventMapper;
 
-    private static final String CRON = "0 0 0 * * *";
-
     @Transactional
     @Override
     public void create(EventDto dto) {
@@ -65,7 +64,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
-    @Scheduled(cron = CRON, zone = "Europe/Moscow")
+    @Scheduled(cron = RestConstants.CRON_DELETE_EVENT, zone = RestConstants.TIME_ZONE)
     @Override
     public void deleteByExpiredDate() {
         LocalDate currentDate = LocalDate.now();

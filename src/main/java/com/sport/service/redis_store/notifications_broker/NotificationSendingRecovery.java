@@ -1,5 +1,6 @@
 package com.sport.service.redis_store.notifications_broker;
 
+import com.sport.service.constants.RestConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +20,7 @@ public class NotificationSendingRecovery {
 
     @EventListener(ApplicationReadyEvent.class)
     public void continueToSendInterruptedNotifications() {
-        Set<String> keys = notificationRedisTemplate.keys("notification:*:*:*");
+        Set<String> keys = notificationRedisTemplate.keys(RestConstants.KEY_OF_CHANNEL_NAME + "*:*:*");
 
         if (keys == null || keys.isEmpty()) {
             return;
@@ -30,7 +31,7 @@ public class NotificationSendingRecovery {
             String[] parts = key.split(":");
             String type = parts[1];
             Long userId = Long.parseLong(parts[2]);
-            String topic = "notification:" + type;
+            String topic = RestConstants.KEY_OF_CHANNEL_NAME + type;
             notificationRedisTemplate.convertAndSend(topic, userId.toString());
         }
     }

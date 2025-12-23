@@ -54,6 +54,4 @@ public interface CoachSpecification {
         return (root, query, cb) ->
                 cb.equal(root.get("yearsOfExperience"), yearsOfExperience);
     }
-
-    ;
 }

@@ -1,5 +1,7 @@
 package com.sport.service.services.impl;
 
+import com.sport.service.bot.TelegramMessageSender;
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.subscriber.RoleType;
 import com.sport.service.repositories.SubscriberRepository;
@@ -19,6 +21,8 @@ import java.util.Optional;
 @Slf4j
 public class SubscriberServiceImpl implements SubscriberService {
     private final SubscriberRepository subscriberRepository;
+
+    private final TelegramMessageSender sender;
 
     @Transactional
     @Override
@@ -45,6 +49,9 @@ public class SubscriberServiceImpl implements SubscriberService {
                     .build();
             subscriberRepository.save(transientSubscriber);
             log.info("New user is saved - {}", user.getId());
+
+            String greetingMessage = "<i>Привет</i> @" + user.getUserName() + " \uD83D\uDC4B" + "\n" + CommandsConstants.GREETING_MESSAGE;
+            sender.sendMessageWithoutPhoto(user.getId(), greetingMessage);
         }
     }
 

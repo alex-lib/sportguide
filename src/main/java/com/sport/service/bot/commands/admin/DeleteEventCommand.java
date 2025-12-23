@@ -6,13 +6,11 @@ import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
-import com.sport.service.redis_store.commands_store.sessions.EventSession;
 import com.sport.service.services.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -22,7 +20,6 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @Slf4j
 public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	private final CommandStateStore commandStateStore;
-	private final EventSession eventSession;
 
 	private final TelegramMessageSender sender;
 
@@ -38,23 +35,22 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
         return CommandsConstants.DELETE_EVENT_DESCRIPTION;
 	}
 
+	@AdminOnly
 	@Override
-    @AdminOnly
 	public void processMessage(AbsSender absSender, Message message, String[] arguments) {
 		User user = message.getFrom();
 		Long chatId = message.getChatId();
         Long userId = user.getId();
-        log.info("Call command delete_place by userId={}, username={}", userId, user.getUserName());
-		SendMessage answer = new SendMessage();
-		answer.setChatId(chatId);
 
-        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-        answer.setText("Удалить событие можно только по точному имени ранее сохраненного события. " +
-                "Напишите название события, которое хотите удалить:");
+        log.info("Call command delete_place by userId={}, username={}", userId, user.getUserName());
+
 		try {
-			absSender.execute(answer);
+			commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
+			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.DELETING_EVENT_INSTRUCTION);
 		} catch (Exception e) {
-			log.error("Error sending initial message", e);
+			log.error("Error to start processing message", e);
+			commandStateStore.clearCurrentCommand(userId);
+			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
 		}
 	}
 
@@ -62,21 +58,17 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	public void processTextInput(AbsSender absSender, Message message) {
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
-		SendMessage answer = new SendMessage();
-		answer.setChatId(chatId.toString());
 
         if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
             return;
         }
 
-		String text = message.getText();
-		log.info("Received text: {}", text);
-		eventService.deleteByName(text);
-		eventSession.clear(chatId);
-		commandStateStore.clearCurrentCommand(userId);
-        answer.setText("Удаление события завершено ✅");
 		try {
-			absSender.execute(answer);
+			String text = message.getText();
+			log.info("Received text: {}", text);
+			eventService.deleteByName(text);
+			commandStateStore.clearCurrentCommand(userId);
+			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.EVENT_DELETED);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
