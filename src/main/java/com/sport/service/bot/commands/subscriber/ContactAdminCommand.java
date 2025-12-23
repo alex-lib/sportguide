@@ -12,11 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Service
 @Slf4j
@@ -48,42 +46,38 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
         Long userId = user.getId();
         Long chatId = message.getChatId();
         log.info("Call command contact_admin by userId={}, username={}", userId, user.getUserName());
-		SendMessage answer = new SendMessage();
-        answer.setChatId(chatId);
 
 		commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-        answer.setText("📩 Напишите ваше предложение (ТОЛЬКО ТЕКСТ):");
+
 		try {
-			absSender.execute(answer);
-		} catch (TelegramApiException e) {
+			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.ENTER_TEXT);
+		} catch (Exception e) {
 			log.error("Error occurred in /contact_admin command", e);
+			commandStateStore.clearCurrentCommand(userId);
 		}
 	}
 
     @Override
 	public void processTextInput(AbsSender absSender, Message message) {
+		User user = message.getFrom();
 		Long userId = message.getFrom().getId();
+		Long chatId = message.getChatId();
 
 		if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
 			return;
 		}
 
-		Long chatId = message.getChatId();
-		User user = message.getFrom();
-		SendMessage answer = new SendMessage();
-		answer.setChatId(chatId.toString());
-
 		String text = message.getText();
 		log.info("Received text: {}", text);
 
-		String notification = notificationCreatorService.createSubscriberSentMessageToAdminNotification(text, user);
-        notificationSenderService.sendSubscriberToAdminNotification(notification, Long.valueOf(mainAdminId));
-		commandStateStore.clearCurrentCommand(userId);
-        answer.setText("Сообщение отправлено админу ✅");
 		try {
-			absSender.execute(answer);
+			String notification = notificationCreatorService.createSubscriberSentMessageToAdminNotification(text, user);
+			notificationSenderService.sendSubscriberToAdminNotification(notification, Long.valueOf(mainAdminId));
+			commandStateStore.clearCurrentCommand(userId);
+			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT_TO_ADMIN);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
+			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
 	}

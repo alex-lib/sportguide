@@ -2,6 +2,7 @@ package com.sport.service.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.sport.service.constants.RestConstants;
 import com.sport.service.redis_store.notifications_broker.NotificationListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -50,21 +51,21 @@ public class RedisNotificationConfiguration {
 
     @Bean
     public ChannelTopic weatherTopic() {
-        return new ChannelTopic("notification:weather");
+        return new ChannelTopic(RestConstants.WEATHER_CHANNEL_NAME);
     }
 
     @Bean
     public ChannelTopic eventTopic() {
-        return new ChannelTopic("notification:event");
+        return new ChannelTopic(RestConstants.EVENT_CHANNEL_NAME);
     }
 
     @Bean
     public ChannelTopic subscriberToAdminTopic() {
-        return new ChannelTopic("notification:subscriber_to_admin");
+        return new ChannelTopic(RestConstants.SUBSCRIBER_TO_ADMIN_CHANNEL_NAME);
     }
 
     @Bean
     public ChannelTopic adminToSubscriberTopic() {
-        return new ChannelTopic("notification:admin_to_subscriber");
+        return new ChannelTopic(RestConstants.ADMIN_TO_SUBSCRIBER_CHANNEL_NAME);
     }
 }

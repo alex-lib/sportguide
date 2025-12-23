@@ -1,0 +1,5 @@
+🔹 <b>Название:</b> <i>[[${place.name}]]</i>
+📍 <b>Адрес:</b> [[${place.address}]]
+📝 <b>Описание:</b> [[${place.description}]]
+🗺️ <a href="[[${mapLink}]]">Посмотреть местоположение в Google Maps</a>
+<i>#место</i>

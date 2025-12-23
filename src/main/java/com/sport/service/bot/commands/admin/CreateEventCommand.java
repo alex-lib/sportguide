@@ -21,9 +21,6 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-
-import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Service
@@ -35,11 +32,6 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
     private final TelegramMessageSender sender;
 
-    private final Pattern DATE_PATTERN = Pattern.compile(
-            "^([1-9]\\d{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$");
-    private final Pattern TIME_PATTERN = Pattern.compile(
-            "^([01]\\d|2[0-3]):([0-5]\\d)$");
-
     @Override
     public String getCommandIdentifier() {
         return CommandsConstants.CREATE_EVENT;
@@ -50,27 +42,30 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         return CommandsConstants.CREATE_EVENT_DESCRIPTION;
     }
 
-    @Override
     @AdminOnly
+    @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
         User user = message.getFrom();
         Long userId = user.getId();
         Long chatId = message.getChatId();
         log.info("Call command create_event by userId={}, username={}", userId, user.getUserName());
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
-
-        EventDto dto = eventSession.createSession(chatId);
-        dto.setStep(1);
-        eventSession.save(chatId, dto);
-        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-        answer.setText("creating");
-        answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
 
         try {
-            absSender.execute(answer);
+            EventDto dto = eventSession.createSession(chatId);
+            dto.setStep(1);
+            eventSession.save(chatId, dto);
+            commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
+
+            SendMessage answer = new SendMessage();
+            answer.setChatId(chatId.toString());
+            answer.setText(CommandsConstants.CREATING_TYPE);
+            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+
+            sender.sendMessageWithoutPhoto(answer);
         } catch (Exception e) {
-            log.error("Error sending initial message", e);
+            log.error("Error to start processing message", e);
+            eventSession.clear(chatId);
+            commandStateStore.clearCurrentCommand(userId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
@@ -80,21 +75,14 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         Long chatId = callback.getMessage().getChatId();
         Long userId = callback.getFrom().getId();
 
-        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
-            log.warn("User {} not in create_event session", userId);
-            return;
-        }
-
         EventDto dto = eventSession.getIfExists(chatId);
-        if (dto == null) {
-            log.warn("No session found for chatId: {}", chatId);
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-            commandStateStore.clearCurrentCommand(userId);
+        if (!ifSessionValid(chatId, dto)) {
             return;
         }
 
         String data = callback.getData();
         log.info("Processing callback for create_event: step={}, data={}", dto.getStep(), data);
+
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
@@ -105,17 +93,17 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
                 handleUnknownStep(chatId, userId, answer);
             }
             eventSession.save(chatId, dto);
-            absSender.execute(answer);
-        } catch (TelegramApiException e) {
-            eventSession.clear(chatId);
+            sender.sendMessageWithoutPhoto(answer);
+        } catch (Exception e) {
             log.error("Error processing callback", e);
+            eventSession.clear(chatId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
     private void handleDistrictStep(EventDto dto, String data, SendMessage answer) {
         dto.setDistrict(District.valueOf(data));
-        answer.setText("\uD83D\uDD8A Введите наименование события:");
+        answer.setText(CommandsConstants.ENTER_EVENT_NAME);
         dto.setStep(2);
     }
 
@@ -123,19 +111,14 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
     public void processTextInput(AbsSender absSender, Message message) {
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
-
-        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
-            return;
-        }
 
         EventDto dto = eventSession.getIfExists(chatId);
-        if (dto == null) {
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-            commandStateStore.clearCurrentCommand(userId);
+        if (!ifSessionValid(chatId, dto)) {
             return;
         }
+
+        SendMessage answer = new SendMessage();
+        answer.setChatId(chatId.toString());
 
         try {
             handleTextInput(message, dto, answer);
@@ -144,16 +127,15 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
             if (dto.getStep() > 8) {
                 eventService.create(dto);
-                SendMessage successMsg = new SendMessage();
-                successMsg.setChatId(chatId.toString());
-                successMsg.setText("Событие создано ✅");
-                absSender.execute(successMsg);
+                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.EVENT_CREATED);
                 log.info("Event created successfully by userId={}, eventName={}", userId, dto.getName());
                 eventSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
+            eventSession.clear(chatId);
+            commandStateStore.clearCurrentCommand(userId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
@@ -167,48 +149,48 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
             case 2 -> {
                 if (!eventService.existsByName(text)) {
                     dto.setName(text);
-                    answer.setText("\uD83D\uDD8A Введите адрес:");
+                    answer.setText(CommandsConstants.ENTER_EVENT_ADDRESS);
                     dto.setStep(3);
                 } else {
-                    answer.setText("\uD83D\uDD8A Такое наименовение события уже существует.\nВведите другое наименование события:");
+                    answer.setText(CommandsConstants.EVENT_NAME_IS_EXISTED);
                 }
             }
             case 3 -> {
                 dto.setAddress(text);
-                answer.setText("\uD83D\uDD8A Введите описание:");
+                answer.setText(CommandsConstants.ENTER_EVENT_DESCRIPTION);
                 dto.setStep(4);
             }
             case 4 -> {
                 dto.setDescription(text);
-                answer.setText("\uD83D\uDD8A Введите ссылку на событие (или '-' если нет):");
+                answer.setText(CommandsConstants.ENTER_EVENT_LINK);
                 dto.setStep(5);
             }
             case 5 -> {
                 dto.setLink(text);
-                answer.setText("\uD83D\uDD8A Введите имя места где будет организовано событие:");
+                answer.setText(CommandsConstants.ENTER_EVENT_PLACE);
                 dto.setStep(6);
             }
             case 6 -> {
                 dto.setPlaceName(text);
-                answer.setText("\uD83D\uDD8A Введите дату в формате YYYY-MM-DD:");
+                answer.setText(CommandsConstants.ENTER_EVENT_DATE);
                 dto.setStep(7);
             }
             case 7 -> {
                 if (isValidDate(text)) {
                     dto.setDate(text);
-                    answer.setText("\uD83D\uDD8A Введите время в формате HH:mm:");
+                    answer.setText(CommandsConstants.ENTER_EVENT_TIME);
                     dto.setStep(8);
                 } else {
-                    answer.setText("Неверный формат даты.\nВведите дату в формате YYYY-MM-DD:");
+                    answer.setText(CommandsConstants.EVENT_DATE_IS_INVALID);
                 }
             }
             case 8 -> {
                 if (isValidTime(text)) {
                     dto.setTime(text);
-                    answer.setText("Все данные получены.\nСоздаю событие ⏳");
+                    answer.setText(CommandsConstants.DATA_IS_RECEIVED);
                     dto.setStep(9);
                 } else {
-                    answer.setText("Неверный формат времени.\nВведите время в формате HH:mm:");
+                    answer.setText(CommandsConstants.EVENT_TIME_IS_INVALID);
                 }
             }
             default -> handleUnknownStep(chatId, userId, answer);
@@ -222,10 +204,25 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
     }
 
     private boolean isValidDate(String date) {
-        return DATE_PATTERN.matcher(date).matches();
+        return CommandsConstants.DATE_PATTERN.matcher(date).matches();
     }
 
     private boolean isValidTime(String time) {
-        return TIME_PATTERN.matcher(time).matches();
+        return CommandsConstants.TIME_PATTERN.matcher(time).matches();
+    }
+
+    private boolean ifSessionValid(Long chatId, EventDto dto) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(chatId))) {
+            log.warn("User {} is not in create_event session", chatId);
+            return false;
+        }
+
+        if (dto == null) {
+            log.warn("No session found for chatId: {}", chatId);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
+            commandStateStore.clearCurrentCommand(chatId);
+            return false;
+        }
+        return true;
     }
 }

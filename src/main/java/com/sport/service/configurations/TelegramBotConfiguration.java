@@ -17,9 +17,9 @@ public class TelegramBotConfiguration {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
             botsApi.registerBot(sportGuideBot);
-            log.info("Telegram bot has been registered successfully!");
+            log.info("Telegram bot has been launched successfully!");
         } catch (TelegramApiException e) {
-            log.error("Error occurred while registering Telegram bot!", e);
+            log.error("Error occurred while launching Telegram bot!", e);
             throw e;
         }
         return botsApi;

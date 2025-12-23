@@ -1,5 +1,6 @@
 package com.sport.service.bot.commands.menu;
 
+import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.KeyboardConstants;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
@@ -28,7 +29,7 @@ public abstract class ChoosingPlaceOptionsMenu {
     }
 
     private static List<List<InlineKeyboardButton>> addExtraButtonsIntoDistrictKeyboard(List<List<InlineKeyboardButton>> keyboard, String command) {
-        if (command.equals("getting")) {
+        if (command.equals(CommandsConstants.GETTING_TYPE)) {
             keyboard.add(createButton(KeyboardConstants.ALL_DISTRICTS, District.ALL_DISTRICTS.name()));
             keyboard.add(createButton(KeyboardConstants.CHOOSE_TYPE_OF_PLACE_AGAIN, KeyboardConstants.BACK));
         }
@@ -91,11 +92,11 @@ public abstract class ChoosingPlaceOptionsMenu {
     }
 
     private static List<List<InlineKeyboardButton>> addExtraButtonsIntoSubdistrictsKeyboard(List<List<InlineKeyboardButton>> keyboard, String command) {
-        if (command.equals("getting")) {
+        if (command.equals(CommandsConstants.GETTING_TYPE)) {
             keyboard.add(createButton(KeyboardConstants.ALL_SUBDISTRICTS, SubDistrict.ALL_SUBDISTRICTS.name()));
             keyboard.add(createButton(KeyboardConstants.CHOOSE_DISTRICT_AGAIN, KeyboardConstants.BACK));
         }
-        if (command.equals("creating")) {
+        if (command.equals(CommandsConstants.CREATING_TYPE)) {
             keyboard.add(createButton(KeyboardConstants.CHOOSE_DISTRICT_AGAIN, KeyboardConstants.BACK));
         }
         return keyboard;
@@ -129,11 +130,11 @@ public abstract class ChoosingPlaceOptionsMenu {
     }
 
     private static List<List<InlineKeyboardButton>> addExtraButtonsIntoOutdoorKeyboard(List<List<InlineKeyboardButton>> keyboard, String command) {
-        if (command.equals("getting")) {
+        if (command.equals(CommandsConstants.GETTING_TYPE)) {
             keyboard.add(createButton(KeyboardConstants.OUTSIDE_AND_INSIDE, KeyboardConstants.NULL));
             keyboard.add(createButton(KeyboardConstants.CHOOSE_TYPE_OF_PLACE_AGAIN, KeyboardConstants.BACK));
         }
-        if (command.equals("creating")) {
+        if (command.equals(CommandsConstants.CREATING_TYPE)) {
             keyboard.add(createButton(KeyboardConstants.CHOOSE_TYPE_OF_PLACE_AGAIN, KeyboardConstants.BACK));
         }
         return keyboard;

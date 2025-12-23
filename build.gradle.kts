@@ -35,7 +35,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
 
     implementation("org.springframework.retry:spring-retry")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+//    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.security:spring-security-config")
     implementation("org.springframework.security:spring-security-web")
 //    implementation("org.springframework.security:spring-security-oauth2-client")

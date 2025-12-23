@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
@@ -33,6 +34,15 @@ public class TelegramMessageSender {
             getBot().execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Failed to send message without photo: {}", message, e);
+        }
+    }
+
+    public void sendMessageWithoutPhoto(SendMessage sendMessage) {
+        try {
+            sendMessage.setParseMode("HTML");
+            getBot().execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Failed to send message without photo: {}", sendMessage.getText(), e);
         }
     }
 

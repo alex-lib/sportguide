@@ -2,8 +2,22 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Column;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.EnumType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.ToString;
+import lombok.Builder;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

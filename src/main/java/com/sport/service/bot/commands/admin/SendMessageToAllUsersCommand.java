@@ -2,6 +2,7 @@ package com.sport.service.bot.commands.admin;
 
 import com.sport.service.aop.annotations.AdminOnly;
 import com.sport.service.bot.TelegramMessageSender;
+import com.sport.service.bot.commands.UtilMethods;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.CommandsConstants;
@@ -17,18 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 @Service
@@ -63,23 +58,22 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         Long chatId = message.getChatId();
         Long userId = user.getId();
         log.info("Call command send_message_to_all_users by userId={}, username={}", userId, user.getUserName());
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
 
-        MessageDto dto = messageSession.createSession(chatId);
-        dto.setStep(1);
-        messageSession.save(chatId, dto);
-        commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
-        answer.setText("📩 Напишите, что вы хотите отправить подписчикам:");
         try {
-            absSender.execute(answer);
-        } catch (TelegramApiException e) {
+            MessageDto dto = messageSession.createSession(chatId);
+            dto.setStep(1);
+            messageSession.save(chatId, dto);
+            commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
+            sender.sendMessageWithoutPhoto(chatId, CommandsConstants.ENTER_TEXT_TO_SEND_TO_ALL_USERS);
+        } catch (Exception e) {
             log.error("Error occurred in /send_message_to_all_users command", e);
+            messageSession.clear(chatId);
+            commandStateStore.clearCurrentCommand(userId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
 
-    private void handleTextInput(Message message, MessageDto dto, SendMessage answer, AbsSender absSender) {
+    private void handleTextInput(Message message, MessageDto dto, SendMessage answer) {
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
         String text = message.getText();
@@ -92,55 +86,46 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         switch (dto.getStep()) {
             case 1 -> {
                 dto.setMessage(text);
-                answer.setText("\uD83D\uDDBC Отправьте фото или картинку (или - если картинки/фото нет):");
+                answer.setText(CommandsConstants.SEND_PHOTO_TO_SEND_TO_ALL_USERS);
                 dto.setStep(2);
             }
             case 2 -> {
-                if ("-".equals(text)) {
+                if (CommandsConstants.NO_PHOTO.equals(text)) {
                     notificationSenderService.sendAdminToSubscriberNotification(dto.getMessage(), null, subscriberIds);
-                    log.info("Publishing EventSendMessageToAllUsers: message='{}', subscribers={}", dto.getMessage(), subscriberService.findAll().size());
-                    answer.setText("Сообщение отправлено всем пользователям ✅");
+                    log.info("Publishing EventSendMessageToAllUsers: message='{}'", dto.getMessage());
+                    answer.setText(CommandsConstants.MESSAGE_SENT_TO_ALL_USERS);
                     messageSession.clear(chatId);
                     commandStateStore.clearCurrentCommand(userId);
                 } else {
-                    answer.setText("\uD83D\uDDBC Пожалуйста, отправьте фото (или - если картинки/фото нет):");
+                    answer.setText(CommandsConstants.SEND_PHOTO_TO_SEND_TO_ALL_USERS_2);
                 }
             }
-            default -> {
-                answer.setText(ErrorConstants.UNKNOWN_STEP);
-                messageSession.clear(chatId);
-                commandStateStore.clearCurrentCommand(userId);
-            }
+            default -> handleUnknownStep(chatId, userId, answer);
         }
     }
 
     @Override
     public void processTextInput(AbsSender absSender, Message message) {
         Long chatId = message.getChatId();
-        Long userId = message.getFrom().getId();
-
-        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
-            return;
-        }
 
         MessageDto dto = messageSession.getIfExists(chatId);
-        if (dto == null) {
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-            commandStateStore.clearCurrentCommand(userId);
+        if (!ifSessionValid(chatId, dto)) {
             return;
         }
 
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
         try {
-            handleTextInput(message, dto, answer, absSender);
+            SendMessage answer = new SendMessage();
+            answer.setChatId(chatId.toString());
+            handleTextInput(message, dto, answer);
             messageSession.save(chatId, dto);
 
             if (!answer.getText().isEmpty()) {
-                absSender.execute(answer);
+                sender.sendMessageWithoutPhoto(answer);
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
+            messageSession.clear(chatId);
+            commandStateStore.clearCurrentCommand(chatId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
         }
     }
@@ -150,14 +135,8 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
 
-        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
-            return;
-        }
-
         MessageDto dto = messageSession.getIfExists(chatId);
-        if (dto == null || dto.getStep() != 2) {
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-            commandStateStore.clearCurrentCommand(userId);
+        if (!ifSessionValid(chatId, dto)) {
             return;
         }
 
@@ -168,52 +147,53 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
 
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
+
         try {
             if (message.hasPhoto()) {
+
                 List<PhotoSize> photos = message.getPhoto();
                 PhotoSize bestPhoto = photos.get(photos.size() - 1);
                 String fileId = bestPhoto.getFileId();
                 log.info("Processing photo: {} sizes available, selected size: {}x{}, file size: {} bytes",
                         photos.size(), bestPhoto.getWidth(), bestPhoto.getHeight(), bestPhoto.getFileSize());
-                byte[] photoBytes = downloadPhoto(absSender, fileId);
+                byte[] photoBytes = UtilMethods.downloadPhoto(absSender, fileId, botToken);
                 log.info("Downloaded photo: {} bytes", photoBytes.length);
+
                 dto.setPhoto(photoBytes);
                 notificationSenderService.sendAdminToSubscriberNotification(dto.getMessage(), dto.getPhoto(), subscriberIds);
-                answer.setText("Сообщение отправлено всем пользователям ✅");
                 messageSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
             } else {
-                answer.setText("\uD83D\uDDBC Пожалуйста, отправьте фото (или - если картинки/фото нет):");
+                answer.setText(CommandsConstants.SEND_PHOTO_TO_SEND_TO_ALL_USERS_2);
             }
+            sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT);
             absSender.execute(answer);
-        } catch (TelegramApiException e) {
+        } catch (Exception e) {
             log.error("Error processing photo", e);
+            messageSession.clear(chatId);
+            commandStateStore.clearCurrentCommand(userId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.UNEXPECTED_PHOTO);
         }
     }
 
-    private byte[] downloadPhoto(AbsSender absSender, String fileId) {
-        GetFile getFileMethod = new GetFile();
-        getFileMethod.setFileId(fileId);
-        File file = null;
-        try {
-            file = absSender.execute(getFileMethod);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+    private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
+        answer.setText(ErrorConstants.UNKNOWN_STEP);
+        messageSession.clear(chatId);
+        commandStateStore.clearCurrentCommand(userId);
+    }
+
+    private boolean ifSessionValid(Long chatId, MessageDto dto) {
+        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(chatId))) {
+            log.warn("User {} is not in send_message_to_all_users session", chatId);
+            return false;
         }
-        String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
-        log.info("Downloading photo from: {}", fileUrl);
-        try (InputStream inputStream = new URL(fileUrl).openStream();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-            return outputStream.toByteArray();
-        } catch (Exception e) {
-            log.error("Failed to download photo from URL: {}", fileUrl, e);
-            throw new RuntimeException("Failed to download photo: " + e.getMessage(), e);
+
+        if (dto == null) {
+            log.warn("No session found for chatId: {}", chatId);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
+            commandStateStore.clearCurrentCommand(chatId);
+            return false;
         }
+        return true;
     }
 }

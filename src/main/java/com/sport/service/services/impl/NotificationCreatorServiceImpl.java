@@ -2,6 +2,7 @@ package com.sport.service.services.impl;
 
 import com.sport.service.dto.WeatherDataAtSpecificHourDto;
 import com.sport.service.entities.Event;
+import com.sport.service.entities.Place;
 import com.sport.service.entities.TodayWeather;
 import com.sport.service.services.NotificationCreatorService;
 import lombok.RequiredArgsConstructor;
@@ -66,5 +67,18 @@ public class NotificationCreatorServiceImpl implements NotificationCreatorServic
         context.setVariable("userId", user.getId());
         context.setVariable("message", text);
         return templateEngine.process("subscriber_sent_message_to_admin_notification.txt", context);
+    }
+
+    public String createPlaceMessage(Place place, String mapLink) {
+        Context context = new Context();
+
+        context.setVariable("place", place);
+        context.setVariable("mapLink", mapLink);
+
+        if (place.getWebSite().equals("-")) {
+            return templateEngine.process("place_without_link_message.txt", context);
+        }
+
+        return templateEngine.process("place_with_link_message.txt", context);
     }
 }

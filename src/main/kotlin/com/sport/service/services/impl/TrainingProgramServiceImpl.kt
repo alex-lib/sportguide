@@ -1,12 +1,12 @@
 package com.sport.service.services.impl
 
 import com.sport.service.entities.training_program.TrainingProgram
-import com.sport.service.entities.training_program.TrainingProgramDocument
+//import com.sport.service.entities.training_program.TrainingProgramDocument
 import com.sport.service.mappers.training_program.TrainingProgramMapper
 import com.sport.service.repositories.TrainingProgramRepository
 import com.sport.service.specifications.ProgramTrainingSpecification
 import com.sport.service.utils.BeanUtils
-import com.sport.service.web.models.payment.PaymentLinkResponse
+//import com.sport.service.web.models.payment.PaymentLinkResponse
 import com.sport.service.web.models.training_program.CreateTrainingProgramRequest
 import com.sport.service.web.models.training_program.ListTrainingProgramResponse
 import com.sport.service.web.models.training_program.TrainingProgramFilter
@@ -21,7 +21,7 @@ class TrainingProgramServiceImpl(
     private var trainingProgramRepository: TrainingProgramRepository,
     private var trainingProgramMapper: TrainingProgramMapper,
     private var paymentServiceImpl: PaymentServiceImpl,
-    private var trainingProgramDocumentService: TrainingProgramDocumentServiceImpl
+//    private var trainingProgramDocumentService: TrainingProgramDocumentServiceImpl
 ) {
 
     fun findByTitle(title: String): Optional<TrainingProgram> {
@@ -42,8 +42,8 @@ class TrainingProgramServiceImpl(
         //val subscriberId: Long = jwt.token.subject.toLong()
         val trainingProgram: TrainingProgram = findById(id)
         //paymentServiceImpl.createPayment(subscriberId, trainingProgram)
-        val trainingProgramDocument: TrainingProgramDocument =
-            trainingProgramDocumentService.findById(trainingProgram.programIdInMongoDB)
+//        val trainingProgramDocument: TrainingProgramDocument =
+//            trainingProgramDocumentService.findById(trainingProgram.programIdInMongoDB)
         //TODO: generate link and set a payment provider
         //TODO: and if client paid so increment payment count
 //        return PaymentLinkResponse("This is a link to pay")
@@ -51,16 +51,16 @@ class TrainingProgramServiceImpl(
 
     @Transactional
     fun create(request: CreateTrainingProgramRequest, file: MultipartFile) {
-        val mongoId: String = trainingProgramDocumentService.save(file)
-        val trainingProgram: TrainingProgram =
-            trainingProgramMapper.createTrainingProgramRequestToTrainingProgram(mongoId, request)
-        trainingProgramRepository.save(trainingProgram)
+//        val mongoId: String = trainingProgramDocumentService.save(file)
+//        val trainingProgram: TrainingProgram =
+//            trainingProgramMapper.createTrainingProgramRequestToTrainingProgram(mongoId, request)
+//        trainingProgramRepository.save(trainingProgram)
     }
 
     @Transactional
     fun delete(id: Long) {
         val trainingProgram: TrainingProgram = findById(id)
-        trainingProgramDocumentService.delete(trainingProgram.programIdInMongoDB)
+//        trainingProgramDocumentService.delete(trainingProgram.programIdInMongoDB)
         trainingProgramRepository.deleteById(id)
     }
 
@@ -72,7 +72,7 @@ class TrainingProgramServiceImpl(
                 trainingProgram.programIdInMongoDB,
                 request
             )
-        trainingProgramDocumentService.update(trainingProgram.programIdInMongoDB, file)
+//        trainingProgramDocumentService.update(trainingProgram.programIdInMongoDB, file)
         BeanUtils.copyNonNullProperties(updatedTrainingProgram, trainingProgram)
         trainingProgramRepository.save(trainingProgram)
     }

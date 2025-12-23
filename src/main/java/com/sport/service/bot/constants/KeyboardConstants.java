@@ -12,7 +12,7 @@ public final class KeyboardConstants {
     public static final String ALL_DISTRICTS = "ВСЕ РАЙОНЫ ♾\uFE0F";
 
     public static final String CHOOSE_TYPE_OF_PLACE = "\uD83E\uDDBE Выберите тип места:";
-    public static final String SPORT_GROUND = "Открытая уличная спортивная площадка \uD83C\uDFD6";
+    public static final String SPORT_GROUND = "Уличная спортивная площадка \uD83C\uDFD6";
     public static final String FOOTBALL_FIELD = "Футбольное поле ⚽\uFE0F";
     public static final String BASKETBALL_FIELD = "Баскетбольное поле \uD83C\uDFC0";
     public static final String VOLLEYBALL_FIELD = "Волейбольное поле \uD83C\uDFD0";
@@ -42,10 +42,10 @@ public final class KeyboardConstants {
     public static final String PROCESSOR = "Процессор";
 
     public static final String CHOOSE_SUBDISTRICT_OF_LEVOBEREZHNYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Левобережного района:";
-    public static final String DIMITROVA_STREET = "Вдоль ул.Димитрова/Мостозавод/частный сектор";
+    public static final String DIMITROVA_STREET = "Димитрова/Мостозавод/Частный сектор";
     public static final String FROM_CHERNAVSKYY_BRIDGE_TO_VOGRESOVSKYY_BRIDGE = "От Чернавского моста до Вогресовского моста";
     public static final String VAI_KRASNYY_OKTYABR = "ВАИ/Красный октябрь";
-    public static final String PESCHANKA_OZERKI_SHINNIK_1_STARYY_MASHMET_BAM_MASHMET = "Песчанка/Озерки/Шинник-1/Старый машмет/БАМ/Машмет";
+    public static final String PESCHANKA_OZERKI_SHINNIK_1_STARYY_MASHMET_BAM_MASHMET = "Машмет/БАМ/Озерки/Шинник-1/Песчанка";
 
     public static final String CHOOSE_SUBDISTRICT_OF_SOVETSKYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Совесткого района:";
     public static final String FROM_NOVYY_BOMBEY_TO_ARMADA_TO_DEPUTATKA = "От мкр.Новый Бомбей до ТЦ Армада и до мкр.Депутатка";
@@ -55,12 +55,12 @@ public final class KeyboardConstants {
     public static final String SHILOVO = "Шилово";
 
     public static final String CHOOSE_SUBDISTRICT_OF_CENTRALNYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Центрального района:";
-    public static final String REST_OF_CENTRALNYY_DISTRICT = "Березовая роща/СХИ/ул.Ломоносова/Московский пр./ул.Крынина";
+    public static final String REST_OF_CENTRALNYY_DISTRICT = "Ломоносова/Московский пр./Крынина";
     public static final String FROM_VGU_TO_SEVERNYY_BRIDGE = "От ВГУ до Северного моста";
 
     public static final String CHOOSE_SUBDISTRICT_OF_KOMINTERNOVSKYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Коминтерновского района:";
-    public static final String FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP = "От 45 Стрелковой див. до 9 января, до Московского пр.";
-    public static final String IPPODROM_FROM_MP_TO_ROTONDA_TO_URITSKOGO_STREET = "Кв-л Ипподром/От Московского пр. до ул.Урицкого";
+    public static final String FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP = "От 45 Стрел-ой див. до 9 января, до Московского пр.";
+    public static final String IPPODROM_FROM_MP_TO_ROTONDA_TO_URITSKOGO_STREET = "Кв-л Ипподром/От Московского пр. до Урицкого";
     public static final String PODGORNOE_HVOINYY_ZADONIE = "Подгорное/Хвойный/Задонье(Грин парк)";
     public static final String SEVERNYY = "Северный";
 
@@ -68,4 +68,6 @@ public final class KeyboardConstants {
     public static final String ALL_SUBDISTRICTS = "ВСЕ ПОДРАЙОНЫ ♾\uFE0F";
 
     public static final String BACK = "BACK";
+
+    public static final String DELETING_MENU = "⏳ Удаление меню...";
 }
