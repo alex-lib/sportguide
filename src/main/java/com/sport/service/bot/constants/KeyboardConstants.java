@@ -36,19 +36,19 @@ public final class KeyboardConstants {
 
     public static final String CHOOSE_SUBDISTRICT_OF_ZHELEZNODOROZHNYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Железнодорожного района:";
     public static final String OTROZHKA_BOROVOE_SOMOVO = "Отрожка/Боровое/Сомово";
-    public static final String FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM = "От Остужевского кольца до Чернавской дамбы";
-    public static final String FROM_OSTUZHEVO_RING_TO_RAILWAY_BRIDGE = "От ЖД моста до Остужевского кольца";
+    public static final String FROM_OSTUZHEVO_RING_TO_RAILWAY_BRIDGE = "От ЖД моста до Остужевского к-а";
+    public static final String FROM_OSTUZHEVO_RING_TO_CHERNAVSKAAY_DAM = "От Остужевского к-а до Чернавской дамбы";
     public static final String ELECTRONIKA = "Электроника";
     public static final String PROCESSOR = "Процессор";
 
     public static final String CHOOSE_SUBDISTRICT_OF_LEVOBEREZHNYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Левобережного района:";
     public static final String DIMITROVA_STREET = "Димитрова/Мостозавод/Частный сектор";
-    public static final String FROM_CHERNAVSKYY_BRIDGE_TO_VOGRESOVSKYY_BRIDGE = "От Чернавского моста до Вогресовского моста";
+    public static final String FROM_CHERNAVSKYY_BRIDGE_TO_VOGRESOVSKYY_BRIDGE = "От Чернавского м-а до Вогресовского м-а";
     public static final String VAI_KRASNYY_OKTYABR = "ВАИ/Красный октябрь";
     public static final String PESCHANKA_OZERKI_SHINNIK_1_STARYY_MASHMET_BAM_MASHMET = "Машмет/БАМ/Озерки/Шинник-1/Песчанка";
 
     public static final String CHOOSE_SUBDISTRICT_OF_SOVETSKYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Совесткого района:";
-    public static final String FROM_NOVYY_BOMBEY_TO_ARMADA_TO_DEPUTATKA = "От мкр.Новый Бомбей до ТЦ Армада и до мкр.Депутатка";
+    public static final String FROM_NOVYY_BOMBEY_TO_ARMADA_TO_DEPUTATKA = "м.Новый Бомбей/Ц Армада/м.Депутатка";
     public static final String PERVOE_MAAY_UGO_ZAPADNYY_ZAPADNYY_POSELOK = "Первое мая/Юго-западный/Западный поселок";
     public static final String PRIDONSKOYY_PODKLETNOE = "ПридонскоЙ/Подкетное";
     public static final String TENNISTYY_ZAYYMISHE = "Теннистый/Займище";
@@ -59,8 +59,8 @@ public final class KeyboardConstants {
     public static final String FROM_VGU_TO_SEVERNYY_BRIDGE = "От ВГУ до Северного моста";
 
     public static final String CHOOSE_SUBDISTRICT_OF_KOMINTERNOVSKYY_DISTRICT = "\uD83D\uDDFA Выберите подрайон Коминтерновского района:";
-    public static final String FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP = "От 45 Стрел-ой див. до 9 января, до Московского пр.";
-    public static final String IPPODROM_FROM_MP_TO_ROTONDA_TO_URITSKOGO_STREET = "Кв-л Ипподром/От Московского пр. до Урицкого";
+    public static final String FROM_45_DIVISII_STREET_TO_9_YANVARY_STREET_AND_TO_MP = "45 Стрел-ой див./9 января/Московский пр.";
+    public static final String IPPODROM_FROM_MP_TO_ROTONDA_TO_URITSKOGO_STREET = "Кв. Ипподром/Московский пр./Урицкого";
     public static final String PODGORNOE_HVOINYY_ZADONIE = "Подгорное/Хвойный/Задонье(Грин парк)";
     public static final String SEVERNYY = "Северный";
 

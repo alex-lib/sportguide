@@ -1,4 +1,5 @@
-✨ <b>Событие:</b> <i>[[${eventName}]]</i>
+<i>[[${eventName}]]</i>
+
 📝 <b>Описание:</b> [[${eventDescription}]]
 📅 <b>Дата:</b> [[${eventDate}]]
 ⌚️ <b>Время:</b> [[${eventTime}]]
