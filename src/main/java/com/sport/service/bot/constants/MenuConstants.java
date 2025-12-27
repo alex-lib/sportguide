@@ -64,5 +64,5 @@ public final class MenuConstants {
     public static final String DELETE_EVENT = "❌ Удалить событие";
     public static final String SEND_MESSAGE_TO_ALL_USERS = "✉\uFE0F Отправить сообщение всем пользователям";
     public static final String GET_COUNT_OF_ALL_USERS = "🔎 Получить кол-во юзеров";
-    public static final String GET_COUNT_OF_SUNSCRIPTIONS = "🔎 Получить кол-во подписавшихся юзеров";
+    public static final String GET_COUNT_OF_SUBSCRIPTIONS = "🔎 Получить кол-во подписок";
 }

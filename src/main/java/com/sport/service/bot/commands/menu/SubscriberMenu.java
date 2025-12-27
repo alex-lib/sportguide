@@ -13,8 +13,6 @@ import java.util.List;
 public class SubscriberMenu {
     private final SendMessage answer;
 
-    public static final String SUBSCRIBER_MENU = MenuConstants.SUBSCRIBER_MENU;
-
     public void getSubscriberMenu() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(MenuConstants.CHOOSE_PLACE);
