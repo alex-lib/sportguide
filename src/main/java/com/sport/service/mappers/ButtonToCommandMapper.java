@@ -23,7 +23,7 @@ public class ButtonToCommandMapper {
         BUTTON_COMMANDS.put(MenuConstants.SUPPORT_PROJECT, "/" + CommandsConstants.SUPPORT_PROJECT);
         BUTTON_COMMANDS.put(MenuConstants.CONTACT_ADMIN, "/" + CommandsConstants.CONTACT_ADMIN);
         BUTTON_COMMANDS.put(MenuConstants.GET_COUNT_OF_ALL_USERS, "/" + CommandsConstants.GET_USERS_COUNT);
-        BUTTON_COMMANDS.put(MenuConstants.GET_COUNT_OF_SUNSCRIPTIONS, "/" + CommandsConstants.GET_SUBSCRIPTIONS_COUNT);
+        BUTTON_COMMANDS.put(MenuConstants.GET_COUNT_OF_SUBSCRIPTIONS, "/" + CommandsConstants.GET_SUBSCRIPTIONS_COUNT);
         BUTTON_COMMANDS.put(MenuConstants.SEND_MESSAGE_TO_ALL_USERS, "/" + CommandsConstants.SEND_MESSAGE_TO_ALL_USERS);
     }
 

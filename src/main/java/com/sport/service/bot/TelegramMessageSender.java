@@ -33,7 +33,7 @@ public class TelegramMessageSender {
         try {
             getBot().execute(sendMessage);
         } catch (TelegramApiException e) {
-            log.error("Failed to send message without photo: {}", message, e);
+            log.error("Failed to send message without photo: {} to subscriber with id: {}", message, userId);
         }
     }
 
@@ -42,7 +42,7 @@ public class TelegramMessageSender {
             sendMessage.setParseMode("HTML");
             getBot().execute(sendMessage);
         } catch (TelegramApiException e) {
-            log.error("Failed to send message without photo: {}", sendMessage.getText(), e);
+            log.error("Failed to send message without photo: {} to subscriber with id: {}", sendMessage.getText(), sendMessage.getChatId());
         }
     }
 
@@ -54,12 +54,12 @@ public class TelegramMessageSender {
             photoMessage.setParseMode("HTML");
             photoMessage.setChatId(userId);
         } catch (IOException e) {
-            log.error("Failed to process photo {}", message, e);
+            log.error("Failed to process photo {}", message);
         }
         try {
             getBot().execute(photoMessage);
         } catch (TelegramApiException e) {
-            log.error("Failed to send message with photo: {}", message, e);
+            log.error("Failed to send message with photo: {} to subscriber with id: {}", message, userId);
         }
     }
 }
