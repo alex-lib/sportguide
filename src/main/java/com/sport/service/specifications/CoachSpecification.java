@@ -7,7 +7,6 @@ import com.sport.service.mappers.string.SexStringMapper;
 import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.web.models.coach.CoachFilter;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.util.List;
 
 public interface CoachSpecification {
@@ -23,13 +22,16 @@ public interface CoachSpecification {
         if (sportTypesStrings == null || sportTypesStrings.isEmpty()) {
             return (root, query, cb) -> cb.conjunction();
         }
-        List<SportType> sportTypes = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(sportTypesStrings);
+
+        List<SportType> sportTypes =
+                SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(sportTypesStrings);
+
         return (root, query, cb) -> {
-            if (sportTypes == null) return cb.conjunction();
-//            TODO change logic to find coaches if at least there is one coincidence
-            return cb.equal(root.get("sportTypes"), sportTypes);
+            query.distinct(true);
+            return root.join("sportTypes").in(sportTypes);
         };
     }
+
 
     static Specification<Coach> byCoachAge(Integer age) {
         if (age == null) {

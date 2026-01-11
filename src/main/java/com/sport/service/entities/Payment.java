@@ -1,7 +1,6 @@
 package com.sport.service.entities;
 
 import com.sport.service.entities.enums.payment.PaymentStatus;
-import com.sport.service.entities.training_program.TrainingProgram;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;

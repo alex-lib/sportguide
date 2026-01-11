@@ -2,6 +2,7 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
+import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +21,7 @@ import lombok.ToString;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -72,6 +74,14 @@ public class JointTraining {
     @Column(name = "creator_name")
     private String creatorName;
 
-    @Column(name = "approved_by_admin")
-    public Boolean approvedByAdmin;
+    @Column(name = "approval_status")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+    @Column(name = "rejected_reason")
+    private String rejectionReason;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
 }

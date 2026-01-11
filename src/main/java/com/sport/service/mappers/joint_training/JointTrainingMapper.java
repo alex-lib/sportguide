@@ -1,6 +1,7 @@
 package com.sport.service.mappers.joint_training;
 
 import com.sport.service.entities.JointTraining;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import org.mapstruct.DecoratedWith;
@@ -17,5 +18,5 @@ public interface JointTrainingMapper {
         return null;
     }
 
-    JointTraining createJointTrainingRequestToJointTraining(CreateJointTrainingRequest request);
+    JointTraining createJointTrainingRequestToJointTraining(CreateJointTrainingRequest request, Subscriber subscriber);
 }

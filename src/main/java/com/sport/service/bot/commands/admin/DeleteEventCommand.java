@@ -66,7 +66,7 @@ public class DeleteEventCommand implements IBotCommand, TextProcessable {
 		try {
 			String text = message.getText();
 			log.info("Received text: {}", text);
-			eventService.deleteByName(text);
+			eventService.deleteEventByName(text);
 			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.EVENT_DELETED);
 		} catch (Exception e) {

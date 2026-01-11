@@ -1,7 +1,5 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.0.0"
-    id("org.jetbrains.kotlin.plugin.spring") version "2.0.0"
     id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.6"
 }
@@ -38,8 +36,8 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.security:spring-security-config")
     implementation("org.springframework.security:spring-security-web")
-//    implementation("org.springframework.security:spring-security-oauth2-client")
-//    implementation("org.springframework.security:spring-security-oauth2-resource-server")
+    implementation("org.springframework.security:spring-security-oauth2-client")
+    implementation("org.springframework.security:spring-security-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-oauth2-jose")
     implementation("com.auth0:java-jwt:4.4.0")

@@ -126,7 +126,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
             absSender.execute(answer);
 
             if (dto.getStep() > 8) {
-                eventService.create(dto);
+                eventService.createEvent(dto);
                 sender.sendMessageWithoutPhoto(chatId, CommandsConstants.EVENT_CREATED);
                 log.info("Event created successfully by userId={}, eventName={}", userId, dto.getName());
                 eventSession.clear(chatId);
@@ -147,7 +147,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
 
         switch (dto.getStep()) {
             case 2 -> {
-                if (!eventService.existsByName(text)) {
+                if (!eventService.existsEventByName(text)) {
                     dto.setName(text);
                     answer.setText(CommandsConstants.ENTER_EVENT_ADDRESS);
                     dto.setStep(3);
