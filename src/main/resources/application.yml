@@ -40,15 +40,15 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
-            issuer-uri: http://keycloak:8080/realms/sportguide
-            authorization-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
-            token-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
-            user-info-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
-            jwk-set-uri: http://keycloak:8080/realms/sportguide/protocol/openid-connect/certs
+            issuer-uri: http://auth.sportguide.online/realms/sportguide
+            authorization-uri: http://auth.sportguide.online/realms/sportguide/protocol/openid-connect/auth
+            token-uri: http://auth.sportguide.online/realms/sportguide/protocol/openid-connect/token
+            user-info-uri: http://auth.sportguide.online/realms/sportguide/protocol/openid-connect/userinfo
+            jwk-set-uri: http://auth.sportguide.online/realms/sportguide/protocol/openid-connect/certs
             user-name-attribute: preferred_username
       resource-server:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/sportguide
+          issuer-uri: http://auth.sportguide.online/realms/sportguide
   data:
     redis:
       host: redis
