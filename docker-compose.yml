@@ -114,6 +114,7 @@ services:
       - KC_HEALTH_ENABLED=true
       - KC_PROXY=edge
       - KC_HOSTNAME=auth.sportguide.online
+      - KC_HTTP_ENABLED=true
     command: start-dev --import-realm
     healthcheck:
       test:
