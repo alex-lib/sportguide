@@ -114,10 +114,13 @@
       "protocol": "openid-connect",
       "publicClient": false,
       "redirectUris": [
-        "http://api.sportguide.online/login/oauth2/code/*"
+        "http://api.sportguide.online/login/oauth2/code/*",
+        "http://app:8081/login/oauth2/code/*",
+        "http://localhost:8081/login/oauth2/code/*"
       ],
       "webOrigins": [
-        "http://api.sportguide.online"
+        "http://api.sportguide.online",
+        "http://app:8081"
       ],
       "defaultClientScopes": [
         "roles",
@@ -126,7 +129,9 @@
       ],
       "optionalClientScopes": [
         "web-origins"
-      ]
+      ],
+      "baseUrl": "http://api.sportguide.online",
+      "rootUrl": "http://api.sportguide.online"
     },
     {
       "clientId": "grafana-client",
