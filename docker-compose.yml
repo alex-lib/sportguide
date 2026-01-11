@@ -112,6 +112,8 @@ services:
       - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
       - KC_HEALTH_ENABLED=true
+      - KC_PROXY=edge
+      - KC_HOSTNAME=auth.sportguide.online
     command: start-dev --import-realm
     healthcheck:
       test:
