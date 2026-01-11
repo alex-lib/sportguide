@@ -6,6 +6,8 @@ import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.KeyboardConstants;
 import com.sport.service.mappers.ButtonToCommandMapper;
 import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.redis_store.commands_store.sessions.JointTrainingRejectingSession;
+import com.sport.service.services.JointTrainingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,14 +35,30 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     private final CommandStateStore commandStateStore;
     private final String botUsername;
 
+    private final JointTrainingService jointTrainingService;
+    private final JointTrainingRejectingSession jointTrainingRejectingSession;
+    private final TelegramMessageSender sender;
+
+    @Value("${telegram.mainAdminId}")
+    private String adminId;
+
+    @Value("${telegram.secondAdminId}")
+    private String secondAdminId;
+
     public SportGuideBot(
             @Value("${telegram.bot.token}") String botToken,
             @Value("${telegram.bot.username}") String botUsername,
             List<IBotCommand> commandList,
-            CommandStateStore commandStateStore) {
+            CommandStateStore commandStateStore,
+            JointTrainingService jointTrainingService,
+            JointTrainingRejectingSession jointTrainingRejectingSession,
+            TelegramMessageSender sender) {
         super(botToken);
         this.botUsername = botUsername;
         this.commandStateStore = commandStateStore;
+        this.jointTrainingService = jointTrainingService;
+        this.jointTrainingRejectingSession = jointTrainingRejectingSession;
+        this.sender = sender;
         commandList.forEach(this::registerCommand);
     }
 
@@ -62,7 +80,26 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             if (!(callback.getMessage() instanceof Message)) return;
 
             long userId = callback.getFrom().getId();
-            log.info("Callback from user: {}", userId);
+            String data = callback.getData();
+
+            log.info("Callback from user: {}, data: {}", userId, data);
+
+            if (data.startsWith("APPROVE_JT:")) {
+                Long id = Long.valueOf(data.replace("APPROVE_JT:", ""));
+                jointTrainingService.approveJointTraining(id);
+                sender.sendMessageWithoutPhoto(Long.valueOf(secondAdminId),"✔️ Одобрено");
+                return;
+            }
+
+            if (data.startsWith("REJECT_JT:")) {
+                Long jtId = Long.valueOf(data.replace("REJECT_JT:", ""));
+                jointTrainingRejectingSession.start(userId, jtId);
+                sender.sendMessageWithoutPhoto(userId,
+                        "❌ Вы собираетесь отклонить тренировку #" + jtId +
+                                "\nВведите причину отказа текстом:");
+                return;
+            }
+
             deleteMenuAndMessage((Message) callback.getMessage());
 
             String currentCommand = commandStateStore.getCurrentCommand(userId);
@@ -79,6 +116,17 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             Message message = update.getMessage();
             long userId = message.getFrom().getId();
             String text = message.getText();
+
+            if (jointTrainingRejectingSession.isWaiting(Long.valueOf(secondAdminId))) {
+                var session = jointTrainingRejectingSession.get(Long.valueOf(secondAdminId));
+                Long jtId = session.getJointTrainingId();
+                jointTrainingService.rejectJointTraining(jtId, text);
+                sender.sendMessageWithoutPhoto(Long.valueOf(secondAdminId),
+                        "❌ Заявка #" + jtId + " отклонена.\nПричина отправлена пользователю:\n" + text);
+                jointTrainingRejectingSession.clear(Long.valueOf(secondAdminId));
+                return;
+            }
+
             String mappedCommand = ButtonToCommandMapper.mapButtonToCommand(text);
             if (mappedCommand != null) {
                 commandStateStore.clearCurrentCommand(userId);

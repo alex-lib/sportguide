@@ -42,7 +42,7 @@ public class GetUpcomingEventsCommand implements IBotCommand {
         log.info("Call command get_upcoming_events by userId={}, username={}", userId, user.getUserName());
 
         try {
-            List<Event> events = eventService.findAll();
+            List<Event> events = eventService.findAllEvents();
             if (events.isEmpty()) {
                 sender.sendMessageWithoutPhoto(userId,
                         CommandsConstants.THERE_ARE_NO_EVENTS);

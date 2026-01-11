@@ -1,7 +1,10 @@
 package com.sport.service.mappers.coach;
 
 import com.sport.service.entities.Coach;
-import com.sport.service.web.models.coach.CreateCoachRequest;
+import com.sport.service.entities.Place;
+import com.sport.service.entities.Subscriber;
+import com.sport.service.entities.TrainingProgram;
+import com.sport.service.web.models.coach.CoachRequest;
 import com.sport.service.web.models.coach.ListCoachResponse;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
@@ -13,7 +16,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE) //uses
 public interface CoachMapper {
 
-    Coach createCoachRequestToCoach(CreateCoachRequest request);
+    Coach coachRequestToCoach(CoachRequest request, byte[] photo, Subscriber subscriber, List<TrainingProgram> trainingPrograms, List<Place> workPlaces);
 
     default ListCoachResponse listCoachToListCoachResponse(List<Coach> coaches) {
         return null;
