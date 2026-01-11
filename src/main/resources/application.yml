@@ -40,11 +40,11 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
-            issuer-uri: http://keycloak:8080/realms/sportguide
+            issuer-uri: http://auth.sportguide.online/realms/sportguide
             user-name-attribute: preferred_username
       resource-server:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/sportguide
+          issuer-uri: http://auth.sportguide.online/realms/sportguide
   data:
     redis:
       host: redis
