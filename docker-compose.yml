@@ -31,32 +31,17 @@ services:
     ports:
       - "6379:6379"
 
-  #  liquibase:
-  #    container_name: liquibase
-  #    image: liquibase/liquibase:latest
-  #    volumes:
-  #      - ./liquibase:/liquibase/changelog
-  #    depends_on:
-  #      - postgres
-  #    entrypoint: /bin/sh
-  #    command:
-  #      - -c
-  #      - |
-  #        echo "Waiting 120 seconds for Postgres..."
-  #        sleep 120
-  #        liquibase --url=jdbc:postgresql://postgres:5432/${POSTGRES_DB} --username=${POSTGRES_USER} --password=${POSTGRES_PASSWORD} --changeLogFile=/liquibase/changelog/db.changelog-master.xml --defaultSchemaName=app_schema generateChangeLog
-
   app:
     restart: on-failure
     ports:
       - "8081:8081"
     build: .
-#    volumes:
-#      - ./logs:/app/logs
+    volumes:
+      - ./logs:/app/logs
     container_name: app
     depends_on:
-#      keycloak:
-#        condition: service_healthy
+      keycloak:
+        condition: service_healthy
       redis:
         condition: service_healthy
       postgres:
@@ -72,62 +57,76 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
     command: [ "sh", "-c", "java -jar /app/app.jar" ]
 
-#  grafana:
-#    container_name: grafana
-#    env_file:
-#      - .env
-#    build: ./config/grafana
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      - ./config/grafana/provisioning:/etc/grafana/provisioning
-#    environment:
-#      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
-#      - GF_AUTH_GENERIC_OAUTH_NAME=Keycloak
-#      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
-#      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${KEYCLOAK_SECRET}
-#      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email
-#      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
-#      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
-#      - GF_AUTH_GENERIC_OAUTH_API_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
-#      - GF_AUTH_SIGNOUT_REDIRECT_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/logout
-#      - GF_AUTH_DISABLE_LOGIN_FORM=true
-#      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
-#    depends_on:
-#      - prometheus
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://api.sportguide.online
+    ports:
+      - "3001:80"
+    depends_on:
+      - app
+    restart: on-failure
 
-#  prometheus:
-#    container_name: prometheus
-#    image: prom/prometheus
-#    ports:
-#      - "9090:9090"
-#    volumes:
-#      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-#      - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
-#      - ./prometheus:/prometheus
-#
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:25.0.1
-#    container_name: keycloak
-#    environment:
-#      - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
-#      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
-#      - KC_HEALTH_ENABLED=true
-#    command: start-dev --import-realm
-#    healthcheck:
-#      test:
-#        [
-#          "CMD-SHELL",
-#          "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep \"200\"'",
-#        ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 60
-#      start_period: 60s
-#    volumes:
-#      - ./keycloak/realm-export:/opt/keycloak/data/import
-#    ports:
-#      - "8080:8080"
+  grafana:
+    container_name: grafana
+    env_file:
+      - .env
+    build: ./config/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SERVER_ROOT_URL=http://grafana.sportguide.online
+      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
+      - GF_AUTH_GENERIC_OAUTH_NAME=Keycloak
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
+      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${KEYCLOAK_SECRET}
+      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email
+      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
+      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
+      - GF_AUTH_GENERIC_OAUTH_API_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
+      - GF_AUTH_SIGNOUT_REDIRECT_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/logout
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
+    depends_on:
+      - prometheus
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - ./prometheus:/prometheus
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.1
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
+      - KC_HEALTH_ENABLED=true
+    command: start-dev --import-realm
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep \"200\"'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+    volumes:
+      - ./keycloak/realm-export:/opt/keycloak/data/import
+    ports:
+      - "8080:8080"
 
 #  alertmanager:
 #    container_name: alertmanager

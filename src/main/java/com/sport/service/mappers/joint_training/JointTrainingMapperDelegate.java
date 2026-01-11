@@ -1,6 +1,7 @@
 package com.sport.service.mappers.joint_training;
 
 import com.sport.service.entities.JointTraining;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
 import com.sport.service.mappers.string.DistrictStringMapper;
@@ -39,6 +40,7 @@ public abstract class JointTrainingMapperDelegate implements JointTrainingMapper
             String linkToChatWithCreator = String.format("[@%s](%s)", username, "https://t.me/" + username);
 
             jointTrainingResponses.add(new JointTrainingResponse(
+                    jointTraining.getId(),
                     jointTraining.getTitle(),
                     jointTraining.getDescription(),
                     jointTraining.getDate(),
@@ -55,10 +57,10 @@ public abstract class JointTrainingMapperDelegate implements JointTrainingMapper
     }
 
     @Override
-    public JointTraining createJointTrainingRequestToJointTraining(CreateJointTrainingRequest request) {
+    public JointTraining createJointTrainingRequestToJointTraining(CreateJointTrainingRequest request, Subscriber subscriber) {
         SportType sportType = SportTypeStringMapper
                 .listSportTypeStringToListSportTypeEnum(List.of(request.getSportType())).getFirst();
-        District district = DistrictStringMapper.districtStringToDistrictEnum(Objects.requireNonNull(request.getDistrict()));
+        District district = DistrictStringMapper.districtStringToDistrictEnum(String.valueOf(Objects.requireNonNull(request.getDistrict())));
 
         return JointTraining.builder()
                 .title(request.getTitle())
@@ -66,12 +68,12 @@ public abstract class JointTrainingMapperDelegate implements JointTrainingMapper
                 .date(LocalDate.parse(request.getDate()))
                 .time(LocalTime.parse(Objects.requireNonNull(request.getTime())))
                 .sportType(sportType)
+                .subscriber(subscriber)
                 .placeName(request.getPlaceName())
                 .district(district)
                 .address(request.getAddress())
                 .creatorName(request.getCreatorName())
                 .phoneNumber(request.getPhoneNumber())
-                .approvedByAdmin(false)
                 .build();
     }
 }

@@ -44,16 +44,17 @@ public abstract class EventMapperDelegate implements EventMapper {
                 coordinates = "Координаты места не указаны";
             }
 
-            eventResponses.add(new EventResponse(
-                    event.getName(),
-                    event.getDescription(),
-                    event.getPlaceName(),
-                    districtString,
-                    event.getAddress(),
-                    event.getLink(),
-                    event.getDate().toString(),
-                    event.getTime().toString(),
-                    coordinates));
+            eventResponses.add(EventResponse.builder()
+                    .name(event.getName())
+                    .description(event.getDescription())
+                    .placeName(event.getPlaceName())
+                    .district(districtString)
+                    .address(event.getAddress())
+                    .link(event.getLink())
+                    .date(event.getDate().toString())
+                    .time(event.getTime().toString())
+                    .coordinates(coordinates)
+                    .build());
         }
         return new ListEventResponse(eventResponses);
     }

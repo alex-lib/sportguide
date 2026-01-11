@@ -5,32 +5,69 @@ import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
+import com.sport.service.mappers.place.PlaceMapper;
+import com.sport.service.repositories.PlaceRepository;
+import com.sport.service.specifications.PlaceSpecification;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceFilter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface PlaceService {
+@RequiredArgsConstructor
+@Service
+@Slf4j
+public class PlaceService {
+    private final PlaceRepository placeRepository;
+    private final PlaceMapper placeMapper;
 
-    void create(PlaceDto dto);
+    @Transactional
+    public void create(PlaceDto dto) {
+        placeRepository.save(placeMapper.placeDtoToPlace(dto));
+    }
 
-    void deleteByName(String name);
+    public boolean existsByName(String name) {
+        return placeRepository.existsByName(name);
+    }
 
-    boolean existsByName(String name);
+    public List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findByDistrictAndPlaceTypeAndOutdoor(district, placeType, outdoor);
+    }
 
-    List<Place> findAllByPlaceType(PlaceType placeType);
+    public List<Place> findByDistrictAndPlaceType(District district, PlaceType placeType) {
+        return placeRepository.findByDistrictAndPlaceType(district, placeType);
+    }
 
-    List<Place> findAllByPlaceTypeAndOutdoor(PlaceType placeType, Boolean outdoor);
+    public ListPlaceResponse findAll(PlaceFilter filter) {
+        return placeMapper.listPlaceToListPlaceResponse(placeRepository.findAll(PlaceSpecification.withFilter(filter)));
+    }
 
-    List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, SubDistrict subdistrict, PlaceType placeType, Boolean outdoor);
+    public Place findByName(String name) {
+        return placeRepository.findByName(name);
+    }
 
-    List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, SubDistrict subdistrict, PlaceType placeType);
+    public List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, SubDistrict subdistrict, PlaceType placeType) {
+        return placeRepository.findByDistrictAndSubDistrictAndPlaceType(district, subdistrict, placeType);
+    }
 
-    List<Place> findByDistrictAndPlaceTypeAndOutdoor(District district, PlaceType placeType, Boolean outdoor);
+    public List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, SubDistrict subdistrict, PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findByDistrictAndSubDistrictAndPlaceTypeAndOutdoor(district, subdistrict, placeType, outdoor);
+    }
 
-    List<Place> findByDistrictAndPlaceType(District district, PlaceType placeType);
+    public List<Place> findAllByPlaceType(PlaceType placeType) {
+        return placeRepository.findAllByPlaceType(placeType);
+    }
 
-    ListPlaceResponse findAll(PlaceFilter filter);
+    public List<Place> findAllByPlaceTypeAndOutdoor(PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findAllByPlaceTypeAndOutdoor(placeType, outdoor);
+    }
 
-    Place findByName(String name);
+    @Transactional
+    public void deleteByName(String name) {
+        Place place = placeRepository.findByName(name);
+        if (place != null) placeRepository.delete(place);
+    }
 }
