@@ -114,14 +114,13 @@ services:
       - KC_HEALTH_ENABLED=true
       - KC_PROXY=edge
       - KC_HOSTNAME=auth.sportguide.online
+      - KC_HOSTNAME_ADMIN_URL=http://keycloak:8080
       - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
     command: start-dev --import-realm
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep \"200\"'",
-        ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
       retries: 60
