@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Column;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.EnumType;
@@ -26,7 +25,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@ToString(exclude = {"coach", "jointTrainings", "payments"})
+@ToString(exclude = {"jointTrainings", "payments"})
 public class Subscriber {
     @Id
     @Column(name = "id")
@@ -47,9 +46,6 @@ public class Subscriber {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     public RoleType role;
-
-    @OneToOne(mappedBy = "subscriber")
-    private Coach coach;
 
     @OneToMany(mappedBy = "subscriber", fetch = FetchType.LAZY)
     private List<JointTraining> jointTrainings;

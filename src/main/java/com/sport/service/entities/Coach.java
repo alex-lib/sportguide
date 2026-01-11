@@ -2,7 +2,6 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.coach.Sex;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.entities.training_program.TrainingProgram;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +14,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Lob;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.FetchType;
 import lombok.Getter;
@@ -28,6 +26,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,7 +43,7 @@ public class Coach {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToOne
     @JoinColumn(name = "subscriber_id")
     public Subscriber subscriber;
 
@@ -78,7 +77,8 @@ public class Coach {
     @JoinTable(name = "coaches_work_places",
             joinColumns = @JoinColumn(name = "coach_id"),
             inverseJoinColumns = @JoinColumn(name = "place_id"))
-    private List<Place> workPlaces;
+    @Builder.Default
+    private List<Place> workPlaces = new ArrayList<>();
 
     @Lob
     @JdbcTypeCode(SqlTypes.BINARY)
@@ -98,5 +98,6 @@ public class Coach {
     private Boolean showInWeb;
 
     @ManyToMany(mappedBy = "creators", fetch = FetchType.LAZY)
-    private List<TrainingProgram> trainingPrograms;
+    @Builder.Default
+    private List<TrainingProgram> trainingPrograms = new ArrayList<>();
 }

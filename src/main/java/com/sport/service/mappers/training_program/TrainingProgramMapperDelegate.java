@@ -2,35 +2,21 @@ package com.sport.service.mappers.training_program;
 
 import com.sport.service.entities.Coach;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.entities.training_program.TrainingProgram;
+import com.sport.service.entities.TrainingProgram;
 import com.sport.service.mappers.string.SportTypeStringMapper;
-import com.sport.service.services.impl.CoachServiceImpl;
 import com.sport.service.web.models.training_program.CreateTrainingProgramRequest;
 import com.sport.service.web.models.training_program.ListTrainingProgramResponse;
 import com.sport.service.web.models.training_program.TrainingProgramResponse;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
 public abstract class TrainingProgramMapperDelegate implements TrainingProgramMapper {
-    private CoachServiceImpl coachServiceImpl;
-
-    @Autowired
-    public TrainingProgramMapperDelegate(CoachServiceImpl coachServiceImpl) {
-        this.coachServiceImpl = coachServiceImpl;
-    }
 
     @Override
-    public TrainingProgram createTrainingProgramRequestToTrainingProgram(String mongoId, CreateTrainingProgramRequest request) {
+    public TrainingProgram createTrainingProgramRequestToTrainingProgram(CreateTrainingProgramRequest request, List<Coach> creators) {
         List<SportType> sportTypesEnum = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(request.getSportTypes());
-        List<Coach> creators = new ArrayList<>();
-        for (Long id : request.getCoachesId()) {
-            Coach coach = coachServiceImpl.findById(id);
-            creators.add(coach);
-        }
 
         return TrainingProgram.builder()
                 .creators(creators)
@@ -38,8 +24,10 @@ public abstract class TrainingProgramMapperDelegate implements TrainingProgramMa
                 .price(request.getPrice())
                 .description(request.getDescription())
                 .sportTypes(sportTypesEnum)
-                .programIdInMongoDB(mongoId)
                 .showInWeb(true)
+                .createdAt(LocalDate.now())
+                .haveVideoMaterials(request.getHaveVideoMaterials())
+                .contactToBuy(request.getContactToBuy())
                 .build();
     }
 
@@ -50,13 +38,17 @@ public abstract class TrainingProgramMapperDelegate implements TrainingProgramMa
         for (TrainingProgram trainingProgram : trainingPrograms) {
             List<String> sportTypesStrings = SportTypeStringMapper.listSportTypeEnumToListSportTypeString(trainingProgram.getSportTypes());
             List<String> creators = trainingProgram.getCreators().stream().map(Coach::getName).toList();
+            String contactToBuy = String.format("[@%s](%s)", trainingProgram.getContactToBuy(), "https://t.me/" + trainingProgram.getContactToBuy());
 
-            trainingProgramResponses.add(new TrainingProgramResponse(
-                    trainingProgram.getTitle(),
-                    creators,
-                    trainingProgram.getPrice(),
-                    trainingProgram.getDescription(),
-                    sportTypesStrings));
+            trainingProgramResponses.add(
+                    TrainingProgramResponse.builder()
+                            .title(trainingProgram.getTitle())
+                            .creators(creators)
+                            .price(trainingProgram.getPrice())
+                            .description(trainingProgram.getDescription())
+                            .sportTypes(sportTypesStrings)
+                            .contactToBuy(contactToBuy)
+                            .build());
         }
         return new ListTrainingProgramResponse(trainingProgramResponses);
     }

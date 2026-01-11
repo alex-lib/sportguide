@@ -3,20 +3,30 @@ package com.sport.service.specifications;
 import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
+import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import com.sport.service.mappers.string.DistrictStringMapper;
 import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.web.models.joint_training.JointTrainingFilter;
+import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.sport.service.entities.enums.joint_training.ApprovalStatus.APPROVED;
+
 public interface JointTrainingSpecification {
 
     static Specification<JointTraining> withFilter(JointTrainingFilter filter) {
-        return Specification.where(byJointTrainingDistrict(filter.getDistrict()))
+        return Specification.where(onlyApproved())
+                .and(byJointTrainingDistrict(filter.getDistrict()))
                 .and(byJointTrainingDate(filter.getDate()))
                 .and(byJointTrainingSportType(filter.getSportType()));
+    }
+
+    static Specification<JointTraining> onlyApproved() {
+        return (root, query, cb) ->
+                cb.equal(root.get("approvalStatus"), ApprovalStatus.APPROVED);
     }
 
     static Specification<JointTraining> byJointTrainingSportType(List<String> sportTypesStrings) {

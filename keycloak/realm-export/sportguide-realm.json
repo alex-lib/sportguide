@@ -2,7 +2,7 @@
   "realm": "sportguide",
   "enabled": true,
   "attributes": {
-    "frontendUrl": "http://keycloak:8080"
+    "frontendUrl": "http://auth.sportguide.online"
   },
   "users": [
     {
@@ -114,12 +114,10 @@
       "protocol": "openid-connect",
       "publicClient": false,
       "redirectUris": [
-        "http://localhost:8081/login/oauth2/code/*",
-        "http://localhost:3000/*",
-        "http://localhost:8081/admin"
+        "http://api.sportguide.online/login/oauth2/code/*"
       ],
       "webOrigins": [
-        "*"
+        "http://api.sportguide.online"
       ],
       "defaultClientScopes": [
         "roles",
@@ -136,10 +134,10 @@
       "protocol": "openid-connect",
       "publicClient": false,
       "redirectUris": [
-        "http://localhost:3000/login/generic_oauth"
+        "http://grafana.sportguide.online/login/generic_oauth"
       ],
       "webOrigins": [
-        "http://localhost:3000"
+        "http://grafana.sportguide.online"
       ],
       "defaultClientScopes": [
         "roles",

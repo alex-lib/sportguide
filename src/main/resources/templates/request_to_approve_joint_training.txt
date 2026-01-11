@@ -1,0 +1,13 @@
+<i>Запрос на создание соместной тренировки</i>
+
+🔠 <b>Заголовок:</b> [[${jointTraining.title}]]
+📝 <b>Описание:</b> [[${jointTraining.description}]]
+📅 <b>Дата:</b> [[${jointTraining.date}]]
+⌚️ <b>Время:</b> [[${jointTraining.time}]]
+🏆 <b>Вид спорта:</b> [[${jointTraining.sportType}]]
+📍 <b>Название места:</b> [[${jointTraining.placeName}]]
+🗺 <b>Район:</b> [[${jointTraining.district}]]
+📮 <b>Адрес:</b> [[${jointTraining.address}]]
+📱 <b>Телефон:</b> [[${jointTraining.phoneNumber}]]
+👤 <b>Имя создателя:</b> [[${jointTraining.creatorName}]]
+<i>#создание_совместной_тренировки</i>
