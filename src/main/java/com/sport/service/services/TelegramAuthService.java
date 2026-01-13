@@ -50,6 +50,7 @@ public class TelegramAuthService {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             this.secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
 
+            log.info("secret key from init: {}", Arrays.toString(secretKey));
             log.info("Secret key initialized using SHA-256(botToken)");
             log.info("Secret key length: {} bytes", secretKey.length);
 
@@ -176,8 +177,10 @@ public class TelegramAuthService {
 
             log.info("Data check string:\n{}", dataCheckString);
 
-//            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-//            byte[] secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            byte[] secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
+
+            log.info("secret key from hash: {}", Arrays.toString(secretKey));
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
