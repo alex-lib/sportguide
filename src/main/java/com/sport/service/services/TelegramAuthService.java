@@ -47,7 +47,7 @@ public class TelegramAuthService {
                 throw new IllegalStateException("Telegram bot token is not configured");
             }
 
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            MessageDigest sha256 = MessageDigest.getInstance("HmacSHA256");
             this.secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
 
             log.info("secret key from init: {}", Arrays.toString(secretKey));
@@ -106,7 +106,7 @@ public class TelegramAuthService {
                 throw new RuntimeException("Invalid Telegram auth data");
             }
 
-            if (!validateTelegramData(parseInitDataRaw(initData))) {
+            if (!validateTelegramData(data)) {
                 log.error("Telegram data validation failed");
                 throw new RuntimeException("Invalid Telegram auth data");
             }
@@ -164,11 +164,10 @@ public class TelegramAuthService {
                 return false;
             }
 
-
             Map<String, String> filtered = data.entrySet().stream()
                     .filter(e -> !e.getKey().equals("hash"))
+//                    .filter(e -> !e.getKey().equals("signature"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
 
             String dataCheckString = filtered.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
@@ -177,13 +176,18 @@ public class TelegramAuthService {
 
             log.info("Data check string:\n{}", dataCheckString);
 
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            byte[] secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
+//            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+//            byte[] secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
+//
+//            log.info("secret key from hash: {}", Arrays.toString(secretKey));
 
-            log.info("secret key from hash: {}", Arrays.toString(secretKey));
+            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
+            SecretKeySpec keySpec = new SecretKeySpec("WebAppData".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            hmacSha256.init(keySpec);
+            byte[] correctSecretKey = hmacSha256.doFinal(botToken.getBytes(StandardCharsets.UTF_8));
 
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
+            mac.init(new SecretKeySpec(correctSecretKey, "HmacSHA256"));
             byte[] calculated = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
             String calculatedHash = bytesToHex(calculated);
