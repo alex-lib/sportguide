@@ -57,18 +57,18 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
     command: [ "sh", "-c", "java -jar /app/app.jar" ]
 
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: http://api.sportguide.online
-    ports:
-      - "3001:80"
-    depends_on:
-      - app
-    restart: on-failure
+#  frontend:
+#    container_name: frontend
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#      args:
+#        VITE_API_BASE_URL: http://api.sportguide.online
+#    ports:
+#      - "3001:80"
+#    depends_on:
+#      - app
+#    restart: on-failure
 
   grafana:
     container_name: grafana
@@ -109,6 +109,7 @@ services:
     image: quay.io/keycloak/keycloak:25.0.1
     container_name: keycloak
     environment:
+      - KC_PROXY=edge
       - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
       - KC_HEALTH_ENABLED=true
