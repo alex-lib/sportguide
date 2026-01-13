@@ -14,6 +14,8 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,17 +38,26 @@ public class TelegramAuthService {
     private byte[] secretKey;
 
     @PostConstruct
-    public void init() throws Exception {
-        log.info("Initializing Telegram auth with bot token: {}...",
-                botToken.substring(0, Math.min(10, botToken.length())));
+    public void init() {
+        try {
+            log.info("Initializing TelegramAuthService...");
+            log.info("Bot token configured: {}", botToken != null);
 
-        this.secretKey = generateSecretKey();
-        log.info("Secret key initialized");
-    }
+            if (botToken != null) {
+                this.secretKey = botToken.getBytes(StandardCharsets.UTF_8);
 
-
-    private byte[] generateSecretKey() throws Exception {
-        return botToken.getBytes(StandardCharsets.UTF_8);
+                log.info("Secret key created from bot token");
+                log.info("Bot token preview: {}...",
+                        botToken.substring(0, Math.min(20, botToken.length())));
+                log.info("Secret key length: {} bytes", secretKey.length);
+            } else {
+                log.error("Bot token is null! Check application.properties");
+                throw new IllegalStateException("Telegram bot token is not configured");
+            }
+        } catch (Exception e) {
+            log.error("Failed to initialize TelegramAuthService: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     public JwtResponse authenticate(String initData) {
@@ -87,14 +98,14 @@ public class TelegramAuthService {
 
 
     private boolean validateTelegramData(Map<String, String> data) {
-//        if (data.containsKey("signature")) {
-//            log.info("Validating using signature (new Telegram WebApp)");
-//            log.info("Data contains: {}", data.keySet());
-//            log.info("Signature value: {}", data.get("signature"));
-//            boolean result = validateSignature(data);
-//            log.info("Signature validation result: {}", result);
-//            return result;
-//        }
+        if (data.containsKey("signature")) {
+            log.info("Validating using signature (new Telegram WebApp)");
+            log.info("Data contains: {}", data.keySet());
+            log.info("Signature value: {}", data.get("signature"));
+            boolean result = validateSignature(data);
+            log.info("Signature validation result: {}", result);
+            return result;
+        }
 
         if (data.containsKey("hash")) {
             log.info("Validating using hash (old Telegram WebApp)");
@@ -112,7 +123,6 @@ public class TelegramAuthService {
         return false;
     }
 
-
     private boolean validateSignature(Map<String, String> data) {
         try {
             String signature = data.get("signature");
@@ -121,53 +131,82 @@ public class TelegramAuthService {
                 return false;
             }
 
-            log.info("=== SIGNATURE VALIDATION DETAILS ===");
-            log.info("Received signature: {}", signature);
+            log.info("=== SIGNATURE VALIDATION ===");
+            log.info("Signature received (first 20 chars): {}...",
+                    signature.substring(0, Math.min(20, signature.length())));
             log.info("Signature length: {}", signature.length());
 
+            if (secretKey == null || secretKey.length == 0) {
+                log.error("Secret key is not initialized!");
+                return false;
+            }
+
+            log.info("Secret key length: {} bytes", secretKey.length);
+            log.info("Secret key preview: {}...",
+                    new String(secretKey, 0, Math.min(10, secretKey.length)));
 
             Map<String, String> filtered = data.entrySet().stream()
                     .filter(e -> !e.getKey().equals("signature"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            log.info("Filtered keys (excluding signature): {}", filtered.keySet());
-
+            log.info("Fields for validation: {}", filtered.keySet());
 
             String dataCheckString = filtered.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
-                    .map(e -> e.getKey() + "=" + e.getValue())
+                    .map(e -> {
+                        return e.getKey() + "=" + e.getValue();
+                    })
                     .collect(Collectors.joining("\n"));
 
-            log.info("Data check string for signature ({} chars):\n{}",
-                    dataCheckString.length(), dataCheckString);
+            log.info("Data check string ({} chars)", dataCheckString.length());
+            log.debug("Data check string:\n{}", dataCheckString);
 
             Mac mac = Mac.getInstance("HmacSHA256");
+
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
-            byte[] calculated = mac.doFinal(dataCheckString.getBytes());
+            byte[] calculated = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
+            String base64Standard = Base64.getEncoder().encodeToString(calculated);
+            String calculatedBase64Url = base64Standard
+                    .replace('+', '-')
+                    .replace('/', '_')
+                    .replace("=", "");
 
-            String calculatedBase64Url = Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(calculated);
+            log.info("=== CALCULATION RESULTS ===");
+            log.info("Calculated Base64 URL-safe: {}", calculatedBase64Url);
+            log.info("Calculated length: {}", calculatedBase64Url.length());
+            log.info("Received signature: {}", signature);
 
-            log.debug("Calculated signature (Base64Url): {}", calculatedBase64Url);
-            log.debug("Match: {}", calculatedBase64Url.equals(signature));
-
-            String calculatedBase64 = Base64.getUrlEncoder().withoutPadding()
-                    .encodeToString(calculated);
-            log.info("Calculated Base64Url: {}", calculatedBase64Url);
-
-            // 2. Hex (для старого формата)
             String calculatedHex = bytesToHex(calculated);
-            log.info("Calculated Hex: {}", calculatedHex);
+            log.info("Calculated Hex: {}...", calculatedHex.substring(0, Math.min(32, calculatedHex.length())));
 
-            boolean base64UrlMatch = calculatedBase64Url.equals(signature);
-            boolean hexMatch = calculatedHex.equals(signature);
-            boolean base64Match = calculatedBase64.equals(signature);
+            boolean match = calculatedBase64Url.equals(signature);
+            log.info("Signature match: {}", match);
 
-            log.info("Matches - Base64Url: {}, Hex: {}, Base64: {}",
-                    base64UrlMatch, hexMatch, base64Match);
+            if (!match) {
+                log.warn("=== MISMATCH DIAGNOSTICS ===");
+                log.warn("Expected length: {}, Actual length: {}",
+                        calculatedBase64Url.length(), signature.length());
 
-            return calculatedBase64Url.equals(signature);
+                int compareLength = Math.min(20, Math.min(calculatedBase64Url.length(), signature.length()));
+                for (int i = 0; i < compareLength; i++) {
+                    if (calculatedBase64Url.charAt(i) != signature.charAt(i)) {
+                        log.warn("First mismatch at position {}: expected '{}', got '{}'",
+                                i, calculatedBase64Url.charAt(i), signature.charAt(i));
+                        break;
+                    }
+                }
+
+                boolean standardBase64Match = base64Standard.equals(signature);
+                log.info("Standard Base64 match: {}", standardBase64Match);
+
+                boolean hexMatch = calculatedHex.equals(signature);
+                log.info("Hex match: {}", hexMatch);
+
+                return standardBase64Match || hexMatch;
+            }
+
+            return true;
 
         } catch (Exception e) {
             log.error("Signature validation error: {}", e.getMessage(), e);
@@ -184,32 +223,58 @@ public class TelegramAuthService {
             }
 
             log.info("=== HASH VALIDATION DETAILS ===");
-            log.info("Received hash: {}", receivedHash);
-            log.info("Hash length: {}", receivedHash.length());
+            log.info("Received hash: {}...",
+                    receivedHash.substring(0, Math.min(16, receivedHash.length())));
 
             Map<String, String> filtered = data.entrySet().stream()
-                    .filter(e -> !e.getKey().equals("hash"))
+                    .filter(e -> !e.getKey().equals("hash") && !e.getKey().equals("signature"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            log.info("Filtered keys (excluding hash): {}", filtered.keySet());
+            log.info("Filtered keys (excluding hash & signature): {}", filtered.keySet());
 
             String dataCheckString = filtered.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
                     .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining("\n"));
 
-            log.info("Data check string for hash ({} chars):\n{}",
-                    dataCheckString.length(), dataCheckString);
+            log.info("Data check string length: {} chars", dataCheckString.length());
+            log.debug("Data check string for hash:\n{}", dataCheckString);
+
+            if (secretKey == null || secretKey.length == 0) {
+                log.error("Secret key is null or empty!");
+                return false;
+            }
+
+            log.info("Secret key length: {} bytes", secretKey.length);
+            log.info("Secret key preview: {}...",
+                    new String(secretKey, 0, Math.min(20, secretKey.length)));
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
-            byte[] calculated = mac.doFinal(dataCheckString.getBytes());
-
+            byte[] calculated = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
             String calculatedHash = bytesToHex(calculated);
 
-            log.debug("Calculated hash: {}", calculatedHash);
-            log.debug("Match: {}", calculatedHash.equals(receivedHash));
+            log.info("Calculated hash: {}", calculatedHash);
+            log.info("Received hash:   {}", receivedHash);
+            log.info("Hash match: {}", calculatedHash.equals(receivedHash));
+
+            if (!calculatedHash.equals(receivedHash)) {
+                log.warn("=== HASH MISMATCH DIAGNOSTICS ===");
+                log.warn("Calculated length: {}, Received length: {}",
+                        calculatedHash.length(), receivedHash.length());
+
+                int compareLength = Math.min(10, Math.min(calculatedHash.length(), receivedHash.length()));
+                String calculatedStart = calculatedHash.substring(0, compareLength);
+                String receivedStart = receivedHash.substring(0, compareLength);
+                log.warn("First {} chars - Calculated: {}, Received: {}",
+                        compareLength, calculatedStart, receivedStart);
+
+                if (calculatedHash.equalsIgnoreCase(receivedHash)) {
+                    log.warn("Hashes match case-insensitive!");
+                    return true;
+                }
+            }
 
             return calculatedHash.equals(receivedHash);
 
