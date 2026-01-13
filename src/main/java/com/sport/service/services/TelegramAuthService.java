@@ -132,8 +132,59 @@ public class TelegramAuthService {
     }
 
     private boolean validateTelegramHash(Map<String, String> data) {
+        try {
+            String signature = data.get("signature");
+            String receivedHash = data.get("hash");
+
+            if (signature != null) {
+                return validateSignature(data);
+            } else if (receivedHash != null) {
+                return validateOldHash(data);
+            }
+
+            return false;
+
+        } catch (Exception e) {
+            log.error("Hash validation error: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private boolean validateSignature(Map<String, String> data) {
+        try {
+            String signature = data.get("signature");
+            if (signature == null) return false;
+
+            Map<String, String> filtered = data.entrySet().stream()
+                    .filter(e -> !e.getKey().equals("signature"))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            String dataCheckString = filtered.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(e -> e.getKey() + "=" + e.getValue())
+                    .collect(Collectors.joining("\n"));
+
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
+            byte[] calculated = mac.doFinal(dataCheckString.getBytes());
+
+            String calculatedSignature = IntStream.range(0, calculated.length)
+                    .mapToObj(i -> String.format("%02x", calculated[i] & 0xff))
+                    .collect(Collectors.joining());
+
+            log.info("Calculated signature: {}", calculatedSignature);
+            log.info("Received signature:  {}", signature);
+
+            return calculatedSignature.equals(signature);
+
+        } catch (Exception e) {
+            log.error("Signature validation error: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private boolean validateOldHash(Map<String, String> data) {
         String receivedHash = data.get("hash");
-        log.info("Validating hash: {}", receivedHash);
         if (receivedHash == null) return false;
 
         Map<String, String> filtered = data.entrySet().stream()
@@ -144,13 +195,6 @@ public class TelegramAuthService {
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
-        //example:
-        //auth_date=123
-        //user={"id":123}
-        //query_id=AAGXJt8AAAAAAafJt3xYdPq3
-
-        log.info("Data check string:\n{}", dataCheckString);
-        log.info("Data check string bytes: {}", dataCheckString.getBytes());
 
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -161,14 +205,49 @@ public class TelegramAuthService {
                     .mapToObj(i -> String.format("%02x", calculated[i] & 0xff))
                     .collect(Collectors.joining());
 
-//          or  String calculatedHash = HexFormat.of().formatHex(calculated);
-            log.info("Calculated hash: {}", calculatedHash);
-            log.info("Received hash:  {}", receivedHash);
-            log.info("Match: {}", calculatedHash.equals(receivedHash));
             return calculatedHash.equals(receivedHash);
-
         } catch (Exception e) {
             return false;
         }
     }
+//    private boolean validateTelegramHash(Map<String, String> data) {
+//        String receivedHash = data.get("hash");
+//        log.info("Validating hash: {}", receivedHash);
+//        if (receivedHash == null) return false;
+//
+//        Map<String, String> filtered = data.entrySet().stream()
+//                .filter(e -> !e.getKey().equals("hash"))
+//                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+//
+//        String dataCheckString = filtered.entrySet().stream()
+//                .sorted(Map.Entry.comparingByKey())
+//                .map(e -> e.getKey() + "=" + e.getValue())
+//                .collect(Collectors.joining("\n"));
+//        //example:
+//        //auth_date=123
+//        //user={"id":123}
+//        //query_id=AAGXJt8AAAAAAafJt3xYdPq3
+//
+//        log.info("Data check string:\n{}", dataCheckString);
+//        log.info("Data check string bytes: {}", dataCheckString.getBytes());
+//
+//        try {
+//            Mac mac = Mac.getInstance("HmacSHA256");
+//            mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
+//            byte[] calculated = mac.doFinal(dataCheckString.getBytes());
+//
+//            String calculatedHash = IntStream.range(0, calculated.length)
+//                    .mapToObj(i -> String.format("%02x", calculated[i] & 0xff))
+//                    .collect(Collectors.joining());
+//
+////          or  String calculatedHash = HexFormat.of().formatHex(calculated);
+//            log.info("Calculated hash: {}", calculatedHash);
+//            log.info("Received hash:  {}", receivedHash);
+//            log.info("Match: {}", calculatedHash.equals(receivedHash));
+//            return calculatedHash.equals(receivedHash);
+//
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 }
