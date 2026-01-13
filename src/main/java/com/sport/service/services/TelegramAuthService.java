@@ -87,16 +87,26 @@ public class TelegramAuthService {
 
 
     private boolean validateTelegramData(Map<String, String> data) {
-
         if (data.containsKey("signature")) {
             log.info("Validating using signature (new Telegram WebApp)");
-            return validateSignature(data);
+            log.info("Data contains: {}", data.keySet());
+            log.info("Signature value: {}", data.get("signature"));
+            boolean result = validateSignature(data);
+            log.info("Signature validation result: {}", result);
+            return result;
         }
 
         else if (data.containsKey("hash")) {
             log.info("Validating using hash (old Telegram WebApp)");
-            return validateHash(data);
+            log.info("Data contains: {}", data.keySet());
+            log.info("Hash value: {}", data.get("hash"));
+            boolean result = validateHash(data);
+            log.info("Hash validation result: {}", result);
+            return result;
         }
+
+        log.error("Neither signature nor hash found in Telegram data");
+        log.error("Available keys: {}", data.keySet());
 
         log.error("Neither signature nor hash found in Telegram data");
         return false;
@@ -111,12 +121,16 @@ public class TelegramAuthService {
                 return false;
             }
 
-            log.debug("Received signature: {}", signature);
+            log.info("=== SIGNATURE VALIDATION DETAILS ===");
+            log.info("Received signature: {}", signature);
+            log.info("Signature length: {}", signature.length());
 
 
             Map<String, String> filtered = data.entrySet().stream()
                     .filter(e -> !e.getKey().equals("signature"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            log.info("Filtered keys (excluding signature): {}", filtered.keySet());
 
 
             String dataCheckString = filtered.entrySet().stream()
@@ -124,8 +138,8 @@ public class TelegramAuthService {
                     .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining("\n"));
 
-            log.debug("Data check string for signature:\n{}", dataCheckString);
-
+            log.info("Data check string for signature ({} chars):\n{}",
+                    dataCheckString.length(), dataCheckString);
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
@@ -138,6 +152,21 @@ public class TelegramAuthService {
             log.debug("Calculated signature (Base64Url): {}", calculatedBase64Url);
             log.debug("Match: {}", calculatedBase64Url.equals(signature));
 
+            String calculatedBase64 = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(calculated);
+            log.info("Calculated Base64Url: {}", calculatedBase64Url);
+
+            // 2. Hex (для старого формата)
+            String calculatedHex = bytesToHex(calculated);
+            log.info("Calculated Hex: {}", calculatedHex);
+
+            boolean base64UrlMatch = calculatedBase64Url.equals(signature);
+            boolean hexMatch = calculatedHex.equals(signature);
+            boolean base64Match = calculatedBase64.equals(signature);
+
+            log.info("Matches - Base64Url: {}, Hex: {}, Base64: {}",
+                    base64UrlMatch, hexMatch, base64Match);
+
             return calculatedBase64Url.equals(signature);
 
         } catch (Exception e) {
@@ -145,7 +174,6 @@ public class TelegramAuthService {
             return false;
         }
     }
-
 
     private boolean validateHash(Map<String, String> data) {
         try {
@@ -155,21 +183,23 @@ public class TelegramAuthService {
                 return false;
             }
 
-            log.debug("Received hash: {}", receivedHash);
-
+            log.info("=== HASH VALIDATION DETAILS ===");
+            log.info("Received hash: {}", receivedHash);
+            log.info("Hash length: {}", receivedHash.length());
 
             Map<String, String> filtered = data.entrySet().stream()
                     .filter(e -> !e.getKey().equals("hash"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+            log.info("Filtered keys (excluding hash): {}", filtered.keySet());
 
             String dataCheckString = filtered.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
                     .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining("\n"));
 
-            log.debug("Data check string for hash:\n{}", dataCheckString);
-
+            log.info("Data check string for hash ({} chars):\n{}",
+                    dataCheckString.length(), dataCheckString);
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
