@@ -48,7 +48,7 @@ spring:
             user-name-attribute: preferred_username
       resource-server:
         jwt:
-          issuer-uri: http://auth.sportguide.online/realms/sportguide
+          issuer-uri: https://auth.sportguide.online/realms/sportguide
   data:
     redis:
       host: redis
