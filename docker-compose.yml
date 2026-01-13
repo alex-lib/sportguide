@@ -86,10 +86,10 @@ services:
       - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
       - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${KEYCLOAK_SECRET}
       - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email
-      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/auth
-      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/token
-      - GF_AUTH_GENERIC_OAUTH_API_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/userinfo
-      - GF_AUTH_SIGNOUT_REDIRECT_URL=http://keycloak:8080/realms/sportguide/protocol/openid-connect/logout
+      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/auth
+      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/token
+      - GF_AUTH_GENERIC_OAUTH_API_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/userinfo
+      - GF_AUTH_SIGNOUT_REDIRECT_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/logout
       - GF_AUTH_DISABLE_LOGIN_FORM=true
       - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
     depends_on:
