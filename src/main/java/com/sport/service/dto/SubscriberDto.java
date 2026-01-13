@@ -15,4 +15,12 @@ public class SubscriberDto {
     public String firstName;
     @JsonProperty("last_name")
     public String lastName;
+    @JsonProperty("language_code")
+    private String languageCode;
+    @JsonProperty("is_premium")
+    private Boolean isPremium;
+    @JsonProperty("allows_write_to_pm")
+    private Boolean allowsWriteToPm;
+    @JsonProperty("photo_url")
+    private String photoUrl;
 }
