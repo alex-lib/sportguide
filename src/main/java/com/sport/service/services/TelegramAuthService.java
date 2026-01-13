@@ -43,22 +43,22 @@ public class TelegramAuthService {
             log.info("Initializing TelegramAuthService...");
             log.info("Bot token configured: {}", botToken != null);
 
-            if (botToken != null) {
-                this.secretKey = botToken.getBytes(StandardCharsets.UTF_8);
-
-                log.info("Secret key created from bot token");
-                log.info("Bot token preview: {}...",
-                        botToken.substring(0, Math.min(20, botToken.length())));
-                log.info("Secret key length: {} bytes", secretKey.length);
-            } else {
-                log.error("Bot token is null! Check application.properties");
+            if (botToken == null || botToken.isBlank()) {
                 throw new IllegalStateException("Telegram bot token is not configured");
             }
+
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            this.secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
+
+            log.info("Secret key initialized using SHA-256(botToken)");
+            log.info("Secret key length: {} bytes", secretKey.length); // всегда 32
+
         } catch (Exception e) {
-            log.error("Failed to initialize TelegramAuthService: {}", e.getMessage(), e);
-            throw e;
+            log.error("Failed to initialize TelegramAuthService", e);
+            throw new IllegalStateException(e);
         }
     }
+
 
     public JwtResponse authenticate(String initData) {
         log.info("Authenticating Telegram user...");
@@ -222,32 +222,22 @@ public class TelegramAuthService {
                 return false;
             }
 
-            log.info("=== HASH VALIDATION DETAILS ===");
-            log.info("Received hash: {}...",
-                    receivedHash.substring(0, Math.min(16, receivedHash.length())));
 
             Map<String, String> filtered = data.entrySet().stream()
-                    .filter(e -> !e.getKey().equals("hash") && !e.getKey().equals("signature"))
+                    .filter(e -> !e.getKey().equals("hash"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            log.info("Filtered keys (excluding hash & signature): {}", filtered.keySet());
 
             String dataCheckString = filtered.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
                     .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining("\n"));
 
-            log.info("Data check string length: {} chars", dataCheckString.length());
-            log.debug("Data check string for hash:\n{}", dataCheckString);
+            log.debug("Data check string:\n{}", dataCheckString);
 
-            if (secretKey == null || secretKey.length == 0) {
-                log.error("Secret key is null or empty!");
-                return false;
-            }
 
-            log.info("Secret key length: {} bytes", secretKey.length);
-            log.info("Secret key preview: {}...",
-                    new String(secretKey, 0, Math.min(20, secretKey.length)));
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            byte[] secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
@@ -257,32 +247,15 @@ public class TelegramAuthService {
 
             log.info("Calculated hash: {}", calculatedHash);
             log.info("Received hash:   {}", receivedHash);
-            log.info("Hash match: {}", calculatedHash.equals(receivedHash));
-
-            if (!calculatedHash.equals(receivedHash)) {
-                log.warn("=== HASH MISMATCH DIAGNOSTICS ===");
-                log.warn("Calculated length: {}, Received length: {}",
-                        calculatedHash.length(), receivedHash.length());
-
-                int compareLength = Math.min(10, Math.min(calculatedHash.length(), receivedHash.length()));
-                String calculatedStart = calculatedHash.substring(0, compareLength);
-                String receivedStart = receivedHash.substring(0, compareLength);
-                log.warn("First {} chars - Calculated: {}, Received: {}",
-                        compareLength, calculatedStart, receivedStart);
-
-                if (calculatedHash.equalsIgnoreCase(receivedHash)) {
-                    log.warn("Hashes match case-insensitive!");
-                    return true;
-                }
-            }
 
             return calculatedHash.equals(receivedHash);
 
         } catch (Exception e) {
-            log.error("Hash validation error: {}", e.getMessage(), e);
+            log.error("Hash validation error", e);
             return false;
         }
     }
+
 
     private String bytesToHex(byte[] bytes) {
         StringBuilder hex = new StringBuilder();
