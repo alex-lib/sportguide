@@ -98,14 +98,14 @@ public class TelegramAuthService {
 
 
     private boolean validateTelegramData(Map<String, String> data) {
-        if (data.containsKey("signature")) {
-            log.info("Validating using signature (new Telegram WebApp)");
-            log.info("Data contains: {}", data.keySet());
-            log.info("Signature value: {}", data.get("signature"));
-            boolean result = validateSignature(data);
-            log.info("Signature validation result: {}", result);
-            return result;
-        }
+//        if (data.containsKey("signature")) {
+//            log.info("Validating using signature (new Telegram WebApp)");
+//            log.info("Data contains: {}", data.keySet());
+//            log.info("Signature value: {}", data.get("signature"));
+//            boolean result = validateSignature(data);
+//            log.info("Signature validation result: {}", result);
+//            return result;
+//        }
 
         if (data.containsKey("hash")) {
             log.info("Validating using hash (old Telegram WebApp)");
