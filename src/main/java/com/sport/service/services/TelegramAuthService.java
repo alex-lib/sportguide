@@ -47,7 +47,7 @@ public class TelegramAuthService {
                 throw new IllegalStateException("Telegram bot token is not configured");
             }
 
-            MessageDigest sha256 = MessageDigest.getInstance("HmacSHA256");
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             this.secretKey = sha256.digest(botToken.getBytes(StandardCharsets.UTF_8));
 
             log.info("secret key from init: {}", Arrays.toString(secretKey));
