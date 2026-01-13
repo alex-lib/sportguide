@@ -7,6 +7,7 @@ import com.sport.service.entities.Subscriber;
 import com.sport.service.web.models.auth.JwtResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -22,6 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TelegramAuthService {
     private final SubscriberService subscriberService;
     private final JwtService jwtService;
@@ -41,16 +43,34 @@ public class TelegramAuthService {
 
     //https://github.com/riobits/Telegram-Web-API-Cheatsheet?utm_source=chatgpt.com
     public JwtResponse authenticate(String initData) {
+        log.info("Raw initData received: {}", initData);
+        log.info("InitData length: {}", initData.length());
         Map<String, String> data = parseInitData(initData);
-
+        log.info("Parsed data keys: {}", data.keySet());
+        log.info("Parsed data: {}", data);
 //        if ("DEV_MODE".equals(initData)) {
 //            Subscriber devUser = subscriberService.findOrCreateDevUser();
 //            return new JwtResponse(jwtService.generateToken(devUser));
 //        }
 
+
         if (!validateTelegramHash(data)) {
+            log.error("InitData is null or empty");
             throw new RuntimeException("Invalid Telegram auth data");
         }
+
+        if (!data.containsKey("hash")) {
+            log.error("No hash found in initData");
+            throw new RuntimeException("Invalid Telegram auth data: missing hash");
+        }
+
+        if (!data.containsKey("user")) {
+            log.error("No user found in initData");
+            throw new RuntimeException("Invalid Telegram auth data: missing user");
+        }
+
+        log.info("Received hash: {}", data.get("hash"));
+        log.info("User JSON: {}", data.get("user"));
 
         String userJson = data.get("user");
         if (userJson == null) throw new RuntimeException("Invalid Telegram auth data");
@@ -89,17 +109,22 @@ public class TelegramAuthService {
     //&hash=9e4f2b4c6f0c3d8e7b3b1e6c1a2d4f8a9c7e4b2ff3c9d1a6b4f2c8c9d1e0f2a - подпись, для проверки подлинности данных
     private Map<String, String> parseInitData(String initData) {
         Map<String, String> result = new HashMap<>();
-
+        log.debug("Parsing initData: {}", initData);
 //        if (!initData.contains("=")) {
 //            return result;
 //        }
 
         for (String pair : initData.split("&")) {
-            if (!pair.contains("=")) continue;
+
+            if (!pair.contains("=")) {
+                log.warn("Skipping malformed pair: {}", pair);
+                continue;
+            }
 
             String[] keyAndValue = pair.split("=", 2);
             String key = keyAndValue[0];
             String value = URLDecoder.decode(keyAndValue[1], StandardCharsets.UTF_8);
+            log.debug("Parsed: {} = {}", key, value);
             result.put(key, value);
         }
 
@@ -108,6 +133,7 @@ public class TelegramAuthService {
 
     private boolean validateTelegramHash(Map<String, String> data) {
         String receivedHash = data.get("hash");
+        log.info("Validating hash: {}", receivedHash);
         if (receivedHash == null) return false;
 
         Map<String, String> filtered = data.entrySet().stream()
@@ -123,6 +149,9 @@ public class TelegramAuthService {
         //user={"id":123}
         //query_id=AAGXJt8AAAAAAafJt3xYdPq3
 
+        log.info("Data check string:\n{}", dataCheckString);
+        log.info("Data check string bytes: {}", dataCheckString.getBytes());
+
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
@@ -133,7 +162,9 @@ public class TelegramAuthService {
                     .collect(Collectors.joining());
 
 //          or  String calculatedHash = HexFormat.of().formatHex(calculated);
-
+            log.info("Calculated hash: {}", calculatedHash);
+            log.info("Received hash:  {}", receivedHash);
+            log.info("Match: {}", calculatedHash.equals(receivedHash));
             return calculatedHash.equals(receivedHash);
 
         } catch (Exception e) {
