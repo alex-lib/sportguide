@@ -80,7 +80,7 @@ services:
     volumes:
       - ./config/grafana/provisioning:/etc/grafana/provisioning
     environment:
-      - GF_SERVER_ROOT_URL=http://grafana.sportguide.online
+      - GF_SERVER_ROOT_URL=https://grafana.sportguide.online
       - GF_AUTH_GENERIC_OAUTH_ENABLED=true
       - GF_AUTH_GENERIC_OAUTH_NAME=Keycloak
       - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
