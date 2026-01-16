@@ -22,9 +22,9 @@ function App() {
         // Initialize Telegram WebApp
         WebApp.ready();
         
-        // Set theme colors
-        WebApp.setHeaderColor('#3390ec');
-        WebApp.setBackgroundColor('#ffffff');
+        // Set theme colors - modern green/teal scheme
+        WebApp.setHeaderColor('#1a9b8e');
+        WebApp.setBackgroundColor('#f0f9f8');
 
         // Check if already authenticated
         if (authService.isAuthenticated()) {

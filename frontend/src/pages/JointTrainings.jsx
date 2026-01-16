@@ -1,13 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { apiService } from '../services/api.js';
+import FilterPanel from '../components/FilterPanel.jsx';
+import { DISTRICTS, SPORT_TYPES } from '../constants/filters.js';
 import '../App.css';
 import WebApp from '@twa-dev/sdk';
 
 const JointTrainings = () => {
   const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [filter, setFilter] = useState({
+    date: null,
+    sportType: [],
+    district: null,
+  });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -20,22 +28,64 @@ const JointTrainings = () => {
     phoneNumber: '',
   });
 
-  useEffect(() => {
-    loadTrainings();
-  }, []);
-
-  const loadTrainings = async () => {
+  const loadTrainings = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await apiService.getJointTrainings();
-      setTrainings(response.list || []);
+      setError(null);
+      const filterParams = {};
+      if (filter.date) filterParams.date = filter.date;
+      if (filter.sportType && filter.sportType.length > 0) {
+        filterParams.sportType = filter.sportType;
+      }
+      if (filter.district) filterParams.district = filter.district;
+
+      const response = await apiService.getJointTrainings(filterParams);
+      setTrainings(response?.list || []);
     } catch (error) {
       console.error('Failed to load joint trainings:', error);
+      setError(error.message || 'Не удалось загрузить тренировки');
+      setTrainings([]);
       WebApp.showAlert('Не удалось загрузить тренировки');
     } finally {
       setLoading(false);
     }
+  }, [filter]);
+
+  useEffect(() => {
+    loadTrainings();
+  }, [loadTrainings]);
+
+  const handleFilterChange = (key, value) => {
+    setFilter((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
+
+  const handleResetFilters = () => {
+    setFilter({
+      date: null,
+      sportType: [],
+      district: null,
+    });
+  };
+
+  const filterConfig = [
+    {
+      type: 'chip',
+      key: 'district',
+      title: 'Район',
+      options: DISTRICTS,
+      value: filter.district,
+    },
+    {
+      type: 'multiselect',
+      key: 'sportType',
+      title: 'Вид спорта',
+      options: SPORT_TYPES,
+      value: filter.sportType,
+    },
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,14 +123,41 @@ const JointTrainings = () => {
   };
 
   const handleEdit = (training) => {
+    // Format date and time for HTML inputs
+    let formattedDate = training.date;
+    let formattedTime = training.time;
+    
+    if (training.date) {
+      // If date is already in YYYY-MM-DD format, use it; otherwise format it
+      if (typeof training.date === 'string' && training.date.includes('T')) {
+        formattedDate = training.date.split('T')[0];
+      } else if (typeof training.date === 'string') {
+        formattedDate = training.date;
+      } else {
+        // If it's a Date object or other format
+        const dateObj = new Date(training.date);
+        formattedDate = dateObj.toISOString().split('T')[0];
+      }
+    }
+    
+    if (training.time) {
+      // If time is already in HH:MM format, use it; otherwise format it
+      if (typeof training.time === 'string' && training.time.includes(':')) {
+        // Extract HH:MM from HH:MM:SS if needed
+        formattedTime = training.time.substring(0, 5);
+      } else {
+        formattedTime = training.time;
+      }
+    }
+    
     setFormData({
       title: training.title,
       description: training.description,
-      date: training.date,
-      time: training.time,
-      sportType: training.sportType,
+      date: formattedDate,
+      time: formattedTime,
+      sportType: training.sportType || '',
       placeName: training.placeName,
-      district: training.district,
+      district: training.district || '',
       address: training.address,
       phoneNumber: training.phoneNumber,
     });
@@ -119,15 +196,27 @@ const JointTrainings = () => {
     return (
       <div className="page-container">
         <h1 className="page-title">Совместные тренировки</h1>
-        <div className="empty-state">Загрузка...</div>
+        <div className="empty-state">
+          <div className="empty-state-icon">⏳</div>
+          <p>Загрузка...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="page-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h1 className="page-title" style={{ marginBottom: 0 }}>Совместные тренировки</h1>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
+        <h1 className="page-title" style={{ marginBottom: 0 }}>
+          Совместные тренировки
+        </h1>
         <button
           className="btn btn-primary btn-small"
           onClick={() => {
@@ -139,6 +228,18 @@ const JointTrainings = () => {
           + Создать
         </button>
       </div>
+
+      <FilterPanel
+        filters={filterConfig}
+        onFilterChange={handleFilterChange}
+        onReset={handleResetFilters}
+      />
+
+      {error && (
+        <div className="card" style={{ background: '#fef2f2', borderColor: 'var(--error-color)' }}>
+          <p style={{ color: 'var(--error-color)', margin: 0 }}>⚠️ {error}</p>
+        </div>
+      )}
 
       {showForm && (
         <div className="card" style={{ marginBottom: '16px' }}>
@@ -185,13 +286,19 @@ const JointTrainings = () => {
             </div>
             <div className="form-group">
               <label className="form-label">Вид спорта</label>
-              <input
-                type="text"
-                className="form-input"
+              <select
+                className="form-select"
                 value={formData.sportType}
                 onChange={(e) => setFormData({ ...formData, sportType: e.target.value })}
                 required
-              />
+              >
+                <option value="">Выберите вид спорта</option>
+                {SPORT_TYPES.map((sport) => (
+                  <option key={sport.value} value={sport.value}>
+                    {sport.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label className="form-label">Место</label>
@@ -205,13 +312,19 @@ const JointTrainings = () => {
             </div>
             <div className="form-group">
               <label className="form-label">Район</label>
-              <input
-                type="text"
-                className="form-input"
+              <select
+                className="form-select"
                 value={formData.district}
                 onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                 required
-              />
+              >
+                <option value="">Выберите район</option>
+                {DISTRICTS.map((district) => (
+                  <option key={district.value} value={district.value}>
+                    {district.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label className="form-label">Адрес</label>
@@ -253,10 +366,13 @@ const JointTrainings = () => {
         </div>
       )}
 
-      {trainings.length === 0 ? (
+      {!error && trainings.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">👥</div>
           <p>Тренировки не найдены</p>
+          <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>
+            Попробуйте изменить фильтры или создать новую тренировку
+          </p>
         </div>
       ) : (
         <div>

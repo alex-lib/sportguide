@@ -6,21 +6,29 @@
 
 :root {
   --tg-theme-bg-color: #ffffff;
-  --tg-theme-text-color: #000000;
-  --tg-theme-hint-color: #999999;
-  --tg-theme-link-color: #3390ec;
-  --tg-theme-button-color: #3390ec;
+  --tg-theme-text-color: #1a1a1a;
+  --tg-theme-hint-color: #6b7280;
+  --tg-theme-link-color: #1a9b8e;
+  --tg-theme-button-color: #1a9b8e;
   --tg-theme-button-text-color: #ffffff;
-  --tg-theme-secondary-bg-color: #f1f1f1;
+  --tg-theme-secondary-bg-color: #f0f9f8;
   
-  --primary-color: #3390ec;
-  --secondary-color: #f1f1f1;
-  --text-primary: #000000;
-  --text-secondary: #999999;
-  --border-color: #e0e0e0;
-  --success-color: #4caf50;
-  --error-color: #f44336;
-  --warning-color: #ff9800;
+  /* Modern green/teal color scheme based on Voronezh Sport Guide */
+  --primary-color: #1a9b8e;
+  --primary-dark: #158075;
+  --primary-light: #2dccb3;
+  --primary-lighter: #e0f7f5;
+  --secondary-color: #f0f9f8;
+  --accent-orange: #ff6b35;
+  --accent-orange-light: #ff8c66;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --border-color: #d1e5e2;
+  --success-color: #10b981;
+  --error-color: #ef4444;
+  --warning-color: #f59e0b;
+  --card-shadow: 0 2px 8px rgba(26, 155, 142, 0.08);
+  --card-shadow-hover: 0 4px 16px rgba(26, 155, 142, 0.12);
 }
 
 body {
