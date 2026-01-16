@@ -92,7 +92,7 @@ class ApiService {
   }
 
   // Joint Trainings
-  async getJointTrainings(filter) {
+  async getJointTrainings(filter = {}) {
     const response = await this.api.get(
       API_ENDPOINTS.JOINT_TRAININGS,
       { params: filter }
@@ -113,7 +113,7 @@ class ApiService {
   }
 
   // Training Programs
-  async getTrainingPrograms(filter) {
+  async getTrainingPrograms(filter = {}) {
     const response = await this.api.get(
       API_ENDPOINTS.TRAINING_PROGRAMS,
       { params: filter }
@@ -122,7 +122,7 @@ class ApiService {
   }
 
   // Coaches
-  async getCoaches(filter) {
+  async getCoaches(filter = {}) {
     const response = await this.api.get(API_ENDPOINTS.COACHES, {
       params: filter,
     });
