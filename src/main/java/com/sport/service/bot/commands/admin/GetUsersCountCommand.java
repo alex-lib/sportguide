@@ -1,6 +1,6 @@
 package com.sport.service.bot.commands.admin;
 
-import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.annotations.AdminOnly;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;

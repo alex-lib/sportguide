@@ -1,4 +1,4 @@
-package com.sport.service.aop.annotations;
+package com.sport.service.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

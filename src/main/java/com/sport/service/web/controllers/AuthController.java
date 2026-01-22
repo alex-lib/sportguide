@@ -18,8 +18,8 @@ public class AuthController {
     private final TelegramAuthService telegramAuthServiceImpl;
 
     @PostMapping("/telegram")
-    public JwtResponse authenticateViaTelegram(@RequestBody TelegramAuthRequest request) {
-        log.info("Auth request received");
+    public JwtResponse authenticateByTelegram(@RequestBody TelegramAuthRequest request) {
+        log.info("Authentication request received: " + request);
         return telegramAuthServiceImpl.authenticate(request.getInitData());
     }
 }

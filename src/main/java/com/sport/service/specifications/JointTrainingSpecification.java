@@ -7,13 +7,10 @@ import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import com.sport.service.mappers.string.DistrictStringMapper;
 import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.web.models.joint_training.JointTrainingFilter;
-import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import static com.sport.service.entities.enums.joint_training.ApprovalStatus.APPROVED;
 
 public interface JointTrainingSpecification {
 

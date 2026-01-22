@@ -1,6 +1,6 @@
 package com.sport.service.aop.aspects;
 
-import com.sport.service.aop.annotations.AdminOnly;
+import com.sport.service.annotations.AdminOnly;
 import com.sport.service.mappers.ButtonToCommandMapper;
 import com.sport.service.services.SubscriberService;
 import lombok.RequiredArgsConstructor;
