@@ -5,6 +5,7 @@
 }
 
 :root {
+  /* Default values - will be overridden by Telegram theme if available */
   --tg-theme-bg-color: #ffffff;
   --tg-theme-text-color: #1a1a1a;
   --tg-theme-hint-color: #6b7280;
@@ -41,11 +42,18 @@ body {
   color: var(--tg-theme-text-color);
   line-height: 1.5;
   overflow-x: hidden;
+  /* Telegram safe area support */
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior-y: contain;
 }
 
 #root {
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   width: 100%;
+  position: relative;
 }
 
 /* Telegram WebApp specific styles */

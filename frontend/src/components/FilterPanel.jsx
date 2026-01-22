@@ -4,6 +4,21 @@ import '../App.css';
 const FilterPanel = ({ filters, onFilterChange, onReset }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Safety check for required props
+  if (!filters || !Array.isArray(filters) || filters.length === 0) {
+    return null;
+  }
+
+  if (!onFilterChange || typeof onFilterChange !== 'function') {
+    console.warn('FilterPanel: onFilterChange is required');
+    return null;
+  }
+
+  if (!onReset || typeof onReset !== 'function') {
+    console.warn('FilterPanel: onReset is required');
+    return null;
+  }
+
   const renderFilterSection = (title, children) => (
     <div className="filter-section">
       <div className="filter-section-title">{title}</div>
@@ -11,20 +26,28 @@ const FilterPanel = ({ filters, onFilterChange, onReset }) => {
     </div>
   );
 
-  const renderChipFilter = (options, selectedValue, onChange, key) => (
-    <div className="filter-chips">
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={`filter-chip ${selectedValue === option.value ? 'active' : ''}`}
-          onClick={() => onChange(option.value === selectedValue ? null : option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
+  const renderChipFilter = (options, selectedValue, onChange, key) => {
+    if (!options || !Array.isArray(options)) {
+      return null;
+    }
+    return (
+      <div className="filter-chips">
+        {options.map((option) => {
+          if (!option || !option.value) return null;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              className={`filter-chip ${selectedValue === option.value ? 'active' : ''}`}
+              onClick={() => onChange(option.value === selectedValue ? null : option.value)}
+            >
+              {option.label || option.value}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
 
   const renderNumberRange = (label, value, onChange, min = 0, max = 100) => (
     <div className="filter-number-input">
@@ -42,39 +65,43 @@ const FilterPanel = ({ filters, onFilterChange, onReset }) => {
     </div>
   );
 
-  const renderMultiSelect = (options, selectedValues, onChange) => (
-    <div className="filter-chips">
-      {options.map((option) => {
-        const isSelected = selectedValues?.includes(option.value);
-        return (
-          <button
-            key={option.value}
-            type="button"
-            className={`filter-chip ${isSelected ? 'active' : ''}`}
-            onClick={() => {
-              const newValues = selectedValues || [];
-              if (isSelected) {
-                onChange(newValues.filter((v) => v !== option.value));
-              } else {
-                onChange([...newValues, option.value]);
-              }
-            }}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  if (!filters || filters.length === 0) {
-    return null;
-  }
+  const renderMultiSelect = (options, selectedValues, onChange) => {
+    if (!options || !Array.isArray(options)) {
+      return null;
+    }
+    return (
+      <div className="filter-chips">
+        {options.map((option) => {
+          if (!option || !option.value) return null;
+          const isSelected = Array.isArray(selectedValues) && selectedValues.includes(option.value);
+          return (
+            <button
+              key={option.value}
+              type="button"
+              className={`filter-chip ${isSelected ? 'active' : ''}`}
+              onClick={() => {
+                const newValues = Array.isArray(selectedValues) ? selectedValues : [];
+                if (isSelected) {
+                  onChange(newValues.filter((v) => v !== option.value));
+                } else {
+                  onChange([...newValues, option.value]);
+                }
+              }}
+            >
+              {option.label || option.value}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
 
   // Check if any filters are active
   const hasActiveFilters = filters.some((filter) => {
+    if (!filter || !filter.type) return false;
+    
     if (filter.type === 'multiselect') {
-      return filter.value && filter.value.length > 0;
+      return Array.isArray(filter.value) && filter.value.length > 0;
     }
     if (filter.type === 'number') {
       return filter.value !== null && filter.value !== undefined && filter.value !== '';
@@ -109,42 +136,49 @@ const FilterPanel = ({ filters, onFilterChange, onReset }) => {
 
       {isOpen && (
         <div style={{ marginTop: '16px' }}>
-          {filters.map((filter, index) => (
-            <div key={index}>
-              {filter.type === 'chip' &&
-                renderFilterSection(
-                  filter.title,
-                  renderChipFilter(
-                    filter.options,
-                    filter.value,
-                    (value) => onFilterChange(filter.key, value),
-                    filter.key
-                  )
-                )}
+          {filters.map((filter, index) => {
+            if (!filter || !filter.type || !filter.key) {
+              return null;
+            }
+            return (
+              <div key={filter.key || index}>
+                {filter.type === 'chip' &&
+                  filter.options &&
+                  renderFilterSection(
+                    filter.title || '',
+                    renderChipFilter(
+                      filter.options,
+                      filter.value,
+                      (value) => onFilterChange(filter.key, value),
+                      filter.key
+                    )
+                  )}
 
-              {filter.type === 'number' &&
-                renderFilterSection(
-                  filter.title,
-                  renderNumberRange(
-                    filter.label,
-                    filter.value,
-                    (value) => onFilterChange(filter.key, value),
-                    filter.min,
-                    filter.max
-                  )
-                )}
+                {filter.type === 'number' &&
+                  renderFilterSection(
+                    filter.title || '',
+                    renderNumberRange(
+                      filter.label || '',
+                      filter.value,
+                      (value) => onFilterChange(filter.key, value),
+                      filter.min || 0,
+                      filter.max || 100
+                    )
+                  )}
 
-              {filter.type === 'multiselect' &&
-                renderFilterSection(
-                  filter.title,
-                  renderMultiSelect(
-                    filter.options,
-                    filter.value,
-                    (value) => onFilterChange(filter.key, value)
-                  )
-                )}
-            </div>
-          ))}
+                {filter.type === 'multiselect' &&
+                  filter.options &&
+                  renderFilterSection(
+                    filter.title || '',
+                    renderMultiSelect(
+                      filter.options,
+                      filter.value,
+                      (value) => onFilterChange(filter.key, value)
+                    )
+                  )}
+              </div>
+            );
+          })}
 
           <div className="filter-actions">
             <button type="button" className="btn btn-secondary btn-small" onClick={onReset}>

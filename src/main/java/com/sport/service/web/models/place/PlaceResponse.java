@@ -11,12 +11,12 @@ public class PlaceResponse {
 
     private String name;
     private String district;
-    private String subDistrict;     // nullable
+    private String subDistrict;
     private String address;
-    private String description;     // nullable
-    private String webSite;         // nullable
+    private String description;
+    private String webSite;
     private String outdoor;
     private String placeType;
     private byte[] photo;
-    private String coordinates;     // nullable
+    private String coordinates;
 }

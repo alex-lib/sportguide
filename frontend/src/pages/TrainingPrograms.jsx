@@ -54,7 +54,7 @@ const TrainingPrograms = () => {
       type: 'multiselect',
       key: 'sportTypes',
       title: 'Вид спорта',
-      options: SPORT_TYPES,
+      options: SPORT_TYPES || [],
       value: filter.sportTypes,
     },
   ];

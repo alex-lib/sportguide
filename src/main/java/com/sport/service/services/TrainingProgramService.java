@@ -37,8 +37,7 @@ public class TrainingProgramService {
     public ListTrainingProgramResponse findAll(TrainingProgramFilter filter) {
         List<TrainingProgram> programs =
                 trainingProgramRepository.findAll(
-                        ProgramTrainingSpecification.withFilter(filter)
-                );
+                        ProgramTrainingSpecification.withFilter(filter));
 
         return trainingProgramMapper
                 .listTrainingProgramToListTrainingProgramResponse(programs);

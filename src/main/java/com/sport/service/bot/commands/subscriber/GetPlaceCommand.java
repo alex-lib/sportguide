@@ -215,11 +215,11 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         }
 
         if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() != null) {
-            places = placeService.findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType(), dto.getOutdoor());
+            places = placeService.findByDistrictAndSubDistrictAndPlaceTypeAndOutdoor(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType(), dto.getOutdoor());
         }
 
         if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && dto.getSubdistrict() != null && !dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS) && dto.getOutdoor() == null) {
-            places = placeService.findByDistrictAndSubdistrictAndPlaceType(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType());
+            places = placeService.findByDistrictAndSubDistrictAndPlaceType(dto.getDistrict(), dto.getSubdistrict(), dto.getPlaceType());
         }
 
         if (!dto.getDistrict().equals(District.ALL_DISTRICTS) && (dto.getSubdistrict() == null || dto.getSubdistrict().equals(SubDistrict.ALL_SUBDISTRICTS)) && dto.getOutdoor() != null) {

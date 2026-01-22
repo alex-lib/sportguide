@@ -50,25 +50,25 @@ const Events = () => {
     });
   };
 
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  // Memoize date options to prevent recreation on every render
+  const dateOptions = [
+    { value: new Date().toISOString().split('T')[0], label: 'Сегодня' },
+    { value: new Date(Date.now() + 86400000).toISOString().split('T')[0], label: 'Завтра' },
+  ];
 
   const filterConfig = [
     {
       type: 'chip',
       key: 'district',
       title: 'Район',
-      options: DISTRICTS,
+      options: DISTRICTS || [],
       value: filter.district,
     },
     {
       type: 'chip',
       key: 'date',
       title: 'Дата',
-      options: [
-        { value: today, label: 'Сегодня' },
-        { value: tomorrow, label: 'Завтра' },
-      ],
+      options: dateOptions,
       value: filter.date,
     },
   ];

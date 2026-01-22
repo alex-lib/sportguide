@@ -2,7 +2,6 @@ package com.sport.service.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.sport.service.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,8 +41,8 @@ public class TelegramJwtFilter extends OncePerRequestFilter {
         try {
             DecodedJWT jwt = jwtService.parseAndValidate(token);
 
-            Long id = jwt.getClaim("id").asLong(); // ты это кладёшь
-            String role = jwt.getClaim("role").asString(); // "SUBSCRIBER"/"ADMIN"
+            Long id = jwt.getClaim("id").asLong();
+            String role = jwt.getClaim("role").asString();
             if (id == null || role == null || role.isBlank()) {
                 throw new IllegalArgumentException("JWT claims missing");
             }
@@ -51,13 +50,11 @@ public class TelegramJwtFilter extends OncePerRequestFilter {
             List<GrantedAuthority> authorities =
                     List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-            // principal можешь сделать хоть id, хоть кастомный объект
             var auth = new UsernamePasswordAuthenticationToken(id, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (JWTVerificationException | IllegalArgumentException e) {
             SecurityContextHolder.clearContext();
-            // можно не ронять запрос, просто оставляем анонимным → попадёт на 401
         }
 
         filterChain.doFilter(request, response);

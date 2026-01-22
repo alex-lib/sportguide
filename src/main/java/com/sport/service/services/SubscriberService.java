@@ -23,16 +23,16 @@ public class SubscriberService {
 
     private final TelegramMessageSender sender;
 
-    public Subscriber findOrCreateDevUser() {
-        return subscriberRepository.findById(1L)
-                .orElseGet(() -> subscriberRepository.save(
-                        Subscriber.builder()
-                                .id(1L)
-                                .username("dev")
-                                .role(RoleType.ADMIN)
-                                .build()
-                ));
-    }
+//    public Subscriber findOrCreateDevUser() {
+//        return subscriberRepository.findById(1L)
+//                .orElseGet(() -> subscriberRepository.save(
+//                        Subscriber.builder()
+//                                .id(1L)
+//                                .username("dev")
+//                                .role(RoleType.ADMIN)
+//                                .build()
+//                ));
+//    }
 
     @Transactional
     public void addSubscriber(User user) {

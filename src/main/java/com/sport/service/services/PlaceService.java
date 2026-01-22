@@ -22,6 +22,7 @@ import java.util.List;
 @Slf4j
 public class PlaceService {
     private final PlaceRepository placeRepository;
+
     private final PlaceMapper placeMapper;
 
     @Transactional
@@ -49,12 +50,12 @@ public class PlaceService {
         return placeRepository.findByName(name);
     }
 
-    public List<Place> findByDistrictAndSubdistrictAndPlaceType(District district, SubDistrict subdistrict, PlaceType placeType) {
-        return placeRepository.findByDistrictAndSubDistrictAndPlaceType(district, subdistrict, placeType);
+    public List<Place> findByDistrictAndSubDistrictAndPlaceType(District district, SubDistrict subDistrict, PlaceType placeType) {
+        return placeRepository.findByDistrictAndSubDistrictAndPlaceType(district, subDistrict, placeType);
     }
 
-    public List<Place> findByDistrictAndSubdistrictAndPlaceTypeAndOutdoor(District district, SubDistrict subdistrict, PlaceType placeType, Boolean outdoor) {
-        return placeRepository.findByDistrictAndSubDistrictAndPlaceTypeAndOutdoor(district, subdistrict, placeType, outdoor);
+    public List<Place> findByDistrictAndSubDistrictAndPlaceTypeAndOutdoor(District district, SubDistrict subDistrict, PlaceType placeType, Boolean outdoor) {
+        return placeRepository.findByDistrictAndSubDistrictAndPlaceTypeAndOutdoor(district, subDistrict, placeType, outdoor);
     }
 
     public List<Place> findAllByPlaceType(PlaceType placeType) {

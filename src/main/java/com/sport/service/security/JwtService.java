@@ -1,4 +1,4 @@
-package com.sport.service.services;
+package com.sport.service.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
