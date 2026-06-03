@@ -106,6 +106,8 @@ public final class CommandsConstants {
     public static final String GET_SUBSCRIPTIONS_COUNT_DESCRIPTION = "Let admin get count of subscriptions to get notifications";
     public static final String GET_SUBSCRIPTIONS_COUNT_TEXT = "\uD83E\uDDEE Количество подписок на получение событий: ";
 
+    public static final String CREATE_TRAINING_PROGRAM = "\uD83E\uDD16 Создать тренировку";
+
     public static final String GREETING_MESSAGE = """
             \s
             <i>Меня зовут</i> <b>SportGuide</b> - <i>спортивный бро bot :)</i>

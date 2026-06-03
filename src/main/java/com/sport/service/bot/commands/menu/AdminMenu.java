@@ -34,6 +34,7 @@ public class AdminMenu {
 
         KeyboardRow row5 = new KeyboardRow();
         row5.add(MenuConstants.SEND_MESSAGE_TO_ALL_USERS);
+        row5.add(MenuConstants.CREATE_TRAINING_PROGRAM);
 
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
