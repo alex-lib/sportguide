@@ -24,6 +24,12 @@ server:
   port: 8081
 
 spring:
+  ai:
+    openai:
+      chat:
+        options:
+          model: gpt-4o
+          temperature: 0.2
   cloud:
     openfeign:
       oauth2:
@@ -99,9 +105,6 @@ management:
       exposure:
         include: health,info,prometheus,metrics,loggers,metricsofusers
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         "[http.server.requests]": true
@@ -117,6 +120,10 @@ management:
       enabled: true
     db:
       enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 app:
   redis:
