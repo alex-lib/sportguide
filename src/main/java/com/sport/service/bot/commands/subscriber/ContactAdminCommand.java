@@ -63,9 +63,7 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
 		Long userId = message.getFrom().getId();
 		Long chatId = message.getChatId();
 
-		if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) {
-			return;
-		}
+		if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(userId))) return;
 
 		String text = message.getText();
 		log.info("Received text: {}", text);
@@ -73,12 +71,12 @@ public class ContactAdminCommand implements IBotCommand, TextProcessable {
 		try {
 			String notification = notificationCreatorService.createSubscriberSentMessageToAdminNotification(text, user);
 			notificationSenderService.sendSubscriberToAdminNotification(notification, Long.valueOf(mainAdminId));
-			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT_TO_ADMIN);
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
+		} finally {
+			commandStateStore.clearCurrentCommand(userId);
 		}
 	}
 }
