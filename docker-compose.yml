@@ -55,7 +55,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SPRING_AI_OPENAI_API_KEY: ${OPENAI_API_KEY}
     command: [ "sh", "-c", "java -jar /app/app.jar" ]
 
 #  frontend:
