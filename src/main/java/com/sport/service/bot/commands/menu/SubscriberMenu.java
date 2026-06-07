@@ -26,10 +26,14 @@ public class SubscriberMenu {
         row3.add(MenuConstants.SUPPORT_PROJECT);
         row3.add(MenuConstants.CONTACT_ADMIN);
 
+        KeyboardRow row4 = new KeyboardRow();
+        row4.add(MenuConstants.CREATE_TRAINING_PROGRAM);
+
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
         keyboard.add(row3);
+        keyboard.add(row4);
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setResizeKeyboard(true);

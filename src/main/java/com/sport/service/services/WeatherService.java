@@ -6,13 +6,16 @@ import com.sport.service.entities.TodayWeather;
 import com.sport.service.mappers.WeatherCodeMapper;
 import com.sport.service.web.api.OpenMeteoClient;
 import com.sport.service.web.models.OpenMeteoResponse;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
@@ -35,15 +38,23 @@ public class WeatherService {
     }
 
     @Scheduled(cron = Constants.CRON_SEND_WEATHER, zone = Constants.TIME_ZONE)
-    public String createWeatherNotification() {
-        TodayWeather weather = getTodayWeather();
-        String message = notificationCreatorService.createWeatherNotification(weather);
-        List<Long> subscriberIds = subscriberService.getSubscribersWhoWantGetEvents()
-                .stream()
-                .map(Subscriber::getId)
-                .toList();
-        notificationSenderService.sendWeatherNotification(message, subscriberIds);
-        return message;
+    public void createWeatherNotification() {
+        try {
+            TodayWeather weather = getTodayWeather();
+            String message = notificationCreatorService.createWeatherNotification(weather);
+
+            List<Long> subscriberIds = subscriberService
+                    .getSubscribersWhoWantGetEvents()
+                    .stream()
+                    .map(Subscriber::getId)
+                    .toList();
+
+            notificationSenderService.sendWeatherNotification(message, subscriberIds);
+        } catch (FeignException e) {
+            log.error("Failed to get weather from OpenMeteo", e);
+        } catch (Exception e) {
+            log.error("Failed to send weather notification", e);
+        }
     }
 
     private TodayWeather convertToTodayWeather(OpenMeteoResponse response) {

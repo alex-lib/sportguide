@@ -103,8 +103,28 @@ public final class CommandsConstants {
     public static final String GET_USERS_COUNT_TEXT = "\uD83E\uDDEE Количество юзеров: ";
 
     public static final String GET_SUBSCRIPTIONS_COUNT = "get_subscriptions_count";
-    public static final String GET_SUBSCRIPTIONS_COUNT_DESCRIPTION = "Let admin get count of subscriptions to get notifications";
+    public static final String GET_SUBSCRIPTIONS_COUNT_DESCRIPTION = "Let admin to get count of subscriptions to get notifications";
     public static final String GET_SUBSCRIPTIONS_COUNT_TEXT = "\uD83E\uDDEE Количество подписок на получение событий: ";
+
+    public static final String CREATE_TRAINING_PROGRAM = "create_training_program";
+    public static final String CREATE_TRAINING_PROGRAM_DESCRIPTION  = "Let users to create training program by ai agent";
+    public static final String CREATE_TRAINING_PROGRAM_START_TEXT = """
+            \s
+            🧠 Введите вид спорта/навык или группу/группы мышц, для которой хотите получить тренировку.
+            
+            Также вы можете указать дополнительные пожелания, например: сообщить о наличии травм, желаемое время тренировки, сведения о предыдущей тренировки.
+            <b>Пример:</b> <i>Тренировка для грудных и трицепса, без прыжков, дома.</i>
+            
+            Для отмены нажмите /cancel
+            \s""";
+    public static final String CREATE_TRAINING_PROGRAM_CANCEL = "/cancel";
+    public static final String CREATE_TRAINING_PROGRAM_CANCEL_TEXT = "Создание тренировки отменено ❌";
+    public static final String CREATE_TRAINING_PROGRAM_CREATING_TEXT = "Создаю программу тренировки... Это может занять до 30 секунд 🔄";
+    public static final String CREATE_TRAINING_PROGRAM_ERROR = """
+            \s
+            Не удалось создать программу тренировки. Попробуйте ещё раз позже.
+            Убедитесь, что ваш запрос понятен и содержит достаточно информации ❌
+            \s""";
 
     public static final String GREETING_MESSAGE = """
             \s
@@ -114,8 +134,9 @@ public final class CommandsConstants {
             
             <i>- уведомлять о грядущих спортивных событиях</i> \uD83C\uDFC6
             <i>- рассказать другим спортикам о твоем спортивном событии</i> \uD83D\uDCE8
-            <i>- найти спортивные/активные места если тебе захочется найти другое место для тренировки/активити или для того, что бы НАЧАТЬ заниматься спортом</i> ⛳\uFE0F
-            <i>- высылать прогноз погоды на грядущий день, что бы ты с самого утра мог решить где будет тебе комфортнее заниматься - на улице или например в зале</i> \uD83C\uDF21
+            <i>- найти спортивные/активные места, если тебе захочется найти другое место для тренировки/активити</i> ⛳\uFE0F
+            <i>- высылать прогноз погоды на грядущий день, что бы ты с самого утра мог решить где будет тебе комфортнее заниматься</i> \uD83C\uDF21
+            <i>- создать тренировку длю любого вида спорта, навыка, мышц и т.д.</i> \uD83E\uDD16
             
             <i>Я пока только изучаю город, поэтому если ты знаешь интересное спортивное место - будет здорово если ты сообщишь об этом моему напарнику /menu, заранее спасибо :)</i>
             \s""";

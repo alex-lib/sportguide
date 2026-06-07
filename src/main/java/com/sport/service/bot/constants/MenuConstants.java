@@ -57,6 +57,7 @@ public final class MenuConstants {
     public static final String CONTACT_ADMIN = "\uD83E\uDE83 Связаться с админом";
     public static final String START = "/start";
     public static final String MENU = "/menu";
+    public static final String CREATE_TRAINING_PROGRAM = "\uD83E\uDD16 Создать тренировку";
 
     public static final String CREATE_PLACE = "➕ Создать место";
     public static final String DELETE_PLACE = "❌ Удалить место";
