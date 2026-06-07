@@ -25,6 +25,7 @@ public class ButtonToCommandMapper {
         BUTTON_COMMANDS.put(MenuConstants.GET_COUNT_OF_ALL_USERS, "/" + CommandsConstants.GET_USERS_COUNT);
         BUTTON_COMMANDS.put(MenuConstants.GET_COUNT_OF_SUBSCRIPTIONS, "/" + CommandsConstants.GET_SUBSCRIPTIONS_COUNT);
         BUTTON_COMMANDS.put(MenuConstants.SEND_MESSAGE_TO_ALL_USERS, "/" + CommandsConstants.SEND_MESSAGE_TO_ALL_USERS);
+        BUTTON_COMMANDS.put(MenuConstants.CREATE_TRAINING_PROGRAM, "/" + CommandsConstants.CREATE_TRAINING_PROGRAM);
     }
 
     public static String mapButtonToCommand(String buttonText) {

@@ -14,7 +14,7 @@ java {
     }
 }
 
-val springAiVersion = "1.0.1"
+val springAiVersion = "1.0.0-M6"
 
 dependencyManagement {
     imports {
@@ -25,6 +25,7 @@ dependencyManagement {
 
 repositories {
     mavenCentral()
+    maven("https://repo.spring.io/milestone")
 }
 
 dependencies {
@@ -56,6 +57,9 @@ dependencies {
     implementation("com.google.guava:guava:32.0.1-jre")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     implementation("org.apache.commons:commons-lang3:3.18.0")
+
+    // AI
+    implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")
 
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")

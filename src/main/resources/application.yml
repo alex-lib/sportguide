@@ -11,19 +11,23 @@ jwt:
 
 logging:
   level:
-    org.hibernate.SQL: OFF
-    org.hibernate.type.descriptor.sql.BasicBinder: OFF
-    org.hibernate: WARN
     org.springframework.orm.jpa: WARN
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.boot.autoconfigure.security: DEBUG
-    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.security: WARN
+    org.springframework.security.oauth2: WARN
+    org.springframework.boot.autoconfigure.security: WARN
+    org.springframework.web.client.RestTemplate: WARN
 
 server:
   port: 8081
 
 spring:
+  ai:
+    openai:
+      api-key: ${SPRING_AI_OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+          temperature: 0.2
   cloud:
     openfeign:
       oauth2:
@@ -66,13 +70,13 @@ spring:
       max-lifetime: 600000
 #      connection-init-sql: CREATE SCHEMA IF NOT EXISTS app_schema
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: none
     defer-datasource-initialization: true
     properties:
-      hibernate.default_schema: app_schema
+      format_sql: true
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: app_schema
         hbm2ddl:
           create_namespaces: true
@@ -99,9 +103,6 @@ management:
       exposure:
         include: health,info,prometheus,metrics,loggers,metricsofusers
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         "[http.server.requests]": true
@@ -117,6 +118,10 @@ management:
       enabled: true
     db:
       enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 app:
   redis:
