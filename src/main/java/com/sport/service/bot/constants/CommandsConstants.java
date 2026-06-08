@@ -110,9 +110,10 @@ public final class CommandsConstants {
     public static final String CREATE_TRAINING_PROGRAM_DESCRIPTION  = "Let users to create training program by ai agent";
     public static final String CREATE_TRAINING_PROGRAM_START_TEXT = """
             \s
-            🧠 Введите вид спорта/навык или группу/группы мышц, для которой хотите получить тренировку.
+            Введите вид спорта/навык или группу/группы мышц, для которой хотите получить тренировку 🧠
             
             Также вы можете указать дополнительные пожелания, например: сообщить о наличии травм, желаемое время тренировки, сведения о предыдущей тренировки.
+            
             <b>Пример:</b> <i>Тренировка для грудных и трицепса, без прыжков, дома.</i>
             
             Для отмены нажмите /cancel
