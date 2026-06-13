@@ -3,44 +3,27 @@ package com.sport.service.services;
 import com.sport.service.constants.Constants;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TodayWeather;
-import com.sport.service.mappers.WeatherCodeMapper;
-import com.sport.service.web.api.OpenMeteoClient;
-import com.sport.service.web.models.OpenMeteoResponse;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
-    private final OpenMeteoClient openMeteoClient;
-
+    private final OpenMeteoClientService openMeteoClientService;
     private final NotificationSenderService notificationSenderService;
     private final SubscriberService subscriberService;
     private final NotificationCreatorService notificationCreatorService;
 
-    public TodayWeather getTodayWeather() {
-        OpenMeteoResponse response = openMeteoClient.getTodayWeather(
-                Constants.COORDINATES[0],
-                Constants.COORDINATES[1],
-                "temperature_2m,weathercode,precipitation_probability",
-                "weathercode,temperature_2m_max,temperature_2m_min",
-                "temperature_2m,weathercode",
-                Constants.TIME_ZONE,
-                "1");
-        return convertToTodayWeather(response);
-    }
-
     @Scheduled(cron = Constants.CRON_SEND_WEATHER, zone = Constants.TIME_ZONE)
     public void createWeatherNotification() {
         try {
-            TodayWeather weather = getTodayWeather();
+            TodayWeather weather = openMeteoClientService.getTodayWeather();
             String message = notificationCreatorService.createWeatherNotification(weather);
 
             List<Long> subscriberIds = subscriberService
@@ -55,40 +38,5 @@ public class WeatherService {
         } catch (Exception e) {
             log.error("Failed to send weather notification", e);
         }
-    }
-
-    private TodayWeather convertToTodayWeather(OpenMeteoResponse response) {
-        TodayWeather.CurrentWeather current = TodayWeather.CurrentWeather.builder()
-                .temperature(response.getCurrent().getTemperature_2m())
-                .description(WeatherCodeMapper.mapCodeToWeatherDescription(
-                        response.getCurrent().getWeathercode()))
-                .build();
-
-        List<TodayWeather.HourlyForecast> hourly = new ArrayList<>();
-        if (response.getHourly() != null && response.getHourly().getTime() != null) {
-            for (int i = 0; i < Math.min(24, response.getHourly().getTime().size()); i++) {
-                hourly.add(TodayWeather.HourlyForecast.builder()
-                        .time(response.getHourly().getTime().get(i))
-                        .temperature(response.getHourly().getTemperature_2m().get(i))
-                        .description(WeatherCodeMapper.mapCodeToWeatherDescription(
-                                response.getHourly().getWeathercode().get(i)))
-                        .precipitationProbability(response.getHourly().getPrecipitation_probability().get(i))
-                        .build());
-            }
-        }
-
-        TodayWeather.DailySummary daily = TodayWeather.DailySummary.builder()
-                .maxTemperature(response.getDaily().getTemperature_2m_max().get(0))
-                .minTemperature(response.getDaily().getTemperature_2m_min().get(0))
-                .description(WeatherCodeMapper.mapCodeToWeatherDescription(
-                        response.getDaily().getWeathercode().get(0)))
-                .build();
-
-        return TodayWeather.builder()
-                .date(response.getDaily().getTime().get(0))
-                .current(current)
-                .hourlyForecast(hourly)
-                .daily(daily)
-                .build();
     }
 }
