@@ -32,6 +32,11 @@ spring:
     openfeign:
       oauth2:
         enabled: false
+      client:
+        config:
+          default:
+            connect-timeout: 10000
+            read-timeout: 30000
   security:
     oauth2:
       client:
