@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SportGuide - Mockups (Old / New)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   GLOBAL PAGE CHROME (the documentation wrapper, not the app)
+   ============================================================ */
+:root{
+  /* ---- OLD app design tokens (mirror frontend/src/index.css) ---- */
+  --o-primary:#1a9b8e;
+  --o-primary-dark:#158075;
+  --o-primary-light:#2dccb3;
+  --o-primary-lighter:#e0f7f5;
+  --o-secondary:#f0f9f8;
+  --o-accent-orange:#ff6b35;
+  --o-text:#1a1a1a;
+  --o-text-2:#6b7280;
+  --o-border:#d1e5e2;
+  --o-success:#10b981;
+  --o-error:#ef4444;
+  --o-warning:#f59e0b;
+  --o-card-shadow:0 2px 8px rgba(26,155,142,.08);
+  --o-bg-grad: linear-gradient(180deg,#f0f9f8 0%,#ffffff 100%);
+
+  /* ---- NEW app design tokens (HIG 2026 inspired) ---- */
+  --n-bg:#f2f4f7;
+  --n-bg-elev:#ffffff;
+  --n-brand:#0f9d8f;            /* refined teal, same family, deeper */
+  --n-brand-2:#14b8a6;
+  --n-brand-grad: linear-gradient(135deg,#12b3a3 0%,#0f9d8f 100%);
+  --n-accent:#ff7a45;
+  --n-label:#0b0f12;
+  --n-label-2:#3c4450;
+  --n-label-3:#7b8694;
+  --n-sep:rgba(60,70,90,.10);
+  --n-fill:rgba(20,120,110,.08);
+  --n-fill-2:rgba(118,130,150,.10);
+  --n-danger:#e5484d;            /* destructive red, HIG-style */
+  --n-danger-fill:rgba(229,72,77,.12);
+  --n-radius:22px;
+  --n-radius-lg:30px;
+
+  /* ---- page-chrome tokens (DARK defaults; light overrides below) ---- */
+  --page-bg:
+    radial-gradient(1200px 600px at 15% -5%, rgba(26,155,142,.10), transparent 60%),
+    radial-gradient(1000px 700px at 95% 0%, rgba(255,107,53,.08), transparent 55%),
+    #0e1418;
+  --page-text:#e9eef2;
+  --page-text-2:#9aa6b1;
+  --page-text-3:#8b97a3;
+  --page-caption:#93a0ac;
+  --hairline:rgba(255,255,255,.08);
+  --panel-bg:rgba(255,255,255,.05);
+  --panel-border:rgba(255,255,255,.09);
+  --topbar-bg:rgba(14,20,24,.82);
+  --seg-bg:rgba(255,255,255,.06);
+  --seg-border:rgba(255,255,255,.10);
+  --seg-inactive:#aeb8c2;
+  --review-bg:rgba(255,255,255,.04);
+  --review-li:#aab4be;
+  --foot:#6b7682;
+}
+/* LIGHT theme - light page chrome */
+body[data-theme="light"]{
+  --page-bg:
+    radial-gradient(1200px 600px at 15% -5%, rgba(26,155,142,.12), transparent 60%),
+    radial-gradient(1000px 700px at 95% 0%, rgba(255,107,53,.10), transparent 55%),
+    #eaeef3;
+  --page-text:#1a2230;
+  --page-text-2:#566070;
+  --page-text-3:#6b7682;
+  --page-caption:#66707c;
+  --hairline:rgba(12,22,34,.10);
+  --panel-bg:rgba(12,22,34,.04);
+  --panel-border:rgba(12,22,34,.10);
+  --topbar-bg:rgba(247,249,252,.85);
+  --seg-bg:rgba(12,22,34,.05);
+  --seg-border:rgba(12,22,34,.12);
+  --seg-inactive:#566070;
+  --review-bg:rgba(255,255,255,.62);
+  --review-li:#566070;
+  --foot:#8b97a3;
+}
+/* DARK theme - the NEW app surfaces go dark. Old keeps --o-* (always light). */
+body[data-theme="dark"]{
+  --n-bg:#0c0c0f;
+  --n-bg-elev:#1c1c20;
+  --n-label:#f5f5f7;
+  --n-label-2:#b6bcc6;
+  --n-label-3:#7e848e;
+  --n-sep:rgba(255,255,255,.14);
+  --n-fill:rgba(20,180,160,.20);
+  --n-fill-2:rgba(255,255,255,.08);
+  --n-danger-fill:rgba(229,72,77,.22);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;
+  background:var(--page-bg);
+  color:var(--page-text);
+  -webkit-font-smoothing:antialiased;
+  transition:color .25s ease;
+}
+
+/* top sticky control bar */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  padding:18px 26px;
+  background:var(--topbar-bg);
+  backdrop-filter:blur(18px) saturate(150%);
+  border-bottom:1px solid var(--hairline);
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:18px;letter-spacing:-.3px;}
+.brand .logo{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;
+  background:linear-gradient(135deg,#14b8a6,#0f9d8f);box-shadow:0 4px 14px rgba(15,157,143,.5);
+}
+.brand small{display:block;font-weight:500;font-size:11px;color:var(--page-text-3);letter-spacing:.2px;}
+
+.toggle-wrap{display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap;}
+.seg-label{font-size:12px;font-weight:700;color:var(--page-text-3);letter-spacing:.3px;}
+.seg{
+  display:inline-flex;background:var(--seg-bg);border:1px solid var(--seg-border);
+  border-radius:999px;padding:4px;position:relative;
+}
+.seg button{
+  appearance:none;border:0;background:transparent;color:var(--seg-inactive);cursor:pointer;
+  font-family:inherit;font-weight:700;font-size:14px;letter-spacing:.2px;
+  padding:9px 20px;border-radius:999px;transition:color .25s ease;z-index:1;
+}
+.seg button.active{color:#06231f;}
+.seg .pill{
+  position:absolute;top:4px;left:4px;height:calc(100% - 8px);width:calc(50% - 4px);
+  background:linear-gradient(135deg,#2dd4bf,#14b8a6);border-radius:999px;
+  transition:transform .32s cubic-bezier(.4,1.2,.4,1);box-shadow:0 4px 14px rgba(20,184,166,.45);
+}
+body[data-design="new"] #seg .pill{transform:translateX(100%);}
+body[data-theme="dark"] #seg-theme .pill{transform:translateX(100%);}
+.legend{font-size:12.5px;color:var(--page-text-3);max-width:360px;line-height:1.5;}
+
+/* layout */
+.wrap{max-width:1320px;margin:0 auto;padding:42px 26px 120px;}
+.intro{margin-bottom:10px;}
+.intro h1{font-size:30px;font-weight:800;letter-spacing:-.6px;margin:0 0 8px;}
+.intro p{color:var(--page-text-2);max-width:760px;line-height:1.6;margin:0;font-size:15px;}
+
+.section{margin-top:64px;}
+.section-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;border-bottom:1px solid var(--hairline);padding-bottom:14px;}
+.section-head .num{font-size:13px;font-weight:700;color:var(--n-brand);font-variant-numeric:tabular-nums;letter-spacing:1px;}
+.section-head h2{font-size:23px;font-weight:800;letter-spacing:-.4px;margin:0;}
+.section-head .tag{margin-left:auto;font-size:12px;color:var(--page-text-3);background:var(--panel-bg);border:1px solid var(--panel-border);padding:5px 12px;border-radius:999px;}
+.section-desc{color:var(--page-text-2);font-size:14px;line-height:1.6;max-width:820px;margin:14px 0 0;}
+
+/* the row of device frames */
+.screens{display:flex;flex-wrap:wrap;gap:46px 38px;margin-top:34px;}
+.screen-block{display:flex;flex-direction:column;align-items:center;gap:16px;width:var(--devW);}
+.caption{width:var(--devW);text-align:left;}
+.caption h3{font-size:15px;font-weight:700;margin:0 0 5px;letter-spacing:-.2px;}
+.caption p{font-size:12.5px;color:var(--page-caption);line-height:1.55;margin:0;}
+.state-chip{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#0f9d8f;background:rgba(15,157,143,.14);border:1px solid rgba(15,157,143,.3);padding:3px 9px;border-radius:6px;margin-bottom:8px;}
+
+/* show old vs new sets */
+.set-old{display:contents;}
+.set-new{display:none;}
+body[data-design="new"] .set-old{display:none;}
+body[data-design="new"] .set-new{display:contents;}
+
+/* ============================================================
+   iPHONE 17 PRO DEVICE FRAME
+   logical 402 x 874 pt. Scaled to --devW.
+   ============================================================ */
+.screens{--devW:300px;--dev:300;}
+.phone{
+  width:402px;height:874px;
+  /* iPhone 17 Pro is authored at 402x874 logical px, then shrunk to --devW.
+     `zoom` (not transform:scale) is used on purpose: it scales the LAYOUT
+     box too, so each frame really occupies --devW and the flex row wraps
+     instead of overlapping. --dev is unitless so the division is a number. */
+  zoom:calc(var(--dev) / 402);
+  position:relative;flex:0 0 auto;
+  border-radius:60px;
+  background:#0a0a0c;
+  padding:9px;
+  /* thin black bezel + ONE titanium rim - no thick outer ring and no inner
+     ring, so the frame is a single clean edge. Side buttons sit outside it. */
+  box-shadow:
+    0 0 0 2px #3a3d42,
+    0 26px 60px -22px rgba(0,0,0,.7);
+}
+.screen{
+  position:relative;width:100%;height:100%;border-radius:52px;overflow:hidden;
+  background:#fff;
+}
+/* dynamic island */
+.island{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:124px;height:35px;background:#000;border-radius:20px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;padding:0 12px;
+}
+.island::after{content:"";width:8px;height:8px;border-radius:50%;background:#0d1b1a;box-shadow:inset 0 0 0 2px #1c2b2a;}
+/* status bar */
+.statusbar{
+  position:absolute;top:0;left:0;right:0;height:54px;z-index:30;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 30px 0;font-size:15px;font-weight:600;color:var(--sb,#0b0f12);pointer-events:none;
+}
+.statusbar .time{font-weight:700;letter-spacing:.3px;}
+.statusbar .icons{display:flex;align-items:center;gap:6px;font-size:13px;}
+.statusbar .icons svg{display:block;}
+
+/* the actual app viewport inside the screen, below status bar */
+.app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;}
+.app-scroll{flex:1;overflow:hidden;position:relative;}
+
+/* ============================================================
+   ============  OLD APP STYLES  ==============================
+   (1:1 reproduction of the current Telegram WebApp CSS)
+   ============================================================ */
+.o-app{background:var(--o-bg-grad);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto',sans-serif;color:var(--o-text);}
+.o-body{padding:20px 16px 90px;height:100%;overflow:hidden;}
+.o-body.has-status{padding-top:62px;}
+.o-title{font-size:28px;font-weight:700;letter-spacing:-.5px;color:var(--o-primary);margin:0 0 20px;}
+.o-title.sm{margin:0;}
+.o-subtitle{font-size:16px;color:var(--o-text-2);margin:0 0 24px;}
+.o-card{
+  background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;
+  box-shadow:var(--o-card-shadow);border:1px solid var(--o-border);position:relative;overflow:hidden;
+}
+.o-card-title{font-size:20px;font-weight:600;color:var(--o-text);line-height:1.3;margin:0 0 10px;}
+.o-card-desc{font-size:15px;color:var(--o-text-2);line-height:1.6;margin:0 0 14px;}
+.o-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.o-meta-item{font-size:13px;color:var(--o-primary);padding:6px 12px;background:var(--o-primary-lighter);border-radius:20px;font-weight:500;border:1px solid var(--o-border);}
+.o-btn{padding:12px 24px;border:0;border-radius:12px;font-size:16px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;box-shadow:0 2px 4px rgba(26,155,142,.2);cursor:pointer;}
+.o-btn-primary{background:var(--o-primary);color:#fff;}
+.o-btn-secondary{background:var(--o-secondary);color:var(--o-primary);border:1px solid var(--o-border);box-shadow:none;}
+.o-btn-danger{background:var(--o-error);color:#fff;}
+.o-btn-small{padding:8px 16px;font-size:14px;}
+.o-btn-full{width:100%;}
+.o-row{display:flex;gap:8px;}
+.o-addr{margin-top:12px;font-size:14px;color:var(--o-text-2);display:flex;align-items:center;gap:6px;}
+/* filter */
+.o-filter{background:#fff;border-radius:16px;padding:16px;margin-bottom:20px;box-shadow:var(--o-card-shadow);border:1px solid var(--o-border);}
+.o-filter-bar{display:flex;gap:10px;align-items:center;}
+.o-filter-toggle{background:var(--o-secondary);border:2px solid var(--o-border);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--o-primary);display:flex;align-items:center;gap:8px;}
+.o-filter-toggle.active{background:var(--o-primary);color:#fff;border-color:var(--o-primary);}
+.o-fsection{margin-bottom:16px;}
+.o-fsection-title{font-size:14px;font-weight:600;color:var(--o-primary);margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px;}
+.o-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.o-chip{padding:10px 18px;border:2px solid var(--o-border);border-radius:24px;background:#fff;color:var(--o-text);font-size:14px;font-weight:500;white-space:nowrap;}
+.o-chip.active{background:var(--o-primary);color:#fff;border-color:var(--o-primary);box-shadow:0 2px 4px rgba(26,155,142,.2);}
+.o-factions{display:flex;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--o-border);}
+/* empty / loading */
+.o-empty{text-align:center;padding:60px 16px;color:var(--o-text-2);}
+.o-empty-icon{font-size:64px;margin-bottom:20px;opacity:.6;}
+.o-empty p{font-size:16px;margin:0;}
+.o-empty .hint{font-size:14px;margin-top:8px;opacity:.7;}
+.o-spinner{width:40px;height:40px;border:4px solid var(--o-secondary);border-top-color:var(--o-primary);border-radius:50%;margin:0 auto;}
+.o-form-group{margin-bottom:18px;}
+.o-label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;color:var(--o-text);}
+.o-input,.o-select,.o-textarea{width:100%;padding:14px;border:2px solid var(--o-border);border-radius:12px;font-size:16px;background:#fff;color:var(--o-text);font-family:inherit;}
+.o-textarea{min-height:84px;resize:none;}
+.o-select{color:var(--o-text-2);}
+.o-photo{width:100%;height:130px;object-fit:cover;border-radius:12px;margin-bottom:16px;border:1px solid var(--o-border);background:linear-gradient(135deg,#cfeeea,#a9ddd6);display:flex;align-items:center;justify-content:center;color:#3a7c74;font-size:40px;}
+.o-avatar{width:80px;height:80px;border-radius:50%;flex-shrink:0;border:2px solid var(--o-border);background:linear-gradient(135deg,#cfeeea,#a9ddd6);display:flex;align-items:center;justify-content:center;font-size:34px;}
+/* old bottom nav (6 tabs) */
+.o-nav{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--o-border);display:flex;justify-content:space-around;align-items:center;padding:8px 0 10px;box-shadow:0 -4px 16px rgba(26,155,142,.1);z-index:20;}
+.o-nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 4px;color:var(--o-text-2);min-width:54px;position:relative;text-decoration:none;}
+.o-nav-item.active{color:var(--o-primary);background:var(--o-primary-lighter);border-radius:12px;}
+.o-nav-item.active::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:34px;height:3px;background:var(--o-primary);border-radius:0 0 3px 3px;}
+.o-nav-icon{font-size:19px;margin-bottom:3px;}
+.o-nav-label{font-size:10px;font-weight:500;}
+.o-error-box{background:#fef2f2;border:1px solid var(--o-error);border-radius:16px;padding:16px;margin-bottom:16px;}
+.o-error-box p{color:var(--o-error);margin:0;font-size:14px;}
+
+/* ============================================================
+   ============  NEW APP STYLES (HIG 2026)  ===================
+   ============================================================ */
+.n-app{background:var(--n-bg);font-family:'Inter','SF Pro Text',-apple-system,sans-serif;color:var(--n-label);}
+.n-scroll{height:100%;overflow:hidden;display:flex;flex-direction:column;}
+/* large nav-bar title that mimics iOS large titles */
+.n-nav{padding:60px 22px 6px;background:var(--n-bg);}
+.n-nav .eyebrow{font-size:13px;font-weight:600;color:var(--n-label-3);letter-spacing:.2px;margin:0 0 2px;display:flex;align-items:center;gap:7px;}
+.n-nav h1{font-size:32px;font-weight:800;letter-spacing:-.8px;margin:0;line-height:1.05;}
+.n-nav .nav-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
+.n-icon-btn{width:38px;height:38px;border-radius:50%;background:var(--n-fill);display:grid;place-items:center;color:var(--n-brand);font-size:17px;flex:0 0 auto;border:1px solid var(--n-sep);}
+.n-body{flex:1;overflow:hidden;padding:14px 18px 96px;}
+/* search field */
+.n-search{display:flex;align-items:center;gap:9px;background:var(--n-fill-2);border-radius:13px;padding:11px 14px;margin:10px 4px 4px;color:var(--n-label-3);font-size:15.5px;}
+/* segmented filter scroller */
+/* overflow:clip + clip-margin clips the horizontal rail but lets the active
+   chip's drop shadow bleed vertically instead of being trimmed */
+.n-seg-scroll{display:flex;gap:9px;overflow:clip;overflow-clip-margin:24px;padding:14px 4px 6px;}
+.n-fchip{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:13px;font-size:14px;font-weight:600;background:var(--n-bg-elev);border:1px solid var(--n-sep);color:var(--n-label-2);box-shadow:0 1px 2px rgba(16,24,40,.04);}
+.n-fchip.active{background:var(--n-brand);color:#fff;border-color:transparent;box-shadow:0 6px 16px -4px rgba(15,157,143,.55);}
+.n-fchip .dot{width:6px;height:6px;border-radius:50%;background:var(--n-accent);}
+/* cards */
+.n-card{background:var(--n-bg-elev);border-radius:var(--n-radius);padding:17px;margin-top:14px;box-shadow:0 1px 2px rgba(16,24,40,.05),0 8px 24px -16px rgba(16,24,40,.25);border:.5px solid var(--n-sep);}
+.n-card.first{margin-top:6px;}
+.n-card h3{font-size:18px;font-weight:700;letter-spacing:-.3px;margin:0 0 5px;line-height:1.25;}
+.n-card p.desc{font-size:14px;color:var(--n-label-2);line-height:1.5;margin:0;}
+.n-rowtop{display:flex;align-items:flex-start;gap:13px;}
+.n-thumb{width:54px;height:54px;border-radius:15px;flex:0 0 auto;display:grid;place-items:center;font-size:25px;background:var(--n-brand-grad);color:#fff;box-shadow:0 6px 14px -4px rgba(15,157,143,.5);}
+.n-chev{margin-left:auto;color:var(--n-label-3);font-size:18px;align-self:center;}
+.n-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px;}
+.n-pill{font-size:12.5px;font-weight:600;color:var(--n-label-2);background:var(--n-fill-2);border-radius:9px;padding:5px 10px;display:inline-flex;align-items:center;gap:5px;}
+.n-pill.brand{color:var(--n-brand);background:var(--n-fill);}
+.n-divider{height:.5px;background:var(--n-sep);margin:14px 0;}
+.n-meta-line{display:flex;align-items:center;gap:8px;color:var(--n-label-2);font-size:13.5px;margin-top:10px;}
+.n-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:14px;font-family:inherit;font-weight:700;font-size:15px;padding:12px 18px;cursor:pointer;}
+.n-btn-primary{background:var(--n-brand-grad);color:#fff;box-shadow:0 8px 18px -6px rgba(15,157,143,.6);}
+.n-btn-ghost{background:var(--n-fill);color:var(--n-brand);}
+.n-btn-tint{background:var(--n-fill-2);color:var(--n-label);}
+.n-btn-danger{background:var(--n-danger-fill);color:var(--n-danger);}
+.n-btn-full{width:100%;}
+.n-btn-sm{padding:9px 14px;font-size:13.5px;border-radius:12px;}
+.n-card-actions{display:flex;gap:8px;margin-top:14px;}
+/* hero card on home */
+.n-hero{position:relative;overflow:hidden;border-radius:var(--n-radius-lg);padding:20px;margin-top:8px;color:#fff;background:var(--n-brand-grad);box-shadow:0 18px 36px -14px rgba(15,157,143,.7);}
+.n-hero::after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.16);}
+.n-hero::before{content:"";position:absolute;right:30px;bottom:-60px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.1);}
+.n-hero h2{font-size:21px;font-weight:800;letter-spacing:-.4px;margin:0 0 5px;position:relative;}
+.n-hero p{font-size:14px;opacity:.92;margin:0 0 16px;position:relative;line-height:1.45;max-width:230px;}
+.n-hero .cta{position:relative;display:inline-flex;align-items:center;gap:7px;background:#fff;color:var(--n-brand);font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:12px;}
+.n-section-label{font-size:13px;font-weight:700;color:var(--n-label-3);letter-spacing:.3px;text-transform:uppercase;margin:22px 4px 4px;}
+/* grid of quick tiles */
+.n-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+.n-tile{background:var(--n-bg-elev);border-radius:20px;padding:15px;border:.5px solid var(--n-sep);box-shadow:0 1px 2px rgba(16,24,40,.05),0 10px 24px -18px rgba(16,24,40,.3);}
+.n-tile .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:21px;margin-bottom:11px;}
+.n-tile h4{font-size:15px;font-weight:700;margin:0 0 3px;letter-spacing:-.2px;}
+.n-tile span{font-size:12px;color:var(--n-label-3);line-height:1.35;display:block;}
+.n-tile.span2{grid-column:span 2;display:flex;align-items:center;gap:14px;}
+.n-tile.span2 .ic{margin-bottom:0;}
+/* list rows (events/today) */
+.n-listrow{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:.5px solid var(--n-sep);}
+.n-listrow:last-child{border-bottom:0;}
+.n-datechip{width:50px;height:54px;border-radius:14px;background:var(--n-fill);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 auto;}
+.n-datechip .d{font-size:20px;font-weight:800;color:var(--n-brand);line-height:1;}
+.n-datechip .m{font-size:10px;font-weight:700;color:var(--n-brand);text-transform:uppercase;margin-top:2px;}
+.n-listrow .info{flex:1;min-width:0;}
+.n-listrow .info b{font-size:15px;font-weight:700;display:block;letter-spacing:-.2px;}
+.n-listrow .info small{font-size:12.5px;color:var(--n-label-3);display:flex;align-items:center;gap:5px;margin-top:3px;}
+/* coach card new */
+.n-coach{display:flex;gap:14px;align-items:center;}
+.n-coach .ava{width:62px;height:62px;border-radius:20px;flex:0 0 auto;display:grid;place-items:center;font-size:28px;background:var(--n-brand-grad);color:#fff;}
+.n-coach .rate{display:inline-flex;align-items:center;gap:3px;font-size:12.5px;font-weight:700;color:var(--n-accent);}
+/* photo block new */
+.n-photo{width:100%;height:148px;border-radius:18px;margin-bottom:13px;display:grid;place-items:center;font-size:46px;color:#fff;background:linear-gradient(135deg,#1ec4b2,#0f9d8f);}
+/* form new */
+.n-field{margin-bottom:14px;}
+.n-field label{font-size:13px;font-weight:700;color:var(--n-label-2);display:block;margin-bottom:7px;}
+.n-field .inp{background:var(--n-fill-2);border:1px solid transparent;border-radius:13px;padding:13px 14px;font-size:15px;color:var(--n-label-3);}
+.n-field .inp.filled{color:var(--n-label);background:var(--n-bg-elev);border-color:var(--n-sep);}
+.n-field .inp.focus{background:var(--n-bg-elev);border-color:var(--n-brand);box-shadow:0 0 0 4px var(--n-fill);color:var(--n-label);}
+.n-two{display:flex;gap:10px;}
+.n-two>*{flex:1;}
+/* new floating tab bar (5 tabs, Liquid-Glass) */
+.n-tabbar{position:absolute;left:14px;right:14px;bottom:14px;z-index:25;
+  display:flex;justify-content:space-around;align-items:center;
+  padding:11px 8px;border-radius:28px;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(26px) saturate(180%);
+  border:.5px solid rgba(255,255,255,.6);
+  box-shadow:0 10px 30px -8px rgba(16,24,40,.28),inset 0 1px 0 rgba(255,255,255,.7);}
+.n-tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--n-label-3);font-size:10.5px;font-weight:600;flex:1;}
+.n-tab .ti{font-size:21px;line-height:1;}
+.n-tab.active{color:var(--n-brand);}
+.n-tab.active .ti{filter:drop-shadow(0 3px 6px rgba(15,157,143,.5));}
+/* FAB */
+.n-fab{position:absolute;right:18px;bottom:90px;z-index:24;width:56px;height:56px;border-radius:20px;background:var(--n-brand-grad);color:#fff;display:grid;place-items:center;font-size:27px;font-weight:300;box-shadow:0 14px 30px -8px rgba(15,157,143,.7);}
+.n-empty{text-align:center;padding:54px 24px;}
+.n-empty .ico{width:84px;height:84px;border-radius:26px;margin:0 auto 18px;display:grid;place-items:center;font-size:40px;background:var(--n-fill);}
+.n-empty h3{font-size:18px;font-weight:700;margin:0 0 6px;}
+.n-empty p{font-size:13.5px;color:var(--n-label-3);line-height:1.5;margin:0 0 18px;}
+.n-skel{height:84px;border-radius:18px;margin-top:14px;background:linear-gradient(100deg,var(--n-fill-2) 30%,rgba(255,255,255,.6) 50%,var(--n-fill-2) 70%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{to{background-position:-200% 0;}}
+.n-toolbar-title{font-size:17px;font-weight:700;text-align:center;padding:60px 0 6px;}
+.review-card{background:var(--review-bg);border:1px solid var(--panel-border);border-radius:16px;padding:20px 22px;margin-top:18px;}
+.review-card h4{margin:0 0 12px;font-size:15px;font-weight:700;}
+.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.review-grid ul{margin:8px 0 0;padding-left:18px;}
+.review-grid li{font-size:13px;color:var(--review-li);line-height:1.65;margin-bottom:6px;}
+.review-grid b{color:var(--page-text);}
+@media(max-width:760px){.review-grid{grid-template-columns:1fr;}}
+/* ---- developer design guidelines ---- */
+.guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;}
+.guide-grid .span2{grid-column:1 / -1;}
+@media(max-width:760px){.guide-grid{grid-template-columns:1fr;}.guide-grid .span2{grid-column:auto;}}
+.guide-card{background:var(--review-bg);border:1px solid var(--panel-border);border-radius:16px;padding:20px 22px;}
+.guide-card h4{margin:0 0 5px;font-size:15px;font-weight:700;color:var(--page-text);}
+.guide-card>p{margin:0 0 14px;font-size:13px;color:var(--review-li);line-height:1.6;}
+.guide-card a{color:var(--n-brand);text-decoration:none;font-weight:600;}
+.guide-card code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--n-brand);}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;}
+.icon-cell{display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 6px;border:1px solid var(--panel-border);border-radius:12px;background:var(--panel-bg);text-align:center;}
+.icon-cell svg.lucide{width:22px;height:22px;color:var(--n-brand);stroke-width:2;}
+.icon-cell em{font-size:11px;color:var(--page-text-2);font-style:normal;}
+.icon-cell span{font-size:10px;color:var(--page-text-3);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.2;}
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;}
+.sw{border:1px solid var(--panel-border);border-radius:12px;overflow:hidden;background:var(--panel-bg);}
+.sw .chip{height:44px;}
+.sw .meta{padding:8px 11px;}
+.sw .meta b{display:block;font-size:12px;color:var(--page-text);}
+.sw .meta code{font-size:10.5px;}
+.spec{list-style:none;margin:0;padding:0;}
+.spec li{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:13px;padding:8px 0;border-bottom:1px solid var(--hairline);color:var(--review-li);}
+.spec li:last-child{border-bottom:0;}
+.spec li b{color:var(--page-text);font-weight:600;white-space:nowrap;}
+.guide-rules{margin:6px 0 0;padding-left:18px;}
+.guide-rules li{font-size:13px;color:var(--review-li);line-height:1.7;margin-bottom:6px;}
+.guide-rules b{color:var(--page-text);}
+/* dark-theme overrides for hardcoded-light NEW surfaces */
+body[data-theme="dark"] .n-tabbar{
+  background:rgba(28,28,32,.72);border-color:rgba(255,255,255,.10);
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.10);
+}
+body[data-theme="dark"][data-design="new"] .statusbar{--sb:#f5f5f7;}
+/* ---- Lucide icons (New design only) ---- */
+.n-app i[data-lucide]{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.n-app svg.lucide{width:1em;height:1em;stroke-width:2;display:block;}
+.n-fab svg.lucide{stroke-width:2.4;}
+.rate svg.lucide{fill:currentColor;stroke-width:0;}
+.foot{margin-top:80px;text-align:center;color:var(--foot);font-size:12px;}
+body[data-theme="dark"] .n-skel{background:linear-gradient(100deg,var(--n-fill-2) 30%,rgba(255,255,255,.10) 50%,var(--n-fill-2) 70%);background-size:200% 100%;}
+</style>
+</head>
+<body data-design="old" data-theme="dark">
+<script>/* apply saved variant + theme before content paints, to avoid a flash */try{if(localStorage.getItem('sg-mockups-design')==='new')document.body.setAttribute('data-design','new');var _t=localStorage.getItem('sg-mockups-theme');document.body.setAttribute('data-theme',_t==='light'?'light':'dark');}catch(e){}</script>
+
+<!-- ====================== TOP CONTROL BAR ====================== -->
+<div class="topbar">
+  <div class="brand">
+    <span class="logo">🏃</span>
+    <span>SportGuide
+      <small>Voronezh Sport Guide - Telegram Mini App</small>
+    </span>
+  </div>
+
+  <div class="toggle-wrap">
+    <span class="seg-label">Design</span>
+    <div class="seg" id="seg">
+      <span class="pill"></span>
+      <button data-d="old" class="active" onclick="setDesign('old')">Old</button>
+      <button data-d="new" onclick="setDesign('new')">New</button>
+    </div>
+    <span class="seg-label">Theme</span>
+    <div class="seg" id="seg-theme">
+      <span class="pill"></span>
+      <button data-t="light" onclick="setTheme('light')">Light</button>
+      <button data-t="dark" class="active" onclick="setTheme('dark')">Dark</button>
+    </div>
+    <div class="legend" id="legend">Showing the current production design exactly as implemented today.</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="intro">
+    <h1>SportGuide - Screen Mockups</h1>
+    <p>Every screen of the SportGuide Telegram Mini App, rendered inside an iPhone 17 Pro frame.
+       Toggle <b>Old</b> to see the current production design reproduced faithfully (real colors, copy and layout),
+       and <b>New</b> to see a refactored design aligned with Apple Human Interface Guidelines 2026.
+       Screens are grouped by feature and by tab, matching the app's own navigation.</p>
+  </div>
+
+  <!-- ===================================================================
+       SECTION 1 - APP SHELL / NAVIGATION
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">01</span><h2>Home & App Shell</h2>
+      <span class="tag">Tab: Главная</span>
+    </div>
+    <p class="section-desc">The entry screen and the global tab bar. Old: a title, a subtitle and five stacked link cards over a 6-item bottom tab bar. New: a branded hero, a 2-column quick-access grid, a "today" preview, and a 5-item Liquid-Glass floating tab bar.</p>
+
+    <div class="screens">
+
+      <!-- ===== HOME ===== -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar" style="--sb:#0b0f12"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app">
+              <div class="o-body has-status">
+                <h1 class="o-title">SportGuide</h1>
+                <p class="o-subtitle">Ваш помощник в мире спорта</p>
+                <a class="o-card" style="display:block;text-decoration:none"><div style="display:flex;align-items:center;gap:16px"><span style="font-size:32px">📅</span><div style="flex:1"><h3 class="o-card-title" style="margin-bottom:6px">События</h3><p class="o-card-desc" style="margin:0">Ближайшие спортивные события</p></div></div></a>
+                <a class="o-card" style="display:block;text-decoration:none"><div style="display:flex;align-items:center;gap:16px"><span style="font-size:32px">📍</span><div style="flex:1"><h3 class="o-card-title" style="margin-bottom:6px">Места</h3><p class="o-card-desc" style="margin:0">Спортивные площадки и залы</p></div></div></a>
+                <a class="o-card" style="display:block;text-decoration:none"><div style="display:flex;align-items:center;gap:16px"><span style="font-size:32px">👥</span><div style="flex:1"><h3 class="o-card-title" style="margin-bottom:6px">Совместные тренировки</h3><p class="o-card-desc" style="margin:0">Найдите партнеров для тренировок</p></div></div></a>
+                <a class="o-card" style="display:block;text-decoration:none"><div style="display:flex;align-items:center;gap:16px"><span style="font-size:32px">📋</span><div style="flex:1"><h3 class="o-card-title" style="margin-bottom:6px">Программы тренировок</h3><p class="o-card-desc" style="margin:0">Готовые программы для занятий</p></div></div></a>
+              </div>
+              <!-- OLD NAV -->
+              <div class="o-nav">
+                <a class="o-nav-item active"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+                <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+                <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+                <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+                <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+                <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+              </div>
+            </div>
+          </div></div>
+          <div class="caption"><h3>Главная (Home)</h3><p>Title + subtitle + 5 link cards (one per section). 6-tab bottom bar with cramped labels. Cards are full-width with a left accent bar on hover.</p></div>
+        </div>
+      </div>
+
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><div class="nav-row"><div><p class="eyebrow"><i data-lucide="map-pin"></i>Воронеж</p><h1>Привет,<br>чем займёмся?</h1></div><div class="n-icon-btn"><i data-lucide="settings"></i></div></div></div>
+              <div class="n-body">
+                <div class="n-hero">
+                  <h2>Найди тренировку рядом</h2>
+                  <p>6 событий сегодня и 12 партнёров ищут компанию.</p>
+                  <span class="cta">Смотреть события →</span>
+                </div>
+                <div class="n-section-label">Быстрый доступ</div>
+                <div class="n-tiles">
+                  <div class="n-tile"><div class="ic" style="background:var(--n-fill);color:var(--n-brand)"><i data-lucide="calendar"></i></div><h4>События</h4><span>Ближайшие спорт-события</span></div>
+                  <div class="n-tile"><div class="ic" style="background:rgba(255,122,69,.12);color:var(--n-accent)"><i data-lucide="map-pin"></i></div><h4>Места</h4><span>Площадки и залы</span></div>
+                  <div class="n-tile"><div class="ic" style="background:var(--n-fill);color:var(--n-brand)"><i data-lucide="users"></i></div><h4>Тренировки</h4><span>Найти партнёров</span></div>
+                  <div class="n-tile"><div class="ic" style="background:rgba(255,122,69,.12);color:var(--n-accent)"><i data-lucide="clipboard-list"></i></div><h4>Программы</h4><span>Готовые планы</span></div>
+                  <div class="n-tile span2"><div class="ic" style="background:var(--n-fill);color:var(--n-brand)"><i data-lucide="graduation-cap"></i></div><div><h4>Тренеры</h4><span>Профессиональные инструкторы рядом с тобой</span></div></div>
+                </div>
+              </div>
+              <div class="n-tabbar">
+                <div class="n-tab active"><span class="ti"><i data-lucide="home"></i></span>Главная</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="calendar"></i></span>События</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="graduation-cap"></i></span>Тренеры</div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption"><h3>Главная (Home)</h3><p>Personalized greeting, brand hero with a live stat, a 2-col quick-access grid, and a 5-tab floating glass bar. Programs + Coaches consolidated to keep the tab bar uncluttered.</p></div>
+        </div>
+      </div>
+
+      <!-- ===== LOADING ===== -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+              <div class="o-spinner"></div>
+              <p style="color:var(--o-text-2);font-size:14px;margin:0">Загрузка...</p>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Loading (boot)</h3><p>Full-screen centered spinner shown while the app authenticates with Telegram.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+              <div style="width:72px;height:72px;border-radius:22px;display:grid;place-items:center;font-size:34px;background:var(--n-brand-grad);color:#fff;box-shadow:0 16px 34px -10px rgba(15,157,143,.7)"><i data-lucide="footprints"></i></div>
+              <div style="width:130px;height:4px;border-radius:99px;overflow:hidden;background:var(--n-fill-2)"><div style="width:55%;height:100%;border-radius:99px;background:var(--n-brand-grad);animation:shimmer 1.4s infinite;background-size:200% 100%"></div></div>
+              <p style="color:var(--n-label-3);font-size:13.5px;margin:0">Готовим SportGuide…</p>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Loading (boot)</h3><p>Brand mark + determinate progress bar instead of a bare spinner; reads as intentional, on-brand launch.</p></div>
+        </div>
+      </div>
+
+      <!-- ===== AUTH ERROR ===== -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status" style="display:flex;align-items:center;justify-content:center;text-align:center">
+              <div class="o-empty">
+                <div class="o-empty-icon">⚠️</div>
+                <h2 style="color:var(--o-error);margin:0 0 16px;font-size:22px">Ошибка аутентификации</h2>
+                <p style="margin-bottom:16px">Не удалось войти в приложение. Убедитесь, что вы открыли приложение из Telegram.</p>
+                <button class="o-btn o-btn-primary">Перезагрузить</button>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Auth error</h3><p>Shown when Telegram authentication fails. Single "Перезагрузить" recovery action.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div style="height:100%;display:flex;align-items:center;justify-content:center;padding:24px">
+              <div class="n-empty">
+                <div class="ico" style="background:rgba(255,122,69,.12);color:var(--n-accent)"><i data-lucide="triangle-alert"></i></div>
+                <h3>Не удалось войти</h3>
+                <p>Откройте SportGuide из Telegram, чтобы продолжить. Если приложение уже в Telegram - попробуйте ещё раз.</p>
+                <button class="n-btn n-btn-primary n-btn-full">Повторить попытку</button>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Auth error</h3><p>Calmer recovery screen: soft tinted icon, plain-language guidance, full-width primary action with clearer label.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SECTION 2 - EVENTS
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">02</span><h2>События / Events</h2>
+      <span class="tag">Tab: События</span>
+    </div>
+    <p class="section-desc">Browse upcoming sport events. Filterable by district and date. Old: a collapsible filter panel sitting above a stack of cards with emoji meta pills. New: an inline search + horizontal filter scroller, and event cards with a date badge.</p>
+
+    <div class="screens">
+
+      <!-- EVENTS POPULATED -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">События</h1>
+              <div class="o-filter"><div class="o-filter-bar"><button class="o-filter-toggle">🔍 Фильтры ▶</button></div></div>
+              <div class="o-card">
+                <h3 class="o-card-title">Городской забег "Воронеж бежит"</h3>
+                <p class="o-card-desc">5 км по набережной, регистрация открыта для всех желающих.</p>
+                <div class="o-meta"><span class="o-meta-item">📍 Адмиралтейская пл.</span><span class="o-meta-item">🏘️ Центральный 🏘</span><span class="o-meta-item">📅 28 июня 2026 в 10:00</span></div>
+                <p class="o-addr">📍 Петровская набережная, 1</p>
+                <a class="o-btn o-btn-primary o-btn-small" style="margin-top:16px">Подробнее →</a>
+              </div>
+              <div class="o-card">
+                <h3 class="o-card-title">Турнир по уличному баскетболу 3x3</h3>
+                <p class="o-card-desc">Открытый турнир, команды до 4 человек.</p>
+                <div class="o-meta"><span class="o-meta-item">📍 Парк "Динамо"</span><span class="o-meta-item">🏘️ Центральный 🏘</span><span class="o-meta-item">📅 29 июня 2026 в 12:00</span></div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><h3>События - список</h3><p>Collapsed filter toggle, then event cards. Meta is a wrap of teal emoji pills; address repeated below; "Подробнее →" links out.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><div class="nav-row"><div><p class="eyebrow">5 событий рядом</p><h1>События</h1></div><div class="n-icon-btn"><i data-lucide="arrow-up-down"></i></div></div>
+                <div class="n-search"><i data-lucide="search"></i>Поиск событий</div>
+                <div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip">Сегодня</span><span class="n-fchip">Завтра</span><span class="n-fchip"><span class="dot"></span>Центральный</span><span class="n-fchip">Левобережный</span></div>
+              </div>
+              <div class="n-body" style="padding-top:0">
+                <div class="n-card first">
+                  <div class="n-rowtop"><div class="n-datechip"><span class="d">28</span><span class="m">июн</span></div><div style="flex:1"><h3>Городской забег «Воронеж бежит»</h3><p class="desc">5 км по набережной, регистрация открыта.</p></div></div>
+                  <div class="n-pills"><span class="n-pill brand"><i data-lucide="clock"></i>10:00</span><span class="n-pill"><i data-lucide="map-pin"></i>Адмиралтейская пл.</span><span class="n-pill">Центральный</span></div>
+                  <div class="n-divider"></div>
+                  <button class="n-btn n-btn-primary n-btn-sm n-btn-full">Подробнее</button>
+                </div>
+                <div class="n-card">
+                  <div class="n-rowtop"><div class="n-datechip"><span class="d">29</span><span class="m">июн</span></div><div style="flex:1"><h3>Турнир по баскетболу 3×3</h3><p class="desc">Открытый турнир, команды до 4 человек.</p></div></div>
+                  <div class="n-pills"><span class="n-pill brand"><i data-lucide="clock"></i>12:00</span><span class="n-pill"><i data-lucide="map-pin"></i>Парк «Динамо»</span><span class="n-pill">Центральный</span></div>
+                </div>
+              </div>
+              <div class="n-tabbar">
+                <div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div>
+                <div class="n-tab active"><span class="ti"><i data-lucide="calendar"></i></span>События</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div>
+                <div class="n-tab"><span class="ti"><i data-lucide="graduation-cap"></i></span>Тренеры</div>
+              </div>
+            </div></div>
+          </div></div>
+          <div class="caption"><h3>События - список</h3><p>Filters become a sticky search + horizontal chip rail (no extra tap to expand). Date badge gives instant scannability; meta condensed to clean pills.</p></div>
+        </div>
+      </div>
+
+      <!-- EVENTS FILTER OPEN -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">События</h1>
+              <div class="o-filter">
+                <div class="o-filter-bar"><button class="o-filter-toggle active">🔍 Фильтры ▼</button></div>
+                <div style="margin-top:16px">
+                  <div class="o-fsection"><div class="o-fsection-title">Район</div><div class="o-chips"><span class="o-chip">Железнодорожный</span><span class="o-chip active">Центральный</span><span class="o-chip">Советский</span><span class="o-chip">Ленинский</span></div></div>
+                  <div class="o-fsection"><div class="o-fsection-title">Дата</div><div class="o-chips"><span class="o-chip">Сегодня</span><span class="o-chip">Завтра</span></div></div>
+                  <div class="o-factions"><button class="o-btn o-btn-secondary o-btn-small">Сбросить</button></div>
+                </div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">Filters</span><h3>Filter panel (expanded)</h3><p>The shared FilterPanel: uppercase section titles, pill chips that toggle, and a "Сбросить" reset. Pushes content down when open.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar" style="--sb:#fff"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app">
+              <div class="n-scroll">
+                <div class="n-nav"><div class="nav-row"><div><p class="eyebrow">5 событий рядом</p><h1>События</h1></div><div class="n-icon-btn"><i data-lucide="arrow-up-down"></i></div></div>
+                  <div class="n-search"><i data-lucide="search"></i>Поиск событий</div>
+                  <div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip">Сегодня</span><span class="n-fchip">Завтра</span><span class="n-fchip"><span class="dot"></span>Центральный</span><span class="n-fchip">Левобережный</span></div>
+                </div>
+                <div class="n-body" style="padding-top:0">
+                  <div class="n-card first">
+                    <div class="n-rowtop"><div class="n-datechip"><span class="d">28</span><span class="m">июн</span></div><div style="flex:1"><h3>Городской забег «Воронеж бежит»</h3><p class="desc">5 км по набережной, регистрация открыта.</p></div></div>
+                    <div class="n-pills"><span class="n-pill brand"><i data-lucide="clock"></i>10:00</span><span class="n-pill"><i data-lucide="map-pin"></i>Адмиралтейская пл.</span><span class="n-pill">Центральный</span></div>
+                  </div>
+                  <div class="n-card">
+                    <div class="n-rowtop"><div class="n-datechip"><span class="d">29</span><span class="m">июн</span></div><div style="flex:1"><h3>Турнир по баскетболу 3×3</h3><p class="desc">Открытый турнир, команды до 4 человек.</p></div></div>
+                  </div>
+                </div>
+              </div>
+              <div style="position:absolute;inset:0;background:rgba(11,15,18,.5)"></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;background:var(--n-bg-elev);border-radius:28px 28px 0 0;padding:8px 20px 28px;box-shadow:0 -12px 40px -8px rgba(0,0,0,.4)">
+                <div style="width:38px;height:5px;border-radius:99px;background:var(--n-sep);margin:0 auto 16px"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><h3 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px">Фильтры</h3><span style="color:var(--n-brand);font-weight:700;font-size:14px">Сбросить</span></div>
+                <div class="n-section-label" style="margin-left:0">Район</div>
+                <div class="n-seg-scroll" style="flex-wrap:wrap"><span class="n-fchip">Железнодорожный</span><span class="n-fchip active">Центральный</span><span class="n-fchip">Советский</span><span class="n-fchip">Ленинский</span></div>
+                <div class="n-section-label" style="margin-left:0">Когда</div>
+                <div class="n-seg-scroll" style="flex-wrap:wrap"><span class="n-fchip active">Сегодня</span><span class="n-fchip">Завтра</span><span class="n-fchip">На неделе</span></div>
+                <button class="n-btn n-btn-primary n-btn-full" style="margin-top:20px">Показать 5 событий</button>
+              </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">Filters</span><h3>Filter sheet</h3><p>Filters promoted to a proper bottom sheet with a grabber. Apply button states the result count - a clear, reversible commit instead of an inline accordion.</p></div>
+        </div>
+      </div>
+
+      <!-- EVENTS EMPTY -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">События</h1>
+              <div class="o-filter"><div class="o-filter-bar"><button class="o-filter-toggle">🔍 Фильтры ▶</button></div></div>
+              <div class="o-empty"><div class="o-empty-icon">📅</div><p>События не найдены</p><p class="hint">Попробуйте изменить фильтры</p></div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Empty result</h3><p>Faded emoji + "События не найдены" + hint. Reused verbatim across every tab's empty state.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><h1>События</h1><div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><span class="dot"></span>Завтра</span><span class="n-fchip"><span class="dot"></span>Советский</span></div></div>
+              <div class="n-body">
+                <div class="n-empty">
+                  <div class="ico" style="background:var(--n-fill);color:var(--n-brand)"><i data-lucide="calendar"></i></div>
+                  <h3>Пока ничего нет</h3>
+                  <p>На «Завтра» в Советском районе событий не нашлось. Сбросьте фильтры или загляните позже.</p>
+                  <button class="n-btn n-btn-ghost">Сбросить фильтры</button>
+                </div>
+              </div>
+              <div class="n-tabbar"><div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div><div class="n-tab active"><span class="ti"><i data-lucide="calendar"></i></span>События</div><div class="n-tab"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div><div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div><div class="n-tab"><span class="ti"><i data-lucide="graduation-cap"></i></span>Тренеры</div></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Empty result</h3><p>Names the active filters in the message and offers a one-tap "Сбросить фильтры" recovery, so the dead end becomes actionable.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SECTION 3 - PLACES
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">03</span><h2>Спортивные места / Places</h2>
+      <span class="tag">Tab: Места</span>
+    </div>
+    <p class="section-desc">A directory of courts, gyms and outdoor grounds. Filterable by district, place type and indoor/outdoor. Cards carry a photo (base64), meta pills and an optional website link.</p>
+
+    <div class="screens">
+
+      <!-- PLACES POPULATED -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">Спортивные места</h1>
+              <div class="o-filter"><div class="o-filter-bar"><button class="o-filter-toggle">🔍 Фильтры ▶</button></div></div>
+              <div class="o-card">
+                <div class="o-photo">🏟️</div>
+                <h3 class="o-card-title">СК "Олимпик"</h3>
+                <p class="o-card-desc">Крытый манеж с беговыми дорожками и тренажёрным залом.</p>
+                <div class="o-meta"><span class="o-meta-item">🏘️ Центральный 🏘</span><span class="o-meta-item">Тренажерный зал 🏋️‍♀️</span><span class="o-meta-item">🏢 В помещении</span></div>
+                <p class="o-addr">📍 ул. Карла Маркса, 116</p>
+                <a class="o-btn o-btn-primary o-btn-small" style="margin-top:16px">Сайт →</a>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><h3>Места - список</h3><p>Photo header on the card, title, description, district/type/indoor meta pills, address line, and a "Сайт →" button when a website exists.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><div class="nav-row"><div><p class="eyebrow">24 места рядом</p><h1>Места</h1></div><div class="n-icon-btn"><i data-lucide="map"></i></div></div>
+                <div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><i data-lucide="goal"></i>Поля</span><span class="n-fchip"><i data-lucide="dumbbell"></i>Залы</span><span class="n-fchip"><i data-lucide="land-plot"></i>Корты</span><span class="n-fchip"><i data-lucide="waves"></i>Бассейн</span></div>
+              </div>
+              <div class="n-body" style="padding-top:4px">
+                <div class="n-card first" style="padding:0;overflow:hidden">
+                  <div class="n-photo" style="border-radius:0;margin:0;height:138px"><i data-lucide="building-2"></i></div>
+                  <div style="padding:15px 17px 17px">
+                    <div style="display:flex;align-items:flex-start"><div style="flex:1"><h3>СК «Олимпик»</h3><p class="desc">Крытый манеж с дорожками и залом.</p></div><span class="n-pill brand" style="margin-left:8px"><i data-lucide="building"></i>Зал</span></div>
+                    <div class="n-meta-line"><i data-lucide="map-pin"></i>ул. Карла Маркса, 116 · Центральный</div>
+                    <div class="n-card-actions"><button class="n-btn n-btn-primary n-btn-sm" style="flex:1">На карте</button><button class="n-btn n-btn-tint n-btn-sm" style="flex:1">Сайт</button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="n-tabbar"><div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div><div class="n-tab"><span class="ti"><i data-lucide="calendar"></i></span>События</div><div class="n-tab active"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div><div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div><div class="n-tab"><span class="ti"><i data-lucide="graduation-cap"></i></span>Тренеры</div></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><h3>Места - список</h3><p>Edge-to-edge photo, indoor/outdoor as a corner badge, single condensed meta line, and a primary "На карте" action - addresses become useful, not decorative.</p></div>
+        </div>
+      </div>
+
+      <!-- PLACES LOADING -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">Спортивные места</h1>
+              <div class="o-empty"><div class="o-empty-icon">⏳</div><p>Загрузка...</p></div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Loading (in-tab)</h3><p>The per-tab loading state: title kept, ⏳ emoji and "Загрузка..." centered. No skeleton; layout jumps when data lands.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><h1>Места</h1><div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><i data-lucide="goal"></i>Поля</span><span class="n-fchip"><i data-lucide="dumbbell"></i>Залы</span></div></div>
+              <div class="n-body">
+                <div class="n-skel" style="height:200px"></div>
+                <div class="n-skel" style="height:200px"></div>
+              </div>
+              <div class="n-tabbar"><div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div><div class="n-tab"><span class="ti"><i data-lucide="calendar"></i></span>События</div><div class="n-tab active"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div><div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div><div class="n-tab"><span class="ti"><i data-lucide="graduation-cap"></i></span>Тренеры</div></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">State</span><h3>Loading (in-tab)</h3><p>Content-shaped skeletons that match the real card layout, so there is no jump when data arrives.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SECTION 4 - JOINT TRAININGS
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">04</span><h2>Совместные тренировки / Joint Trainings</h2>
+      <span class="tag">Tab: Тренировки</span>
+    </div>
+    <p class="section-desc">The only CRUD area: users browse, create, edit and delete training meetups. Filter by district + multi-select sport. Includes a large inline create/edit form and per-card actions (contact organizer / edit / delete).</p>
+
+    <div class="screens">
+
+      <!-- JT LIST -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <h1 class="o-title sm" style="font-size:22px">Совместные тренировки</h1>
+                <button class="o-btn o-btn-primary o-btn-small">+ Создать</button>
+              </div>
+              <div class="o-filter"><div class="o-filter-bar"><button class="o-filter-toggle">🔍 Фильтры ▶</button></div></div>
+              <div class="o-card">
+                <h3 class="o-card-title">Футбол 5х5, ищем ещё двоих</h3>
+                <p class="o-card-desc">Дружеская игра, средний уровень. Берём с собой воду.</p>
+                <div class="o-meta"><span class="o-meta-item">🏃 Футбол</span><span class="o-meta-item">📍 Поле у школы 28</span><span class="o-meta-item">🏘️ Советский 🏡</span><span class="o-meta-item">📅 27 июня 2026 в 19:00</span></div>
+                <p class="o-addr" style="font-size:14px;color:var(--o-text-2)">📍 ул. Космонавтов, 12</p>
+                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                  <a class="o-btn o-btn-primary o-btn-small">Написать организатору</a>
+                  <button class="o-btn o-btn-secondary o-btn-small">Редактировать</button>
+                  <button class="o-btn o-btn-danger o-btn-small">Удалить</button>
+                </div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><h3>Тренировки - список</h3><p>Header with a small "+ Создать". Cards expose three stacked-width action buttons (primary / secondary / danger) that wrap awkwardly on narrow screens.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><div class="nav-row"><div><p class="eyebrow">12 групп ищут участников</p><h1>Группы</h1></div><div class="n-icon-btn"><i data-lucide="arrow-up-down"></i></div></div>
+                <div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><i data-lucide="goal"></i>Футбол</span><span class="n-fchip"><i data-lucide="circle-dot"></i>Баскетбол</span><span class="n-fchip"><i data-lucide="target"></i>Теннис</span></div>
+              </div>
+              <div class="n-body" style="padding-top:4px">
+                <div class="n-card first">
+                  <div style="display:flex;align-items:flex-start;gap:12px"><div class="n-thumb" style="font-size:22px"><i data-lucide="goal"></i></div><div style="flex:1"><h3>Футбол 5×5, ищем ещё двоих</h3><p class="desc">Дружеская игра, средний уровень.</p></div></div>
+                  <div class="n-pills"><span class="n-pill brand"><i data-lucide="calendar"></i>27 июн · 19:00</span><span class="n-pill"><i data-lucide="map-pin"></i>Поле у школы 28</span><span class="n-pill">Советский</span></div>
+                  <div class="n-divider"></div>
+                  <div class="n-card-actions"><button class="n-btn n-btn-primary n-btn-sm" style="flex:1">Написать</button><button class="n-btn n-btn-tint n-btn-sm"><i data-lucide="pencil"></i></button><button class="n-btn n-btn-danger n-btn-sm"><i data-lucide="trash-2"></i></button></div>
+                </div>
+              </div>
+              <div class="n-fab"><i data-lucide="plus"></i></div>
+              <div class="n-tabbar"><div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div><div class="n-tab"><span class="ti"><i data-lucide="calendar"></i></span>События</div><div class="n-tab"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div><div class="n-tab active"><span class="ti"><i data-lucide="users"></i></span>Группы</div><div class="n-tab"><span class="ti"><i data-lucide="graduation-cap"></i></span>Тренеры</div></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><h3>Группы - список</h3><p>Create moves to a floating action button. Primary "Написать" gets full weight; edit/delete shrink to icon buttons so the row stays one line. Sport shown as a colored thumbnail.</p></div>
+        </div>
+      </div>
+
+      <!-- JT CREATE FORM -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <div class="o-card">
+                <h3 class="o-card-title">Создать тренировку</h3>
+                <div class="o-form-group"><label class="o-label">Название</label><div class="o-input">Футбол 5х5</div></div>
+                <div class="o-form-group"><label class="o-label">Описание</label><div class="o-textarea">Дружеская игра, средний уровень...</div></div>
+                <div class="o-form-group"><label class="o-label">Дата</label><div class="o-input" style="color:var(--o-text-2)">дд.мм.гггг</div></div>
+                <div class="o-form-group"><label class="o-label">Время</label><div class="o-input" style="color:var(--o-text-2)">--:--</div></div>
+                <div class="o-form-group"><label class="o-label">Вид спорта</label><div class="o-select">Выберите вид спорта ▾</div></div>
+                <div class="o-form-group"><label class="o-label">Место</label><div class="o-input" style="color:var(--o-text-2)"></div></div>
+                <div class="o-row"><button class="o-btn o-btn-primary o-btn-full">Создать</button><button class="o-btn o-btn-secondary">Отмена</button></div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">Form</span><h3>Создать / Редактировать</h3><p>The form renders inline as a card above the list - 9 stacked fields (name, desc, date, time, sport, place, district, address, phone). The tab bar stays, partly covering the long form.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:58px 20px 8px"><span style="color:var(--n-label-3);font-weight:600;font-size:15px">Отмена</span><b style="font-size:17px">Новая тренировка</b><span style="color:var(--n-label-3);font-weight:700;font-size:15px">Шаг 1/2</span></div>
+              <div class="n-body" style="padding-top:8px">
+                <div class="n-field"><label>Название</label><div class="inp filled">Футбол 5×5</div></div>
+                <div class="n-field"><label>Описание</label><div class="inp focus" style="min-height:62px">Дружеская игра, средний уровень…</div></div>
+                <div class="n-two"><div class="n-field"><label>Дата</label><div class="inp">дд.мм.гггг</div></div><div class="n-field"><label>Время</label><div class="inp">--:--</div></div></div>
+                <div class="n-field"><label>Вид спорта</label><div class="inp filled" style="display:flex;align-items:center;gap:8px"><i data-lucide="goal"></i>Футбол<span style="margin-left:auto;display:inline-flex"><i data-lucide="chevron-down"></i></span></div></div>
+                <div class="n-section-label" style="margin-left:0">Дальше: место и контакты</div>
+              </div>
+              <div style="position:absolute;left:14px;right:14px;bottom:14px"><button class="n-btn n-btn-primary n-btn-full" style="padding:15px">Далее →</button></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><span class="state-chip">Form</span><h3>Создать / Редактировать</h3><p>Full-screen modal with a real Cancel/title/step bar, paired date+time, grouped 2-step flow, focus styling, and a sticky primary button - no tab bar fighting the form.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SECTION 5 - TRAINING PROGRAMS
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">05</span><h2>Программы тренировок / Training Programs</h2>
+      <span class="tag">Tab: Программы</span>
+    </div>
+    <p class="section-desc">Ready-made workout programs, filtered by a multi-select sport list. Cards are minimal: name, description, and optional duration / difficulty pills.</p>
+
+    <div class="screens">
+
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">Программы тренировок</h1>
+              <div class="o-filter"><div class="o-filter-bar"><button class="o-filter-toggle">🔍 Фильтры ▶</button></div></div>
+              <div class="o-card">
+                <h3 class="o-card-title">Старт в беге за 8 недель</h3>
+                <p class="o-card-desc">Программа для новичков: от ходьбы к первым 5 км без травм.</p>
+                <div class="o-meta"><span class="o-meta-item">⏱️ 8 недель</span><span class="o-meta-item">💪 Начальный</span></div>
+              </div>
+              <div class="o-card">
+                <h3 class="o-card-title">Силовая база</h3>
+                <p class="o-card-desc">3 тренировки в неделю на основные группы мышц.</p>
+                <div class="o-meta"><span class="o-meta-item">⏱️ 6 недель</span><span class="o-meta-item">💪 Средний</span></div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><h3>Программы - список</h3><p>Sparse cards: name + description + duration/difficulty pills. No imagery, no CTA - flat and hard to scan when many programs stack up.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><h1>Программы</h1><div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><i data-lucide="footprints"></i>Бег</span><span class="n-fchip"><i data-lucide="dumbbell"></i>Сила</span><span class="n-fchip"><i data-lucide="person-standing"></i>Йога</span></div></div>
+              <div class="n-body" style="padding-top:4px">
+                <div class="n-card first">
+                  <div style="display:flex;gap:13px;align-items:center"><div class="n-thumb" style="font-size:23px"><i data-lucide="footprints"></i></div><div style="flex:1"><h3>Старт в беге за 8 недель</h3><p class="desc">От ходьбы к первым 5 км без травм.</p></div><span class="n-chev"><i data-lucide="chevron-right"></i></span></div>
+                  <div class="n-pills"><span class="n-pill"><i data-lucide="clock"></i>8 недель</span><span class="n-pill" style="color:var(--n-success,#10b981);background:rgba(16,185,129,.1)">● Начальный</span></div>
+                </div>
+                <div class="n-card">
+                  <div style="display:flex;gap:13px;align-items:center"><div class="n-thumb" style="font-size:23px;background:linear-gradient(135deg,#ff9a6b,#ff7a45)"><i data-lucide="dumbbell"></i></div><div style="flex:1"><h3>Силовая база</h3><p class="desc">3 тренировки в неделю на все группы.</p></div><span class="n-chev"><i data-lucide="chevron-right"></i></span></div>
+                  <div class="n-pills"><span class="n-pill"><i data-lucide="clock"></i>6 недель</span><span class="n-pill" style="color:var(--n-warning,#f59e0b);background:rgba(245,158,11,.12)">●● Средний</span></div>
+                </div>
+              </div>
+              <div class="n-tabbar"><div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div><div class="n-tab"><span class="ti"><i data-lucide="calendar"></i></span>События</div><div class="n-tab"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div><div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div><div class="n-tab active"><span class="ti"><i data-lucide="ellipsis"></i></span>Ещё</div></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><h3>Программы - список</h3><p>Sport thumbnail for instant recognition, color-coded difficulty (green/amber/red dots), and a disclosure chevron signalling a detail view. Lives under a consolidated "Ещё" tab.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SECTION 6 - COACHES
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">06</span><h2>Тренеры / Coaches</h2>
+      <span class="tag">Tab: Тренеры</span>
+    </div>
+    <p class="section-desc">A roster of coaches with the richest filter set: multi-select sport, sex chips, and two numeric inputs (age, years of experience). Cards show a circular photo, name, specialization and bio.</p>
+
+    <div class="screens">
+
+      <!-- COACHES LIST -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">Тренеры</h1>
+              <div class="o-filter"><div class="o-filter-bar"><button class="o-filter-toggle">🔍 Фильтры ▶</button></div></div>
+              <div class="o-card">
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                  <div class="o-avatar">🧑‍🦱</div>
+                  <div style="flex:1">
+                    <h3 class="o-card-title">Алексей Петров</h3>
+                    <p style="font-size:14px;color:var(--o-primary);margin:0 0 8px;font-weight:500">Бокс, ММА</p>
+                    <p class="o-card-desc" style="margin:0">КМС по боксу, 8 лет тренерского опыта. Работаю со взрослыми и подростками.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="o-card">
+                <div style="display:flex;gap:16px;align-items:flex-start">
+                  <div class="o-avatar">👩</div>
+                  <div style="flex:1">
+                    <h3 class="o-card-title">Мария Иванова</h3>
+                    <p style="font-size:14px;color:var(--o-primary);margin:0 0 8px;font-weight:500">Йога, Растяжка</p>
+                    <p class="o-card-desc" style="margin:0">Сертифицированный инструктор хатха-йоги.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><h3>Тренеры - список</h3><p>Circular avatar + name + teal specialization + bio. No way to actually contact or book the coach from the card.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app"><div class="n-scroll">
+              <div class="n-nav"><div class="nav-row"><div><p class="eyebrow">18 тренеров</p><h1>Тренеры</h1></div><div class="n-icon-btn"><i data-lucide="arrow-up-down"></i></div></div>
+                <div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><i data-lucide="swords"></i>Бокс</span><span class="n-fchip"><i data-lucide="person-standing"></i>Йога</span><span class="n-fchip"><i data-lucide="waves"></i>Плавание</span></div>
+              </div>
+              <div class="n-body" style="padding-top:4px">
+                <div class="n-card first">
+                  <div class="n-coach"><div class="ava"><i data-lucide="user"></i></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><h3 style="margin:0">Алексей Петров</h3><span class="rate"><i data-lucide="star"></i>4.9</span></div><p class="desc" style="color:var(--n-brand);font-weight:600;margin:3px 0 0">Бокс · ММА</p></div></div>
+                  <p class="desc" style="margin-top:11px">КМС по боксу, 8 лет опыта. Взрослые и подростки.</p>
+                  <div class="n-pills"><span class="n-pill"><i data-lucide="award"></i>8 лет опыта</span><span class="n-pill"><i data-lucide="map-pin"></i>Левобережный</span></div>
+                  <div class="n-divider"></div>
+                  <button class="n-btn n-btn-primary n-btn-sm n-btn-full">Связаться с тренером</button>
+                </div>
+                <div class="n-card">
+                  <div class="n-coach"><div class="ava" style="background:linear-gradient(135deg,#ff9a6b,#ff7a45)"><i data-lucide="user"></i></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><h3 style="margin:0">Мария Иванова</h3><span class="rate"><i data-lucide="star"></i>5.0</span></div><p class="desc" style="color:var(--n-brand);font-weight:600;margin:3px 0 0">Йога · Растяжка</p></div></div>
+                </div>
+              </div>
+              <div class="n-tabbar"><div class="n-tab"><span class="ti"><i data-lucide="home"></i></span>Главная</div><div class="n-tab"><span class="ti"><i data-lucide="calendar"></i></span>События</div><div class="n-tab"><span class="ti"><i data-lucide="map-pin"></i></span>Места</div><div class="n-tab"><span class="ti"><i data-lucide="users"></i></span>Группы</div><div class="n-tab active"><span class="ti"><i data-lucide="ellipsis"></i></span>Ещё</div></div>
+            </div></div>
+          </div></div>
+          <div class="caption"><h3>Тренеры - список</h3><p>Rounded-square avatar (consistent with thumbnails), rating, specialization as the secondary line, experience pill, and a real "Связаться" CTA - the card now drives an action.</p></div>
+        </div>
+      </div>
+
+      <!-- COACHES FILTER (numeric) -->
+      <div class="set-old">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app o-app"><div class="o-body has-status">
+              <h1 class="o-title">Тренеры</h1>
+              <div class="o-filter">
+                <div class="o-filter-bar"><button class="o-filter-toggle active">🔍 Фильтры ▼</button></div>
+                <div style="margin-top:16px">
+                  <div class="o-fsection"><div class="o-fsection-title">Вид спорта</div><div class="o-chips"><span class="o-chip active">Бокс</span><span class="o-chip">ММА</span><span class="o-chip">Йога</span><span class="o-chip">Бег</span></div></div>
+                  <div class="o-fsection"><div class="o-fsection-title">Пол</div><div class="o-chips"><span class="o-chip">Мужчина</span><span class="o-chip">Женщина</span></div></div>
+                  <div class="o-fsection"><div class="o-fsection-title">Возраст</div><div style="display:flex;gap:12px;align-items:center"><label style="font-size:14px;color:var(--o-text-2)">Возраст:</label><div class="o-input" style="text-align:center;color:var(--o-text-2)">18-80</div></div></div>
+                  <div class="o-fsection"><div class="o-fsection-title">Опыт работы</div><div style="display:flex;gap:12px;align-items:center"><label style="font-size:14px;color:var(--o-text-2)">Лет опыта:</label><div class="o-input" style="text-align:center;color:var(--o-text-2)">0-50</div></div></div>
+                  <div class="o-factions"><button class="o-btn o-btn-secondary o-btn-small">Сбросить</button></div>
+                </div>
+              </div>
+            </div>
+            <div class="o-nav">
+              <a class="o-nav-item"><span class="o-nav-icon">🏠</span><span class="o-nav-label">Главная</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📅</span><span class="o-nav-label">События</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📍</span><span class="o-nav-label">Места</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">👥</span><span class="o-nav-label">Трен-ки</span></a>
+              <a class="o-nav-item"><span class="o-nav-icon">📋</span><span class="o-nav-label">Прогр.</span></a>
+              <a class="o-nav-item active"><span class="o-nav-icon">👨‍🏫</span><span class="o-nav-label">Тренеры</span></a>
+            </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">Filters</span><h3>Filter panel - numeric</h3><p>Coaches has the busiest filter: sport multiselect + sex chips + two free-text number inputs for age and experience (placeholders "18-80" / "0-50"). Dense and easy to mis-tap.</p></div>
+        </div>
+      </div>
+      <div class="set-new">
+        <div class="screen-block">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar" style="--sb:#fff"><span class="time">9:41</span><span class="icons">●●● 5G ▣</span></div>
+            <div class="app n-app">
+              <div class="n-scroll">
+                <div class="n-nav"><div class="nav-row"><div><p class="eyebrow">18 тренеров</p><h1>Тренеры</h1></div><div class="n-icon-btn"><i data-lucide="arrow-up-down"></i></div></div>
+                  <div class="n-seg-scroll"><span class="n-fchip active">Все</span><span class="n-fchip"><i data-lucide="swords"></i>Бокс</span><span class="n-fchip"><i data-lucide="person-standing"></i>Йога</span><span class="n-fchip"><i data-lucide="waves"></i>Плавание</span></div>
+                </div>
+                <div class="n-body" style="padding-top:4px">
+                  <div class="n-card first">
+                    <div class="n-coach"><div class="ava"><i data-lucide="user"></i></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><h3 style="margin:0">Алексей Петров</h3><span class="rate"><i data-lucide="star"></i>4.9</span></div><p class="desc" style="color:var(--n-brand);font-weight:600;margin:3px 0 0">Бокс · ММА</p></div></div>
+                    <p class="desc" style="margin-top:11px">КМС по боксу, 8 лет опыта. Взрослые и подростки.</p>
+                    <div class="n-pills"><span class="n-pill"><i data-lucide="award"></i>8 лет опыта</span><span class="n-pill"><i data-lucide="map-pin"></i>Левобережный</span></div>
+                  </div>
+                </div>
+              </div>
+              <div style="position:absolute;inset:0;background:rgba(11,15,18,.5)"></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;background:var(--n-bg-elev);border-radius:28px 28px 0 0;padding:8px 20px 28px;box-shadow:0 -12px 40px -8px rgba(0,0,0,.4)">
+                <div style="width:38px;height:5px;border-radius:99px;background:var(--n-sep);margin:0 auto 16px"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><h3 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-.4px">Фильтры</h3><span style="color:var(--n-brand);font-weight:700;font-size:14px">Сбросить</span></div>
+                <div class="n-section-label" style="margin-left:0">Вид спорта</div>
+                <div class="n-seg-scroll" style="flex-wrap:wrap"><span class="n-fchip active">Бокс</span><span class="n-fchip">ММА</span><span class="n-fchip">Йога</span><span class="n-fchip">Бег</span></div>
+                <div class="n-section-label" style="margin-left:0">Пол</div>
+                <div class="n-seg-scroll" style="flex-wrap:wrap"><span class="n-fchip active">Любой</span><span class="n-fchip">Мужчина</span><span class="n-fchip">Женщина</span></div>
+                <div class="n-section-label" style="margin-left:0">Опыт: от 3 лет</div>
+                <div style="display:flex;align-items:center;gap:12px;margin:8px 2px 0"><div style="flex:1;height:5px;border-radius:99px;background:var(--n-fill-2);position:relative"><div style="position:absolute;left:0;width:42%;height:100%;border-radius:99px;background:var(--n-brand-grad)"></div><div style="position:absolute;left:42%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25),0 0 0 1px var(--n-sep)"></div></div></div>
+                <button class="n-btn n-btn-primary n-btn-full" style="margin-top:22px">Показать тренеров</button>
+              </div>
+            </div>
+          </div></div>
+          <div class="caption"><span class="state-chip">Filters</span><h3>Filter sheet - numeric</h3><p>Free-text number inputs replaced by a draggable slider and segmented "Пол" with an explicit "Любой" default. Everything is a large touch target inside one sheet.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       DESIGN REVIEW
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">07</span><h2>Design review & HIG 2026 changes</h2>
+    </div>
+
+    <div class="review-card">
+      <h4>Key problems found in the current (Old) design</h4>
+      <div class="review-grid">
+        <ul>
+          <li><b>6-tab bottom bar is overloaded.</b> Labels are truncated ("Трен-ки", "Прогр."); Apple recommends 5 or fewer tabs.</li>
+          <li><b>Filters hide behind a 🔍 accordion.</b> Every browse tab needs an extra tap to even see the filters, and opening them shoves content down.</li>
+          <li><b>Meta data is a wall of emoji pills.</b> 📍🏘️📅🏃 chips all look identical, so nothing reads as primary information.</li>
+          <li><b>Home is just five link cards.</b> No personalization, no live content, no hierarchy - it duplicates the tab bar.</li>
+          <li><b>Cards have no real action.</b> Events/Places sometimes link out; Coaches and Programs offer no way to contact or open a detail.</li>
+        </ul>
+        <ul>
+          <li><b>Free-text number filters.</b> Age / experience are raw numeric inputs with "18-80" placeholders - awkward on mobile and easy to mis-enter.</li>
+          <li><b>Inline CRUD form fights the tab bar.</b> The 9-field create form renders as a card under the fixed bottom nav, which overlaps the lower fields.</li>
+          <li><b>Loading is a bare spinner / ⏳ emoji.</b> Layout jumps when data lands; no skeletons.</li>
+          <li><b>Empty states are dead ends.</b> Same "не найдены" copy everywhere, with no reset action.</li>
+          <li><b>Contrast & touch targets.</b> Light teal-on-white meta pills and 54px tab items sit below comfortable contrast / 44pt targets.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="review-card">
+      <h4>HIG 2026 improvements applied in the New design</h4>
+      <div class="review-grid">
+        <ul>
+          <li><b>5-tab Liquid-Glass tab bar.</b> Programs + Coaches fold under a single "Ещё", full labels, translucent material with depth and a safe-area inset.</li>
+          <li><b>Search + horizontal filter rail, then a bottom-sheet for advanced filters</b> with a grabber and a result-count Apply button - a standard iOS commit pattern.</li>
+          <li><b>SF-style large titles</b> with an eyebrow line, tighter type scale and tabular numerics; consistent 8pt spacing rhythm.</li>
+          <li><b>Information hierarchy in cards:</b> date badges, brand-tinted primary pills vs neutral secondary pills, edge-to-edge photos, disclosure chevrons.</li>
+          <li><b>Every card drives an action</b> - "На карте", "Связаться с тренером", "Написать" - matched to intent.</li>
+        </ul>
+        <ul>
+          <li><b>Native controls for numeric ranges:</b> a draggable slider and segmented control with an explicit default instead of free-text fields.</li>
+          <li><b>Create flow becomes a full-screen modal</b> with Cancel/title/step header, paired date+time, focus states and a sticky primary button - no nav-bar collision.</li>
+          <li><b>Content-shaped skeletons</b> replace spinners, so there is no layout shift.</li>
+          <li><b>Actionable empty states</b> that name the active filters and offer one-tap reset.</li>
+          <li><b>Accessibility:</b> deeper brand teal for AA contrast, 44pt+ targets, FAB for "create", and a determinate branded launch screen. Dynamic-Island-aware top spacing throughout.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       DESIGN GUIDELINES (for developers)
+       =================================================================== -->
+  <div class="section">
+    <div class="section-head">
+      <span class="num">08</span><h2>Design guidelines (for developers)</h2>
+      <span class="tag">New design</span>
+    </div>
+    <p class="section-desc">A quick reference for building the New design in code. Tokens below are the same CSS custom properties used in this file (and adapt to light / dark); mirror them in the app's theme.</p>
+
+    <div class="guide-grid">
+
+      <!-- ICONS -->
+      <div class="guide-card span2">
+        <h4>Icons - Lucide</h4>
+        <p>Use the <a href="https://lucide.dev" target="_blank" rel="noopener">Lucide</a> icon set everywhere. In React install <code>lucide-react</code> and render e.g. <code>&lt;Calendar /&gt;</code>; on the web you can also use <code>&lt;i data-lucide="calendar"&gt;</code> + <code>lucide.createIcons()</code>. Icons are outline, <b>2px stroke</b>, drawn in <code>currentColor</code> and sized to the text (~16-24px). Do not mix in emoji or another icon family. If you need a new icon, pick it from Lucide and verify the name exists. Below is the exact semantic set used in these mockups:</p>
+        <div class="icon-grid">
+          <div class="icon-cell"><i data-lucide="home"></i><em>Home tab</em><span>home</span></div>
+          <div class="icon-cell"><i data-lucide="calendar"></i><em>Events, date</em><span>calendar</span></div>
+          <div class="icon-cell"><i data-lucide="map-pin"></i><em>Places, location</em><span>map-pin</span></div>
+          <div class="icon-cell"><i data-lucide="users"></i><em>Groups</em><span>users</span></div>
+          <div class="icon-cell"><i data-lucide="graduation-cap"></i><em>Coaches</em><span>graduation-cap</span></div>
+          <div class="icon-cell"><i data-lucide="clipboard-list"></i><em>Programs</em><span>clipboard-list</span></div>
+          <div class="icon-cell"><i data-lucide="ellipsis"></i><em>More tab</em><span>ellipsis</span></div>
+          <div class="icon-cell"><i data-lucide="search"></i><em>Search</em><span>search</span></div>
+          <div class="icon-cell"><i data-lucide="arrow-up-down"></i><em>Sort / filter</em><span>arrow-up-down</span></div>
+          <div class="icon-cell"><i data-lucide="chevron-down"></i><em>Expand, select</em><span>chevron-down</span></div>
+          <div class="icon-cell"><i data-lucide="chevron-right"></i><em>Disclosure</em><span>chevron-right</span></div>
+          <div class="icon-cell"><i data-lucide="clock"></i><em>Time</em><span>clock</span></div>
+          <div class="icon-cell"><i data-lucide="star"></i><em>Rating</em><span>star</span></div>
+          <div class="icon-cell"><i data-lucide="plus"></i><em>Create (FAB)</em><span>plus</span></div>
+          <div class="icon-cell"><i data-lucide="pencil"></i><em>Edit</em><span>pencil</span></div>
+          <div class="icon-cell"><i data-lucide="trash-2"></i><em>Delete</em><span>trash-2</span></div>
+          <div class="icon-cell"><i data-lucide="award"></i><em>Experience</em><span>award</span></div>
+          <div class="icon-cell"><i data-lucide="user"></i><em>Person, avatar</em><span>user</span></div>
+          <div class="icon-cell"><i data-lucide="settings"></i><em>Settings</em><span>settings</span></div>
+          <div class="icon-cell"><i data-lucide="map"></i><em>Open map</em><span>map</span></div>
+          <div class="icon-cell"><i data-lucide="building"></i><em>Indoor venue</em><span>building</span></div>
+          <div class="icon-cell"><i data-lucide="building-2"></i><em>Sport complex</em><span>building-2</span></div>
+          <div class="icon-cell"><i data-lucide="triangle-alert"></i><em>Error, warning</em><span>triangle-alert</span></div>
+          <div class="icon-cell"><i data-lucide="footprints"></i><em>Running</em><span>footprints</span></div>
+          <div class="icon-cell"><i data-lucide="goal"></i><em>Football</em><span>goal</span></div>
+          <div class="icon-cell"><i data-lucide="dumbbell"></i><em>Gym, strength</em><span>dumbbell</span></div>
+          <div class="icon-cell"><i data-lucide="waves"></i><em>Swimming</em><span>waves</span></div>
+          <div class="icon-cell"><i data-lucide="person-standing"></i><em>Yoga</em><span>person-standing</span></div>
+          <div class="icon-cell"><i data-lucide="swords"></i><em>Combat sports</em><span>swords</span></div>
+          <div class="icon-cell"><i data-lucide="circle-dot"></i><em>Basketball</em><span>circle-dot</span></div>
+          <div class="icon-cell"><i data-lucide="target"></i><em>Tennis</em><span>target</span></div>
+          <div class="icon-cell"><i data-lucide="land-plot"></i><em>Courts</em><span>land-plot</span></div>
+        </div>
+      </div>
+
+      <!-- COLOR -->
+      <div class="guide-card">
+        <h4>Color tokens</h4>
+        <p>Brand teal is the single accent; orange is used sparingly for secondary emphasis. Surfaces and label colors flip automatically in dark mode - reference the tokens, never hard-code hex.</p>
+        <div class="sw-grid">
+          <div class="sw"><div class="chip" style="background:var(--n-brand)"></div><div class="meta"><b>Brand</b><code>--n-brand</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-brand-2)"></div><div class="meta"><b>Brand 2</b><code>--n-brand-2</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-accent)"></div><div class="meta"><b>Accent</b><code>--n-accent</code></div></div>
+          <div class="sw"><div class="chip" style="background:#10b981"></div><div class="meta"><b>Success</b><code>#10b981</code></div></div>
+          <div class="sw"><div class="chip" style="background:#f59e0b"></div><div class="meta"><b>Warning</b><code>#f59e0b</code></div></div>
+          <div class="sw"><div class="chip" style="background:#ef4444"></div><div class="meta"><b>Danger</b><code>#ef4444</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-bg);box-shadow:inset 0 0 0 1px var(--panel-border)"></div><div class="meta"><b>Background</b><code>--n-bg</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-bg-elev);box-shadow:inset 0 0 0 1px var(--panel-border)"></div><div class="meta"><b>Surface</b><code>--n-bg-elev</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-label)"></div><div class="meta"><b>Label</b><code>--n-label</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-label-2)"></div><div class="meta"><b>Label 2</b><code>--n-label-2</code></div></div>
+          <div class="sw"><div class="chip" style="background:var(--n-label-3)"></div><div class="meta"><b>Label 3</b><code>--n-label-3</code></div></div>
+        </div>
+      </div>
+
+      <!-- TYPE + SPACING -->
+      <div class="guide-card">
+        <h4>Typography</h4>
+        <p>SF Pro on iOS, Inter on the web. Numbers use tabular figures so they do not jitter.</p>
+        <ul class="spec">
+          <li><b>Large title</b><code>32 / 800</code></li>
+          <li><b>Section title</b><code>18 / 700</code></li>
+          <li><b>Body</b><code>14-15 / 400-500</code></li>
+          <li><b>Eyebrow / label</b><code>13 / 600-700</code></li>
+          <li><b>Pills &amp; chips</b><code>12.5-14 / 600</code></li>
+          <li><b>Numbers</b><code>tabular-nums</code></li>
+        </ul>
+        <h4 style="margin-top:18px">Spacing &amp; radius</h4>
+        <ul class="spec">
+          <li><b>Base grid</b><code>8pt</code></li>
+          <li><b>Card radius</b><code>22px (--n-radius)</code></li>
+          <li><b>Sheet / large</b><code>30px</code></li>
+          <li><b>Chips / inputs</b><code>13px</code></li>
+          <li><b>Pills</b><code>9px</code></li>
+          <li><b>Touch target</b><code>&ge;44pt</code></li>
+        </ul>
+      </div>
+
+      <!-- COMPONENT RULES -->
+      <div class="guide-card span2">
+        <h4>Component rules</h4>
+        <ul class="guide-rules">
+          <li><b>Tab bar</b> - at most 5 items in a Liquid-Glass floating bar with full labels; overflow goes under "Ещё". Respect the safe-area inset.</li>
+          <li><b>Filters</b> - a sticky search field plus a horizontal chip rail for quick filters; advanced filters open in a bottom sheet with a grabber and a result-count Apply button.</li>
+          <li><b>Cards</b> - every card drives exactly one primary action. Brand-tinted pills carry primary info (time, category); neutral pills are secondary.</li>
+          <li><b>Buttons</b> - primary (brand gradient), ghost (brand on a tinted fill), tint (neutral), and danger (red) for destructive actions. Destructive is always red.</li>
+          <li><b>Lists</b> - use a date badge for events and a disclosure chevron when a row opens a detail view.</li>
+          <li><b>States</b> - replace spinners with content-shaped skeletons; empty states name the active filters and offer a one-tap reset.</li>
+          <li><b>Create flow</b> - a FAB opens a full-screen modal (Cancel / title / sticky primary button); never an inline form fighting the tab bar.</li>
+          <li><b>Accessibility</b> - AA contrast, 44pt+ targets, support Dynamic Type, and keep status-bar / Dynamic-Island spacing.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="foot">SportGuide mockups - Old (current) vs New (HIG 2026). Single self-contained file.</div>
+
+</div>
+
+<script>
+var DESIGN_KEY='sg-mockups-design';
+function setDesign(d){
+  document.body.setAttribute('data-design', d);
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('active', b.dataset.d===d));
+  document.getElementById('legend').textContent = d==='new'
+    ? 'Showing a refactored design aligned with Apple Human Interface Guidelines 2026.'
+    : 'Showing the current production design exactly as implemented today.';
+  try{ localStorage.setItem(DESIGN_KEY, d); }catch(e){}
+}
+var THEME_KEY='sg-mockups-theme';
+function setTheme(t){
+  document.body.setAttribute('data-theme', t);
+  document.querySelectorAll('#seg-theme button').forEach(b=>b.classList.toggle('active', b.dataset.t===t));
+  try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+}
+/* restore the last chosen variant + theme on reload (design defaults to "old", theme to "dark") */
+(function(){
+  var d, t;
+  try{ d = localStorage.getItem(DESIGN_KEY); }catch(e){}
+  try{ t = localStorage.getItem(THEME_KEY); }catch(e){}
+  setDesign(d==='new' ? 'new' : 'old');
+  setTheme(t==='light' ? 'light' : 'dark');
+})();
+</script>
+<script>
+/* Self-contained Lucide icon set (inlined - no CDN/network needed). */
+(function(){
+  var I={"arrow-up-down":"<svg class=\"lucide lucide-arrow-up-down\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m21 16-4 4-4-4\" /><path d=\"M17 20V4\" /><path d=\"m3 8 4-4 4 4\" /><path d=\"M7 4v16\" /></svg>","award":"<svg class=\"lucide lucide-award\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526\" /><circle cx=\"12\" cy=\"8\" r=\"6\" /></svg>","building":"<svg class=\"lucide lucide-building\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M12 10h.01\" /><path d=\"M12 14h.01\" /><path d=\"M12 6h.01\" /><path d=\"M16 10h.01\" /><path d=\"M16 14h.01\" /><path d=\"M16 6h.01\" /><path d=\"M8 10h.01\" /><path d=\"M8 14h.01\" /><path d=\"M8 6h.01\" /><path d=\"M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3\" /><rect x=\"4\" y=\"2\" width=\"16\" height=\"20\" rx=\"2\" /></svg>","building-2":"<svg class=\"lucide lucide-building-2\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M10 12h4\" /><path d=\"M10 8h4\" /><path d=\"M14 21v-3a2 2 0 0 0-4 0v3\" /><path d=\"M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2\" /><path d=\"M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16\" /></svg>","calendar":"<svg class=\"lucide lucide-calendar\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M8 2v4\" /><path d=\"M16 2v4\" /><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /><path d=\"M3 10h18\" /></svg>","chevron-down":"<svg class=\"lucide lucide-chevron-down\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m6 9 6 6 6-6\" /></svg>","chevron-right":"<svg class=\"lucide lucide-chevron-right\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m9 18 6-6-6-6\" /></svg>","circle-dot":"<svg class=\"lucide lucide-circle-dot\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><circle cx=\"12\" cy=\"12\" r=\"10\" /><circle cx=\"12\" cy=\"12\" r=\"1\" /></svg>","clipboard-list":"<svg class=\"lucide lucide-clipboard-list\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\" /><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\" /><path d=\"M12 11h4\" /><path d=\"M12 16h4\" /><path d=\"M8 11h.01\" /><path d=\"M8 16h.01\" /></svg>","clock":"<svg class=\"lucide lucide-clock\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><circle cx=\"12\" cy=\"12\" r=\"10\" /><path d=\"M12 6v6l4 2\" /></svg>","dumbbell":"<svg class=\"lucide lucide-dumbbell\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z\" /><path d=\"m2.5 21.5 1.4-1.4\" /><path d=\"m20.1 3.9 1.4-1.4\" /><path d=\"M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z\" /><path d=\"m9.6 14.4 4.8-4.8\" /></svg>","ellipsis":"<svg class=\"lucide lucide-ellipsis\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><circle cx=\"12\" cy=\"12\" r=\"1\" /><circle cx=\"19\" cy=\"12\" r=\"1\" /><circle cx=\"5\" cy=\"12\" r=\"1\" /></svg>","footprints":"<svg class=\"lucide lucide-footprints\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z\" /><path d=\"M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z\" /><path d=\"M16 17h4\" /><path d=\"M4 13h4\" /></svg>","goal":"<svg class=\"lucide lucide-goal\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M12 13V2l8 4-8 4\" /><path d=\"M20.561 10.222a9 9 0 1 1-12.55-5.29\" /><path d=\"M8.002 9.997a5 5 0 1 0 8.9 2.02\" /></svg>","graduation-cap":"<svg class=\"lucide lucide-graduation-cap\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /><path d=\"M22 10v6\" /><path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" /></svg>","home":"<svg class=\"lucide lucide-home\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" /></svg>","land-plot":"<svg class=\"lucide lucide-land-plot\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m12 8 6-3-6-3v10\" /><path d=\"m8 11.99-5.5 3.14a1 1 0 0 0 0 1.74l8.5 4.86a2 2 0 0 0 2 0l8.5-4.86a1 1 0 0 0 0-1.74L16 12\" /><path d=\"m6.49 12.85 11.02 6.3\" /><path d=\"M17.51 12.85 6.5 19.15\" /></svg>","map":"<svg class=\"lucide lucide-map\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z\" /><path d=\"M15 5.764v15\" /><path d=\"M9 3.236v15\" /></svg>","map-pin":"<svg class=\"lucide lucide-map-pin\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\" /><circle cx=\"12\" cy=\"10\" r=\"3\" /></svg>","pencil":"<svg class=\"lucide lucide-pencil\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /><path d=\"m15 5 4 4\" /></svg>","person-standing":"<svg class=\"lucide lucide-person-standing\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><circle cx=\"12\" cy=\"5\" r=\"1\" /><path d=\"m9 20 3-6 3 6\" /><path d=\"m6 8 6 2 6-2\" /><path d=\"M12 10v4\" /></svg>","plus":"<svg class=\"lucide lucide-plus\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M5 12h14\" /><path d=\"M12 5v14\" /></svg>","search":"<svg class=\"lucide lucide-search\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m21 21-4.34-4.34\" /><circle cx=\"11\" cy=\"11\" r=\"8\" /></svg>","settings":"<svg class=\"lucide lucide-settings\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\" /><circle cx=\"12\" cy=\"12\" r=\"3\" /></svg>","star":"<svg class=\"lucide lucide-star\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" /></svg>","swords":"<svg class=\"lucide lucide-swords\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><polyline points=\"14.5 17.5 3 6 3 3 6 3 17.5 14.5\" /><line x1=\"13\" x2=\"19\" y1=\"19\" y2=\"13\" /><line x1=\"16\" x2=\"20\" y1=\"16\" y2=\"20\" /><line x1=\"19\" x2=\"21\" y1=\"21\" y2=\"19\" /><polyline points=\"14.5 6.5 18 3 21 3 21 6 17.5 9.5\" /><line x1=\"5\" x2=\"9\" y1=\"14\" y2=\"18\" /><line x1=\"7\" x2=\"4\" y1=\"17\" y2=\"20\" /><line x1=\"3\" x2=\"5\" y1=\"19\" y2=\"21\" /></svg>","target":"<svg class=\"lucide lucide-target\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><circle cx=\"12\" cy=\"12\" r=\"10\" /><circle cx=\"12\" cy=\"12\" r=\"6\" /><circle cx=\"12\" cy=\"12\" r=\"2\" /></svg>","trash-2":"<svg class=\"lucide lucide-trash-2\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M10 11v6\" /><path d=\"M14 11v6\" /><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\" /><path d=\"M3 6h18\" /><path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" /></svg>","triangle-alert":"<svg class=\"lucide lucide-triangle-alert\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /><path d=\"M12 9v4\" /><path d=\"M12 17h.01\" /></svg>","user":"<svg class=\"lucide lucide-user\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" /><circle cx=\"12\" cy=\"7\" r=\"4\" /></svg>","users":"<svg class=\"lucide lucide-users\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><path d=\"M16 3.128a4 4 0 0 1 0 7.744\" /><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /><circle cx=\"9\" cy=\"7\" r=\"4\" /></svg>","waves":"<svg class=\"lucide lucide-waves\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" ><path d=\"M2 12q2.5 2 5 0t5 0 5 0 5 0\" /><path d=\"M2 19q2.5 2 5 0t5 0 5 0 5 0\" /><path d=\"M2 5q2.5 2 5 0t5 0 5 0 5 0\" /></svg>"};
+  function render(){
+    document.querySelectorAll("[data-lucide]").forEach(function(el){
+      var svg=I[el.getAttribute("data-lucide")];
+      if(svg) el.outerHTML=svg;
+    });
+  }
+  if(document.readyState!=="loading") render();
+  else document.addEventListener("DOMContentLoaded",render);
+})();
+</script>
+</body>
+</html>
