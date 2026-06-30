@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.MessageDigest;
 
 @Service
 @RequiredArgsConstructor
@@ -131,13 +132,17 @@ public class TelegramAuthService {
 
             log.info("Data check string:\n{}", dataCheckString);
 
-            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
-            SecretKeySpec keySpec = new SecretKeySpec("WebAppData".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            hmacSha256.init(keySpec);
-            byte[] correctSecretKey = hmacSha256.doFinal(botToken.getBytes(StandardCharsets.UTF_8));
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] key = md5.digest(botToken.getBytes(StandardCharsets.UTF_8));
 
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(correctSecretKey, "HmacSHA256"));
+            Mac hmac = Mac.getInstance("HmacSHA-256");
+            byte[] secret = new byte[32];
+            hmac.init(new SecretKeySpec(key, "HmacSHA-256"));
+            hmac.update("WebAppData".getBytes(StandardCharsets.UTF_8));
+            hmac.doFinal(secret, 0);
+
+            Mac mac = Mac.getInstance("HmacSHA-256");
+            mac.init(new SecretKeySpec(secret, "HmacSHA-256"));
             byte[] calculated = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
             String calculatedHash = bytesToHex(calculated);
