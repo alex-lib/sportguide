@@ -56,6 +56,7 @@ spring:
             jwk-set-uri: https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/certs
             user-name-attribute: preferred_username
       resource-server:
+        enabled: false
         jwt:
           issuer-uri: https://auth.sportguide.online/realms/sportguide
   data:

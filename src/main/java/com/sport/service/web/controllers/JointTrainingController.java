@@ -7,8 +7,7 @@ import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,28 +33,28 @@ public class JointTrainingController {
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @PostMapping
     public void createJointTraining(@Valid @RequestBody CreateJointTrainingRequest request,
-                                    @AuthenticationPrincipal Jwt jwt
+                                     Authentication auth
     ) {
-        Long userId = jwt.getClaim("id");
+        Long userId = ((Long) auth.getPrincipal());
         jointTrainingService.createJointTraining(request, userId);
     }
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @PutMapping("/{id}")
     public void updateJointTraining(@Valid @RequestBody CreateJointTrainingRequest request,
-                                    @PathVariable Long id,
-                                    @AuthenticationPrincipal Jwt jwt
+                                     @PathVariable Long id,
+                                     Authentication auth
     ) {
-        Long userId = jwt.getClaim("id");
+        Long userId = ((Long) auth.getPrincipal());
         jointTrainingService.updateJointTrainingById(request, id, userId);
     }
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteJointTraining(@PathVariable Long id,
-                                    @AuthenticationPrincipal Jwt jwt
+                                    Authentication auth
     ) {
-        Long userId = jwt.getClaim("id");
+        Long userId = ((Long) auth.getPrincipal());
         jointTrainingService.deleteJointTrainingById(id, userId);
     }
 }

@@ -8,10 +8,14 @@ public class OutdoorStringMapper {
 
     public static Boolean outdoorStringToOutdoorEnum(String outdoorString) {
         Boolean outdoor;
-        switch (outdoorString) {
-            case "Улица" -> outdoor = Boolean.TRUE;
-            case "Помещение" -> outdoor = Boolean.FALSE;
-            default -> outdoor = null;
+        if (outdoorString == null || outdoorString.isEmpty()) {
+            outdoor = null;
+        } else if (outdoorString.startsWith("Улица")) {
+            outdoor = Boolean.TRUE;
+        } else if (outdoorString.startsWith("Помещение")) {
+            outdoor = Boolean.FALSE;
+        } else {
+            outdoor = null;
         }
         return outdoor;
     }
