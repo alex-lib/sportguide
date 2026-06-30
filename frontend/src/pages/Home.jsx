@@ -1,36 +1,39 @@
-import { Link } from 'react-router-dom';
-import '../App.css';
+import { Page, PageHeader, IconButton, Hero, SectionLabel, Tiles, Tile } from '../ui';
 
 const Home = () => {
-  const quickActions = [
-    { path: '/events', icon: '📅', title: 'События', description: 'Ближайшие спортивные события' },
-    { path: '/places', icon: '📍', title: 'Места', description: 'Спортивные площадки и залы' },
-    { path: '/joint-trainings', icon: '👥', title: 'Совместные тренировки', description: 'Найдите партнеров для тренировок' },
-    { path: '/training-programs', icon: '📋', title: 'Программы тренировок', description: 'Готовые программы для занятий' },
-    { path: '/coaches', icon: '👨‍🏫', title: 'Тренеры', description: 'Профессиональные инструкторы' },
-  ];
-
   return (
-    <div className="page-container">
-      <h1 className="page-title">SportGuide</h1>
-      <p className="page-subtitle">Ваш помощник в мире спорта</p>
+    <>
+      <PageHeader
+        eyebrow="Воронеж"
+        eyebrowIcon="map-pin"
+        title="Привет, чем займёмся?"
+        action={<IconButton icon="settings" label="Настройки" />}
+      />
+      <Page>
+        <Hero
+          to="/events"
+          title="Найди тренировку рядом"
+          subtitle="События, площадки и партнёры для занятий спортом в одном месте."
+          cta="Смотреть события"
+        />
 
-      <div className="grid">
-        {quickActions.map((action) => (
-          <Link key={action.path} to={action.path} className="card" style={{ textDecoration: 'none', display: 'block' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ fontSize: '32px' }}>{action.icon}</span>
-              <div style={{ flex: 1 }}>
-                <h3 className="card-title">{action.title}</h3>
-                <p className="card-description">{action.description}</p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+        <SectionLabel>Быстрый доступ</SectionLabel>
+        <Tiles>
+          <Tile to="/events" icon="calendar" title="События" subtitle="Ближайшие спорт-события" />
+          <Tile to="/places" icon="map-pin" accent title="Места" subtitle="Площадки и залы" />
+          <Tile to="/joint-trainings" icon="users" title="Тренировки" subtitle="Найти партнёров" />
+          <Tile to="/training-programs" icon="clipboard-list" accent title="Программы" subtitle="Готовые планы" />
+          <Tile
+            to="/coaches"
+            icon="graduation-cap"
+            wide
+            title="Тренеры"
+            subtitle="Профессиональные инструкторы рядом с тобой"
+          />
+        </Tiles>
+      </Page>
+    </>
   );
 };
 
 export default Home;
-

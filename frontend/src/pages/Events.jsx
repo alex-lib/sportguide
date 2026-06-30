@@ -2,7 +2,26 @@ import { useEffect, useState, useCallback } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS } from '../constants/filters.js';
-import '../App.css';
+import {
+  Page,
+  PageHeader,
+  IconButton,
+  Card,
+  CardRow,
+  CardTitle,
+  CardText,
+  CardActions,
+  Divider,
+  Pills,
+  Pill,
+  MetaLine,
+  DateBadge,
+  Button,
+  EmptyState,
+  ErrorBanner,
+  SkeletonList,
+} from '../ui';
+import { pluralRu } from '../utils/plural.js';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -37,138 +56,99 @@ const Events = () => {
   }, [loadEvents]);
 
   const handleFilterChange = (key, value) => {
-    setFilter((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilter((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleResetFilters = () => {
-    setFilter({
-      district: null,
-      date: null,
-    });
+    setFilter({ district: null, date: null });
   };
 
-  // Memoize date options to prevent recreation on every render
   const dateOptions = [
     { value: new Date().toISOString().split('T')[0], label: 'Сегодня' },
     { value: new Date(Date.now() + 86400000).toISOString().split('T')[0], label: 'Завтра' },
   ];
 
   const filterConfig = [
-    {
-      type: 'chip',
-      key: 'district',
-      title: 'Район',
-      options: DISTRICTS || [],
-      value: filter.district,
-    },
-    {
-      type: 'chip',
-      key: 'date',
-      title: 'Дата',
-      options: dateOptions,
-      value: filter.date,
-    },
+    { type: 'chip', key: 'date', title: 'Дата', options: dateOptions, value: filter.date },
+    { type: 'chip', key: 'district', title: 'Район', options: DISTRICTS || [], value: filter.district },
   ];
 
-  const formatDate = (date, time) => {
-    try {
-      const dateObj = new Date(date);
-      return dateObj.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }) + (time ? ` в ${time}` : '');
-    } catch {
-      return `${date} ${time}`;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="page-container">
-        <h1 className="page-title">События</h1>
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <p>Загрузка...</p>
-        </div>
-      </div>
-    );
-  }
+  const eyebrow =
+    !loading && events.length > 0
+      ? `${events.length} ${pluralRu(events.length, ['событие', 'события', 'событий'])} рядом`
+      : undefined;
 
   return (
-    <div className="page-container">
-      <h1 className="page-title">События</h1>
-
-      <FilterPanel
-        filters={filterConfig}
-        onFilterChange={handleFilterChange}
-        onReset={handleResetFilters}
+    <>
+      <PageHeader
+        eyebrow={eyebrow}
+        title="События"
+        action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
+      <Page>
+        <FilterPanel
+          filters={filterConfig}
+          onFilterChange={handleFilterChange}
+          onReset={handleResetFilters}
+          searchPlaceholder="Поиск событий"
+        />
 
-      {error && (
-        <div className="card" style={{ background: '#fef2f2', borderColor: 'var(--error-color)' }}>
-          <p style={{ color: 'var(--error-color)', margin: 0 }}>⚠️ {error}</p>
-        </div>
-      )}
+        {error && <ErrorBanner>{error}</ErrorBanner>}
 
-      {!error && events.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">📅</div>
-          <p>События не найдены</p>
-          <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>
-            Попробуйте изменить фильтры
-          </p>
-        </div>
-      ) : (
-        <div>
-          {events.map((event, index) => (
-            <div key={event.id || index} className="card">
-              <h3 className="card-title">{event.name}</h3>
-              {event.description && <p className="card-description">{event.description}</p>}
+        {loading ? (
+          <SkeletonList />
+        ) : !error && events.length === 0 ? (
+          <EmptyState
+            icon="calendar"
+            title="Пока ничего нет"
+            message="По выбранным фильтрам событий не нашлось."
+            action={
+              <Button variant="ghost" onClick={handleResetFilters}>
+                Сбросить фильтры
+              </Button>
+            }
+          />
+        ) : (
+          <div>
+            {events.map((event, index) => (
+              <Card key={event.id || index} first={index === 0}>
+                <CardRow>
+                  <DateBadge date={event.date} />
+                  <div style={{ flex: 1 }}>
+                    <CardTitle>{event.name}</CardTitle>
+                    {event.description && <CardText>{event.description}</CardText>}
+                  </div>
+                </CardRow>
 
-              <div className="card-meta">
-                <span className="meta-item">📍 {event.placeName}</span>
-                <span className="meta-item">🏘️ {event.district}</span>
-                <span className="meta-item">📅 {formatDate(event.date, event.time)}</span>
-              </div>
+                <Pills>
+                  {event.time && (
+                    <Pill tone="brand" icon="clock">
+                      {event.time}
+                    </Pill>
+                  )}
+                  {event.placeName && <Pill icon="map-pin">{event.placeName}</Pill>}
+                  {event.district && <Pill>{event.district}</Pill>}
+                </Pills>
 
-              {event.address && (
-                <p
-                  style={{
-                    marginTop: '12px',
-                    fontSize: '14px',
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <span>📍</span>
-                  <span>{event.address}</span>
-                </p>
-              )}
+                {event.address && <MetaLine>{event.address}</MetaLine>}
 
-              {event.link && (
-                <a
-                  href={event.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-primary btn-small"
-                  style={{ marginTop: '16px' }}
-                >
-                  Подробнее →
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                {event.link && (
+                  <>
+                    <Divider />
+                    <CardActions>
+                      <Button href={event.link} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
+                        Подробнее
+                      </Button>
+                    </CardActions>
+                  </>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </Page>
+    </>
   );
 };
 
 export default Events;
-

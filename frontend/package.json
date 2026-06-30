@@ -10,11 +10,12 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@twa-dev/sdk": "latest",
+    "axios": "^1.7.9",
+    "lucide-react": "^1.22.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "@twa-dev/sdk": "latest",
-    "axios": "^1.7.9"
+    "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
@@ -24,4 +25,3 @@
     "vite": "^6.0.7"
   }
 }
-

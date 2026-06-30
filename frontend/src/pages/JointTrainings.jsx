@@ -2,8 +2,57 @@ import { useEffect, useState, useCallback } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS, SPORT_TYPES } from '../constants/filters.js';
-import '../App.css';
 import WebApp from '@twa-dev/sdk';
+import {
+  Page,
+  PageHeader,
+  IconButton,
+  Card,
+  CardTitle,
+  CardText,
+  Thumb,
+  Pills,
+  Pill,
+  MetaLine,
+  Button,
+  CardActions,
+  Divider,
+  Field,
+  FieldRow,
+  Input,
+  Textarea,
+  Select,
+  Fab,
+  Modal,
+  Icon,
+  EmptyState,
+  ErrorBanner,
+  SkeletonList,
+  sportIconName,
+} from '../ui';
+import { pluralRu } from '../utils/plural.js';
+
+const EMPTY_FORM = {
+  title: '',
+  description: '',
+  date: '',
+  time: '',
+  sportType: '',
+  placeName: '',
+  district: '',
+  address: '',
+  phoneNumber: '',
+};
+
+const formatDateTime = (date, time) => {
+  try {
+    const d = new Date(date);
+    const base = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    return time ? `${base} · ${time}` : base;
+  } catch {
+    return `${date} ${time}`;
+  }
+};
 
 const JointTrainings = () => {
   const [trainings, setTrainings] = useState([]);
@@ -11,22 +60,8 @@ const JointTrainings = () => {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [filter, setFilter] = useState({
-    date: null,
-    sportType: [],
-    district: null,
-  });
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    sportType: '',
-    placeName: '',
-    district: '',
-    address: '',
-    phoneNumber: '',
-  });
+  const [filter, setFilter] = useState({ date: null, sportType: [], district: null });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   const loadTrainings = useCallback(async () => {
     try {
@@ -34,9 +69,7 @@ const JointTrainings = () => {
       setError(null);
       const filterParams = {};
       if (filter.date) filterParams.date = filter.date;
-      if (filter.sportType && filter.sportType.length > 0) {
-        filterParams.sportType = filter.sportType;
-      }
+      if (filter.sportType && filter.sportType.length > 0) filterParams.sportType = filter.sportType;
       if (filter.district) filterParams.district = filter.district;
 
       const response = await apiService.getJointTrainings(filterParams);
@@ -56,36 +89,29 @@ const JointTrainings = () => {
   }, [loadTrainings]);
 
   const handleFilterChange = (key, value) => {
-    setFilter((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilter((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleResetFilters = () => {
-    setFilter({
-      date: null,
-      sportType: [],
-      district: null,
-    });
+    setFilter({ date: null, sportType: [], district: null });
   };
 
   const filterConfig = [
-    {
-      type: 'chip',
-      key: 'district',
-      title: 'Район',
-      options: DISTRICTS,
-      value: filter.district,
-    },
-    {
-      type: 'multiselect',
-      key: 'sportType',
-      title: 'Вид спорта',
-      options: SPORT_TYPES,
-      value: filter.sportType,
-    },
+    { type: 'multiselect', key: 'sportType', title: 'Вид спорта', options: SPORT_TYPES, value: filter.sportType },
+    { type: 'chip', key: 'district', title: 'Район', options: DISTRICTS, value: filter.district },
   ];
+
+  const openCreate = () => {
+    setFormData(EMPTY_FORM);
+    setEditingId(null);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData(EMPTY_FORM);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,9 +123,7 @@ const JointTrainings = () => {
         await apiService.createJointTraining(formData);
         WebApp.showAlert('Тренировка создана');
       }
-      setShowForm(false);
-      setEditingId(null);
-      resetForm();
+      closeForm();
       loadTrainings();
     } catch (error) {
       console.error('Failed to save training:', error);
@@ -107,10 +131,9 @@ const JointTrainings = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     WebApp.showConfirm('Удалить эту тренировку?', async (confirmed) => {
       if (!confirmed) return;
-      
       try {
         await apiService.deleteJointTraining(id);
         WebApp.showAlert('Тренировка удалена');
@@ -123,313 +146,191 @@ const JointTrainings = () => {
   };
 
   const handleEdit = (training) => {
-    // Format date and time for HTML inputs
     let formattedDate = training.date;
     let formattedTime = training.time;
-    
+
     if (training.date) {
-      // If date is already in YYYY-MM-DD format, use it; otherwise format it
       if (typeof training.date === 'string' && training.date.includes('T')) {
         formattedDate = training.date.split('T')[0];
       } else if (typeof training.date === 'string') {
         formattedDate = training.date;
       } else {
-        // If it's a Date object or other format
-        const dateObj = new Date(training.date);
-        formattedDate = dateObj.toISOString().split('T')[0];
+        formattedDate = new Date(training.date).toISOString().split('T')[0];
       }
     }
-    
-    if (training.time) {
-      // If time is already in HH:MM format, use it; otherwise format it
-      if (typeof training.time === 'string' && training.time.includes(':')) {
-        // Extract HH:MM from HH:MM:SS if needed
-        formattedTime = training.time.substring(0, 5);
-      } else {
-        formattedTime = training.time;
-      }
+    if (training.time && typeof training.time === 'string' && training.time.includes(':')) {
+      formattedTime = training.time.substring(0, 5);
     }
-    
+
     setFormData({
-      title: training.title,
-      description: training.description,
-      date: formattedDate,
-      time: formattedTime,
+      title: training.title || '',
+      description: training.description || '',
+      date: formattedDate || '',
+      time: formattedTime || '',
       sportType: training.sportType || '',
-      placeName: training.placeName,
+      placeName: training.placeName || '',
       district: training.district || '',
-      address: training.address,
-      phoneNumber: training.phoneNumber,
+      address: training.address || '',
+      phoneNumber: training.phoneNumber || '',
     });
     setEditingId(training.id || null);
     setShowForm(true);
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      sportType: '',
-      placeName: '',
-      district: '',
-      address: '',
-      phoneNumber: '',
-    });
-  };
+  const setField = (key) => (e) => setFormData((prev) => ({ ...prev, [key]: e.target.value }));
 
-  const formatDateTime = (date, time) => {
-    try {
-      const dateObj = new Date(date);
-      return dateObj.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }) + (time ? ` в ${time}` : '');
-    } catch {
-      return `${date} ${time}`;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="page-container">
-        <h1 className="page-title">Совместные тренировки</h1>
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <p>Загрузка...</p>
-        </div>
-      </div>
-    );
-  }
+  const eyebrow =
+    !loading && trainings.length > 0
+      ? `${trainings.length} ${pluralRu(trainings.length, ['группа', 'группы', 'групп'])} ${
+          pluralRu(trainings.length, ['ищет', 'ищут', 'ищут'])
+        } участников`
+      : undefined;
 
   return (
-    <div className="page-container">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-        }}
-      >
-        <h1 className="page-title" style={{ marginBottom: 0 }}>
-          Совместные тренировки
-        </h1>
-        <button
-          className="btn btn-primary btn-small"
-          onClick={() => {
-            resetForm();
-            setEditingId(null);
-            setShowForm(true);
-          }}
-        >
-          + Создать
-        </button>
-      </div>
-
-      <FilterPanel
-        filters={filterConfig}
-        onFilterChange={handleFilterChange}
-        onReset={handleResetFilters}
+    <>
+      <PageHeader
+        eyebrow={eyebrow}
+        title="Группы"
+        action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
+      <Page>
+        <FilterPanel
+          filters={filterConfig}
+          onFilterChange={handleFilterChange}
+          onReset={handleResetFilters}
+          searchPlaceholder="Поиск тренировок"
+        />
 
-      {error && (
-        <div className="card" style={{ background: '#fef2f2', borderColor: 'var(--error-color)' }}>
-          <p style={{ color: 'var(--error-color)', margin: 0 }}>⚠️ {error}</p>
-        </div>
-      )}
+        {error && <ErrorBanner>{error}</ErrorBanner>}
 
-      {showForm && (
-        <div className="card" style={{ marginBottom: '16px' }}>
-          <h3 className="card-title">{editingId ? 'Редактировать' : 'Создать тренировку'}</h3>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label">Название</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Описание</label>
-              <textarea
-                className="form-textarea"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Дата</label>
-              <input
-                type="date"
-                className="form-input"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Время</label>
-              <input
-                type="time"
-                className="form-input"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Вид спорта</label>
-              <select
-                className="form-select"
-                value={formData.sportType}
-                onChange={(e) => setFormData({ ...formData, sportType: e.target.value })}
-                required
-              >
-                <option value="">Выберите вид спорта</option>
-                {SPORT_TYPES.map((sport) => (
-                  <option key={sport.value} value={sport.value}>
-                    {sport.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Место</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.placeName}
-                onChange={(e) => setFormData({ ...formData, placeName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Район</label>
-              <select
-                className="form-select"
-                value={formData.district}
-                onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                required
-              >
-                <option value="">Выберите район</option>
-                {DISTRICTS.map((district) => (
-                  <option key={district.value} value={district.value}>
-                    {district.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Адрес</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Телефон</label>
-              <input
-                type="tel"
-                className="form-input"
-                placeholder="+7XXXXXXXXXX"
-                value={formData.phoneNumber}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                required
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="submit" className="btn btn-primary btn-full">
-                {editingId ? 'Сохранить' : 'Создать'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => {
-                  setShowForm(false);
-                  resetForm();
-                  setEditingId(null);
-                }}
-              >
-                Отмена
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+        {loading ? (
+          <SkeletonList />
+        ) : !error && trainings.length === 0 ? (
+          <EmptyState
+            icon="users"
+            title="Пока нет тренировок"
+            message="Создайте первую совместную тренировку или измените фильтры."
+            action={<Button onClick={openCreate}>Создать тренировку</Button>}
+          />
+        ) : (
+          <div>
+            {trainings.map((training, index) => (
+              <Card key={training.id || index} first={index === 0}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <Thumb icon={sportIconName(training.sportType)} size={22} />
+                  <div style={{ flex: 1 }}>
+                    <CardTitle>{training.title}</CardTitle>
+                    {training.description && <CardText>{training.description}</CardText>}
+                  </div>
+                </div>
 
-      {!error && trainings.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">👥</div>
-          <p>Тренировки не найдены</p>
-          <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>
-            Попробуйте изменить фильтры или создать новую тренировку
-          </p>
-        </div>
-      ) : (
-        <div>
-          {trainings.map((training, index) => (
-            <div key={index} className="card">
-              <h3 className="card-title">{training.title}</h3>
-              <p className="card-description">{training.description}</p>
-              
-              <div className="card-meta">
-                <span className="meta-item">🏃 {training.sportType}</span>
-                <span className="meta-item">📍 {training.placeName}</span>
-                <span className="meta-item">🏘️ {training.district}</span>
-                <span className="meta-item">📅 {formatDateTime(training.date, training.time)}</span>
-              </div>
+                <Pills>
+                  <Pill tone="brand" icon="calendar">
+                    {formatDateTime(training.date, training.time)}
+                  </Pill>
+                  {training.placeName && <Pill icon="map-pin">{training.placeName}</Pill>}
+                  {training.district && <Pill>{training.district}</Pill>}
+                </Pills>
 
-              {training.address && (
-                <p style={{ marginTop: '8px', fontSize: '14px', color: 'var(--tg-theme-hint-color)' }}>
-                  📍 {training.address}
-                </p>
-              )}
+                {training.address && <MetaLine>{training.address}</MetaLine>}
 
-              <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {training.linkToChatWithCreator && (
-                  <a
-                    href={training.linkToChatWithCreator}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary btn-small"
-                  >
-                    Написать организатору
-                  </a>
-                )}
-                {training.id && (
-                  <>
-                    <button
-                      className="btn btn-secondary btn-small"
-                      onClick={() => handleEdit(training)}
+                <Divider />
+                <CardActions>
+                  {training.linkToChatWithCreator && (
+                    <Button
+                      href={training.linkToChatWithCreator}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      size="sm"
+                      style={{ flex: 1 }}
                     >
-                      Редактировать
-                    </button>
-                    <button
-                      className="btn btn-danger btn-small"
-                      onClick={() => training.id && handleDelete(training.id)}
-                    >
-                      Удалить
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                      <Icon name="message-circle" size={15} />
+                      Написать
+                    </Button>
+                  )}
+                  {training.id && (
+                    <>
+                      <Button variant="tint" size="sm" aria-label="Редактировать" onClick={() => handleEdit(training)}>
+                        <Icon name="pencil" size={15} />
+                      </Button>
+                      <Button variant="danger" size="sm" aria-label="Удалить" onClick={() => handleDelete(training.id)}>
+                        <Icon name="trash-2" size={15} />
+                      </Button>
+                    </>
+                  )}
+                </CardActions>
+              </Card>
+            ))}
+          </div>
+        )}
+      </Page>
+
+      {!showForm && <Fab label="Создать тренировку" onClick={openCreate} />}
+
+      <Modal
+        open={showForm}
+        title={editingId ? 'Редактировать' : 'Новая тренировка'}
+        onCancel={closeForm}
+        footer={
+          <Button type="submit" form="jt-form" fullWidth>
+            {editingId ? 'Сохранить' : 'Создать'}
+          </Button>
+        }
+      >
+        <form id="jt-form" onSubmit={handleSubmit}>
+          <Field label="Название">
+            <Input type="text" value={formData.title} onChange={setField('title')} required />
+          </Field>
+          <Field label="Описание">
+            <Textarea value={formData.description} onChange={setField('description')} required />
+          </Field>
+          <FieldRow>
+            <Field label="Дата">
+              <Input type="date" value={formData.date} onChange={setField('date')} required />
+            </Field>
+            <Field label="Время">
+              <Input type="time" value={formData.time} onChange={setField('time')} required />
+            </Field>
+          </FieldRow>
+          <Field label="Вид спорта">
+            <Select value={formData.sportType} onChange={setField('sportType')} required>
+              <option value="">Выберите вид спорта</option>
+              {SPORT_TYPES.map((sport) => (
+                <option key={sport.value} value={sport.value}>
+                  {sport.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Место">
+            <Input type="text" value={formData.placeName} onChange={setField('placeName')} required />
+          </Field>
+          <Field label="Район">
+            <Select value={formData.district} onChange={setField('district')} required>
+              <option value="">Выберите район</option>
+              {DISTRICTS.map((district) => (
+                <option key={district.value} value={district.value}>
+                  {district.label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Адрес">
+            <Input type="text" value={formData.address} onChange={setField('address')} required />
+          </Field>
+          <Field label="Телефон">
+            <Input
+              type="tel"
+              placeholder="+7XXXXXXXXXX"
+              value={formData.phoneNumber}
+              onChange={setField('phoneNumber')}
+              required
+            />
+          </Field>
+        </form>
+      </Modal>
+    </>
   );
 };
 
 export default JointTrainings;
-
