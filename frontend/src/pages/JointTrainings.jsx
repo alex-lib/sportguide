@@ -341,6 +341,7 @@ const JointTrainings = () => {
               <input
                 type="tel"
                 className="form-input"
+                placeholder="+7XXXXXXXXXX"
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                 required
