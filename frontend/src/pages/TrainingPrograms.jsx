@@ -2,24 +2,45 @@ import { useEffect, useState, useCallback } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { SPORT_TYPES } from '../constants/filters.js';
-import '../App.css';
+import {
+  Page,
+  PageHeader,
+  Card,
+  CardRow,
+  CardTitle,
+  CardText,
+  CardChevron,
+  Thumb,
+  Pills,
+  Pill,
+  Button,
+  EmptyState,
+  ErrorBanner,
+  SkeletonList,
+  sportIconName,
+} from '../ui';
+
+// Map a difficulty label to a tone + dot count.
+const difficultyTone = (d = '') => {
+  const s = d.toLowerCase();
+  if (s.includes('нач') || s.includes('лёг') || s.includes('лег')) return { tone: 'success', dots: '●' };
+  if (s.includes('сред')) return { tone: 'warning', dots: '●●' };
+  if (s.includes('слож') || s.includes('продв') || s.includes('выс')) return { tone: 'danger', dots: '●●●' };
+  return { tone: 'neutral', dots: '' };
+};
 
 const TrainingPrograms = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState({
-    sportTypes: [],
-  });
+  const [filter, setFilter] = useState({ sportTypes: [] });
 
   const loadPrograms = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const filterParams = {};
-      if (filter.sportTypes && filter.sportTypes.length > 0) {
-        filterParams.sportTypes = filter.sportTypes;
-      }
+      if (filter.sportTypes && filter.sportTypes.length > 0) filterParams.sportTypes = filter.sportTypes;
 
       const response = await apiService.getTrainingPrograms(filterParams);
       setPrograms(response?.list || []);
@@ -37,82 +58,78 @@ const TrainingPrograms = () => {
   }, [loadPrograms]);
 
   const handleFilterChange = (key, value) => {
-    setFilter((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilter((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleResetFilters = () => {
-    setFilter({
-      sportTypes: [],
-    });
+    setFilter({ sportTypes: [] });
   };
 
   const filterConfig = [
-    {
-      type: 'multiselect',
-      key: 'sportTypes',
-      title: 'Вид спорта',
-      options: SPORT_TYPES || [],
-      value: filter.sportTypes,
-    },
+    { type: 'multiselect', key: 'sportTypes', title: 'Вид спорта', options: SPORT_TYPES || [], value: filter.sportTypes },
   ];
 
-  if (loading) {
-    return (
-      <div className="page-container">
-        <h1 className="page-title">Программы тренировок</h1>
-        <div className="empty-state">
-          <div className="empty-state-icon">⏳</div>
-          <p>Загрузка...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="page-container">
-      <h1 className="page-title">Программы тренировок</h1>
+    <>
+      <PageHeader title="Программы" />
+      <Page>
+        <FilterPanel
+          filters={filterConfig}
+          onFilterChange={handleFilterChange}
+          onReset={handleResetFilters}
+          searchPlaceholder="Поиск программ"
+        />
 
-      <FilterPanel
-        filters={filterConfig}
-        onFilterChange={handleFilterChange}
-        onReset={handleResetFilters}
-      />
+        {error && <ErrorBanner>{error}</ErrorBanner>}
 
-      {error && (
-        <div className="card" style={{ background: '#fef2f2', borderColor: 'var(--error-color)' }}>
-          <p style={{ color: 'var(--error-color)', margin: 0 }}>⚠️ {error}</p>
-        </div>
-      )}
+        {loading ? (
+          <SkeletonList />
+        ) : !error && programs.length === 0 ? (
+          <EmptyState
+            icon="clipboard-list"
+            accent
+            title="Программ не найдено"
+            message="По выбранным фильтрам ничего нет."
+            action={
+              <Button variant="ghost" onClick={handleResetFilters}>
+                Сбросить фильтры
+              </Button>
+            }
+          />
+        ) : (
+          <div>
+            {programs.map((program, index) => {
+              const diff = difficultyTone(program.difficulty);
+              return (
+                <Card key={program.id || index} first={index === 0}>
+                  <CardRow>
+                    <Thumb icon={sportIconName(program.sportType || program.name)} accent={index % 2 === 1} size={23} />
+                    <div style={{ flex: 1 }}>
+                      <CardTitle>{program.name}</CardTitle>
+                      {program.description && <CardText>{program.description}</CardText>}
+                    </div>
+                    <CardChevron />
+                  </CardRow>
 
-      {!error && programs.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">📋</div>
-          <p>Программы не найдены</p>
-          <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.7 }}>
-            Попробуйте изменить фильтры
-          </p>
-        </div>
-      ) : (
-        <div>
-          {programs.map((program) => (
-            <div key={program.id} className="card">
-              <h3 className="card-title">{program.name}</h3>
-              {program.description && <p className="card-description">{program.description}</p>}
-
-              <div className="card-meta">
-                {program.duration && <span className="meta-item">⏱️ {program.duration}</span>}
-                {program.difficulty && <span className="meta-item">💪 {program.difficulty}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                  {(program.duration || program.difficulty) && (
+                    <Pills>
+                      {program.duration && <Pill icon="clock">{program.duration}</Pill>}
+                      {program.difficulty && (
+                        <Pill tone={diff.tone}>
+                          {diff.dots && `${diff.dots} `}
+                          {program.difficulty}
+                        </Pill>
+                      )}
+                    </Pills>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </Page>
+    </>
   );
 };
 
 export default TrainingPrograms;
-

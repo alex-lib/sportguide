@@ -9,8 +9,7 @@ import Places from './pages/Places.jsx';
 import JointTrainings from './pages/JointTrainings.jsx';
 import TrainingPrograms from './pages/TrainingPrograms.jsx';
 import Coaches from './pages/Coaches.jsx';
-import Loading from './components/Loading.jsx';
-import './App.css';
+import { Page, EmptyState, Button, Loading } from './ui';
 
 // Component to handle Telegram back button
 const TelegramBackButtonHandler = () => {
@@ -91,16 +90,13 @@ function App() {
             // Disable pull-to-refresh
             if (WebApp.enableClosingConfirmation) WebApp.enableClosingConfirmation();
             
-            // Set theme colors - modern green/teal scheme
-            if (WebApp.setHeaderColor) WebApp.setHeaderColor('#1a9b8e');
-            if (WebApp.setBackgroundColor) WebApp.setBackgroundColor('#f0f9f8');
-            
-            // Set main button color to match theme
+            // Match Telegram chrome to the app theme (follows light/dark).
+            const isDark = WebApp.colorScheme === 'dark';
+            if (WebApp.setHeaderColor) WebApp.setHeaderColor(isDark ? '#0c0c0f' : '#f2f4f7');
+            if (WebApp.setBackgroundColor) WebApp.setBackgroundColor(isDark ? '#0c0c0f' : '#f2f4f7');
+
             if (WebApp.MainButton?.setParams) {
-              WebApp.MainButton.setParams({
-                color: '#1a9b8e',
-                text_color: '#ffffff',
-              });
+              WebApp.MainButton.setParams({ color: '#0f9d8f', text_color: '#ffffff' });
             }
           } catch (tgError) {
             console.warn('Telegram WebApp initialization error:', tgError);
@@ -149,21 +145,19 @@ function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="page-container" style={{ padding: '24px', textAlign: 'center' }}>
-        <div className="empty-state">
-          <div className="empty-state-icon">⚠️</div>
-          <h2 style={{ color: 'var(--error-color)', marginBottom: '16px' }}>Ошибка аутентификации</h2>
-          <p style={{ marginBottom: '16px' }}>
-            Не удалось войти в приложение. Убедитесь, что вы открыли приложение из Telegram.
-          </p>
-          <button
-            className="btn btn-primary"
-            onClick={() => window.location.reload()}
-          >
-            Перезагрузить
-          </button>
-        </div>
-      </div>
+      <Page>
+        <EmptyState
+          icon="triangle-alert"
+          accent
+          title="Не удалось войти"
+          message="Откройте приложение из Telegram и попробуйте снова."
+          action={
+            <Button fullWidth onClick={() => window.location.reload()}>
+              Перезагрузить
+            </Button>
+          }
+        />
+      </Page>
     );
   }
 
