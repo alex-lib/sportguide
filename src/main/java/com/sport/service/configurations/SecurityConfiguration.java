@@ -23,7 +23,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -122,10 +124,34 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/auth/telegram").permitAll()
                         .anyRequest().authenticated()
                 )
+                .oauth2ResourceServer(oauth -> oauth
+                        .jwt(jwt -> jwt
+                                .decoder(telegramJwtDecoder())
+                                .jwtAuthenticationConverter(telegramJwtAuthConverter())
+                        )
+                )
                 .requestCache(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
         return http.build();
+    }
+
+    @Bean
+    public JwtAuthenticationConverter telegramJwtAuthConverter() {
+        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+        converter.setAuthorityPrefix("ROLE_");
+        converter.setAuthoritiesClaimName("role");
+
+        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+        jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
+        return jwtConverter;
+    }
+
+    @Bean
+    JwtDecoder telegramJwtDecoder() {
+        return NimbusJwtDecoder.withSecretKey(
+                new SecretKeySpec(secret.getBytes(), "HmacSHA256")
+        ).build();
     }
 
     @Bean
