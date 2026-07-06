@@ -132,13 +132,10 @@ public class TelegramAuthService {
 
             log.info("Data check string:\n{}", dataCheckString);
 
-            Mac hmacSha256 = Mac.getInstance("HmacSHA256");
-            SecretKeySpec keySpec = new SecretKeySpec(botToken.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            hmacSha256.init(keySpec);
-            byte[] correctSecretKey = hmacSha256.doFinal(botToken.getBytes(StandardCharsets.UTF_8));
+            byte[] secretKey = MessageDigest.getInstance("SHA-256").digest(botToken.getBytes(StandardCharsets.UTF_8));
 
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(correctSecretKey, "HmacSHA256"));
+            mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
             byte[] calculated = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
             String calculatedHash = bytesToHex(calculated);
