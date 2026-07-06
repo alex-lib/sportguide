@@ -121,6 +121,8 @@ public class TelegramAuthService {
                 return false;
             }
 
+            String chatType = data.get("chat_type");
+
             Map<String, String> filtered = data.entrySet().stream()
                     .filter(e -> !e.getKey().equals("hash"))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -131,8 +133,17 @@ public class TelegramAuthService {
                     .collect(Collectors.joining("\n"));
 
             log.info("Data check string:\n{}", dataCheckString);
+            log.info("Chat type: {}", chatType);
 
-            byte[] secretKey = MessageDigest.getInstance("SHA-256").digest(botToken.getBytes(StandardCharsets.UTF_8));
+            byte[] secretKey;
+            if ("private".equals(chatType)) {
+                secretKey = MessageDigest.getInstance("SHA-256").digest(botToken.getBytes(StandardCharsets.UTF_8));
+                log.info("Using secret key: private chat (SHA-256(botToken))");
+            } else {
+                String combined = "WEB_APP_DATA_SECRET_V1" + botToken;
+                secretKey = MessageDigest.getInstance("SHA-256").digest(combined.getBytes(StandardCharsets.UTF_8));
+                log.info("Using secret key: sender/group/channel (SHA-256('WEB_APP_DATA_SECRET_V1'+botToken))");
+            }
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
