@@ -252,11 +252,16 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     private String createCaption(Place place) {
         String mapLink = null;
-        if (!place.getCoordinates().equals("-")) {
-            String[] coordinates = place.getCoordinates().split(",");
-            float latitude = Float.parseFloat(coordinates[0].trim());
-            float longitude = Float.parseFloat(coordinates[1].trim());
-            mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+        String rawCoordinates = place.getCoordinates();
+        if (rawCoordinates != null && !rawCoordinates.equals("-") && rawCoordinates.contains(",")) {
+            try {
+                String[] coordinates = rawCoordinates.split(",");
+                float latitude = Float.parseFloat(coordinates[0].trim());
+                float longitude = Float.parseFloat(coordinates[1].trim());
+                mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                log.warn("Malformed coordinates '{}' for place {}", rawCoordinates, place.getName());
+            }
         }
 
        return notificationCreatorService.createPlaceMessage(place, mapLink);

@@ -8,6 +8,9 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
+      // Serialize arrays as repeated keys (sportTypes=A&sportTypes=B) so Spring
+      // binds them into List<String>, instead of the default sportTypes[]=A form.
+      paramsSerializer: { indexes: null },
     });
 
     // Load token from localStorage on initialization

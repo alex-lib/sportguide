@@ -5,8 +5,10 @@ import com.sport.service.entities.Coach;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TrainingProgram;
+import com.sport.service.entities.enums.common.SportType;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.coach.CoachMapper;
+import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.specifications.CoachSpecification;
 import com.sport.service.utils.BeanUtils;
@@ -36,8 +38,18 @@ public class CoachService {
     private final CoachMapper coachMapper;
 
     public ListCoachResponse findAllCoaches(CoachFilter filter) {
-        return coachMapper.listCoachToListCoachResponse(
-                coachRepository.findAll(CoachSpecification.withFilter(filter)));
+        List<Coach> coaches = coachRepository.findAll(CoachSpecification.withFilter(filter));
+
+        List<String> sportTypeNames = filter.getSportTypes();
+        if (sportTypeNames != null && !sportTypeNames.isEmpty()) {
+            List<SportType> wanted = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(sportTypeNames);
+            coaches = coaches.stream()
+                    .filter(coach -> coach.getSportTypes() != null
+                            && coach.getSportTypes().stream().anyMatch(wanted::contains))
+                    .toList();
+        }
+
+        return coachMapper.listCoachToListCoachResponse(coaches);
     }
 
     @Transactional

@@ -149,6 +149,11 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
         answer.setChatId(chatId.toString());
 
         try {
+            if (dto.getStep() != 2 || dto.getMessage() == null) {
+                log.warn("Photo received in send_message_to_all_users at unexpected step {}", dto.getStep());
+                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.ENTER_TEXT_TO_SEND_TO_ALL_USERS);
+                return;
+            }
             if (message.hasPhoto()) {
 
                 List<PhotoSize> photos = message.getPhoto();

@@ -59,7 +59,6 @@ public class AdminController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/program-trainings/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
     public void updateTrainingProgram(
             @PathVariable Long id,
             @Valid @RequestBody CreateTrainingProgramRequest request) {

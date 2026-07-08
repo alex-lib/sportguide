@@ -45,8 +45,10 @@ public class SecurityConfiguration {
     @Order(1)
     SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/admin/**")
-                .authorizeHttpRequests(auth -> auth.anyRequest().hasRole("ADMIN"))
+                .securityMatcher("/admin/**", "/oauth2/**", "/login/**")
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/oauth2/**", "/login/**").permitAll()
+                        .anyRequest().hasRole("ADMIN"))
                 .oauth2Login(oauth ->
                         oauth.userInfoEndpoint(userInfo ->
                                 userInfo.oidcUserService(oidcUserService())

@@ -54,7 +54,12 @@ public interface PlaceSpecification {
         }
 
         Boolean outdoor = OutdoorStringMapper.outdoorStringToOutdoorEnum(outdoorString);
-        return (root, query, cb) -> cb.equal(root.get("outdoor"), outdoor);
+        return (root, query, cb) -> {
+            if (outdoor == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("outdoor"), outdoor);
+        };
     }
 
     static Specification<Place> byPlaceType(String placeTypeString) {

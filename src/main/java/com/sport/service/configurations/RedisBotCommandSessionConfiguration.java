@@ -21,7 +21,11 @@ public class RedisBotCommandSessionConfiguration {
         StringRedisSerializer keySerializer = new StringRedisSerializer();
         ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(
-                BasicPolymorphicTypeValidator.builder().allowIfSubType(Object.class).build(),
+                BasicPolymorphicTypeValidator.builder()
+                        .allowIfSubType("com.sport.service.")
+                        .allowIfSubType("java.util.")
+                        .allowIfSubType("java.time.")
+                        .build(),
                 ObjectMapper.DefaultTyping.NON_FINAL
         );
         Jackson2JsonRedisSerializer<Object> valueSerializer = new Jackson2JsonRedisSerializer<>(mapper, Object.class);
