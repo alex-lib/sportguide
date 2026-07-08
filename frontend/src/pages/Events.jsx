@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS } from '../constants/filters.js';
@@ -33,7 +33,10 @@ const Events = () => {
     date: null,
   });
 
+  const latestRequest = useRef(0);
+
   const loadEvents = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
@@ -42,13 +45,15 @@ const Events = () => {
       if (filter.date) filterParams.date = filter.date;
 
       const response = await apiService.getEvents(filterParams);
+      if (requestId !== latestRequest.current) return;
       setEvents(response?.list || []);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Failed to load events:', error);
       setError(error.message || 'Не удалось загрузить события');
       setEvents([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, [filter]);
 

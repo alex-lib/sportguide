@@ -39,10 +39,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
             String subDistrictString = SubDistrictStringMapper.subDistrictEnumToSubDistrictString(place.getSubDistrict());
             String outdoorString = OutdoorStringMapper.outdoorEnumToOutdoorString(place.getOutdoor());
             String placeTypeString = PlaceTypeStringMapper.placeTypeEnumToPlaceTypeString(place.getPlaceType());
-            String[] coordinatesArray = place.getCoordinates().split(",");
-            float latitude = Float.parseFloat(coordinatesArray[0].trim());
-            float longitude = Float.parseFloat(coordinatesArray[1].trim());
-            String coordinates = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+            String coordinates = buildMapLink(place.getCoordinates());
 
             placeResponses.add(new PlaceResponse(
                     place.getName(),
@@ -57,5 +54,19 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                     coordinates));
         }
         return new ListPlaceResponse(placeResponses);
+    }
+
+    private static String buildMapLink(String rawCoordinates) {
+        if (rawCoordinates == null || rawCoordinates.equals("-") || !rawCoordinates.contains(",")) {
+            return "Координаты места не указаны";
+        }
+        try {
+            String[] parts = rawCoordinates.split(",");
+            float latitude = Float.parseFloat(parts[0].trim());
+            float longitude = Float.parseFloat(parts[1].trim());
+            return String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            return "Координаты места не указаны";
+        }
     }
 }

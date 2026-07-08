@@ -2,7 +2,9 @@ package com.sport.service.services;
 
 import com.sport.service.entities.Coach;
 import com.sport.service.entities.TrainingProgram;
+import com.sport.service.entities.enums.common.SportType;
 import com.sport.service.exceptions.NotFoundException;
+import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.mappers.training_program.TrainingProgramMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.repositories.TrainingProgramRepository;
@@ -39,6 +41,15 @@ public class TrainingProgramService {
                 trainingProgramRepository.findAll(
                         ProgramTrainingSpecification.withFilter(filter));
 
+        List<String> sportTypeNames = filter.getSportTypes();
+        if (sportTypeNames != null && !sportTypeNames.isEmpty()) {
+            List<SportType> wanted = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(sportTypeNames);
+            programs = programs.stream()
+                    .filter(program -> program.getSportTypes() != null
+                            && program.getSportTypes().stream().anyMatch(wanted::contains))
+                    .toList();
+        }
+
         return trainingProgramMapper
                 .listTrainingProgramToListTrainingProgramResponse(programs);
     }
@@ -65,7 +76,8 @@ public class TrainingProgramService {
 
     @Transactional
     public void update(CreateTrainingProgramRequest request, Long id) {
-        TrainingProgram program = findById(id);
+        TrainingProgram program = trainingProgramRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Training program with id " + id + " was not found"));
 
         List<Coach> creators = new ArrayList<>();
         for (Long coachId : request.getCoachesId()) {

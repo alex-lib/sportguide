@@ -259,6 +259,11 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		}
 
 		try {
+			if (dto.getStep() != 10) {
+				log.warn("Photo received in create_place session at unexpected step {}", dto.getStep());
+				sender.sendMessageWithoutPhoto(chatId, CommandsConstants.SEND_PLACE_PHOTO_2);
+				return;
+			}
 			if (message.hasPhoto()) {
 
 				List<PhotoSize> photos = message.getPhoto();
@@ -273,8 +278,8 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 				placeService.create(dto);
 				placeSession.clear(chatId);
 				commandStateStore.clearCurrentCommand(userId);
+				sender.sendMessageWithoutPhoto(chatId, CommandsConstants.PLACE_CREATED);
 			}
-			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.PLACE_CREATED);
 		} catch (Exception e) {
 			log.error("Error processing photo", e);
 			placeSession.clear(chatId);

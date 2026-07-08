@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { SPORT_TYPES, SEX_OPTIONS } from '../constants/filters.js';
@@ -38,7 +38,10 @@ const Coaches = () => {
     yearsOfExperience: null,
   });
 
+  const latestRequest = useRef(0);
+
   const loadCoaches = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
@@ -49,13 +52,15 @@ const Coaches = () => {
       if (filter.yearsOfExperience) filterParams.yearsOfExperience = filter.yearsOfExperience;
 
       const response = await apiService.getCoaches(filterParams);
+      if (requestId !== latestRequest.current) return;
       setCoaches(response?.list || []);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Failed to load coaches:', error);
       setError(error.message || 'Не удалось загрузить тренеров');
       setCoaches([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, [filter]);
 
@@ -149,7 +154,7 @@ const Coaches = () => {
 
                   {(coach.yearsOfExperience || coach.district) && (
                     <Pills>
-                      {coach.yearsOfExperience && <Pill icon="award">{coach.yearsOfExperience} лет опыта</Pill>}
+                      {coach.yearsOfExperience && <Pill icon="award">{coach.yearsOfExperience} {pluralRu(coach.yearsOfExperience, ['год', 'года', 'лет'])} опыта</Pill>}
                       {coach.district && <Pill icon="map-pin">{coach.district}</Pill>}
                     </Pills>
                   )}
