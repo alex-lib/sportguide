@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS, SPORT_TYPES } from '../constants/filters.js';
+import { toLocalISODate } from '../utils/date.js';
 import WebApp from '@twa-dev/sdk';
 import {
   Page,
@@ -78,7 +79,6 @@ const JointTrainings = () => {
       console.error('Failed to load joint trainings:', error);
       setError(error.message || 'Не удалось загрузить тренировки');
       setTrainings([]);
-      WebApp.showAlert('Не удалось загрузить тренировки');
     } finally {
       setLoading(false);
     }
@@ -155,7 +155,7 @@ const JointTrainings = () => {
       } else if (typeof training.date === 'string') {
         formattedDate = training.date;
       } else {
-        formattedDate = new Date(training.date).toISOString().split('T')[0];
+        formattedDate = toLocalISODate(training.date);
       }
     }
     if (training.time && typeof training.time === 'string' && training.time.includes(':')) {

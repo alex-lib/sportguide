@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS } from '../constants/filters.js';
+import { toLocalISODate } from '../utils/date.js';
 import {
   Page,
   PageHeader,
@@ -64,8 +65,8 @@ const Events = () => {
   };
 
   const dateOptions = [
-    { value: new Date().toISOString().split('T')[0], label: 'Сегодня' },
-    { value: new Date(Date.now() + 86400000).toISOString().split('T')[0], label: 'Завтра' },
+    { value: toLocalISODate(new Date()), label: 'Сегодня' },
+    { value: toLocalISODate(new Date(Date.now() + 86400000)), label: 'Завтра' },
   ];
 
   const filterConfig = [

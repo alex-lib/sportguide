@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.MessageDigest;
 
 @Service
 @RequiredArgsConstructor
@@ -121,38 +120,30 @@ public class TelegramAuthService {
                 return false;
             }
 
-            String chatType = data.get("chat_type");
-
-            Map<String, String> filtered = data.entrySet().stream()
+            // Telegram Mini App data-check-string: all fields except "hash",
+            // sorted alphabetically by key, joined with '\n'.
+            String dataCheckString = data.entrySet().stream()
                     .filter(e -> !e.getKey().equals("hash"))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-            String dataCheckString = filtered.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey())
                     .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining("\n"));
 
-            log.info("Data check string:\n{}", dataCheckString);
-            log.info("Chat type: {}", chatType);
+            log.debug("Data check string:\n{}", dataCheckString);
 
-            byte[] secretKey;
-            if ("private".equals(chatType)) {
-                secretKey = MessageDigest.getInstance("SHA-256").digest(botToken.getBytes(StandardCharsets.UTF_8));
-                log.info("Using secret key: private chat (SHA-256(botToken))");
-            } else {
-                String combined = "WEB_APP_DATA_SECRET_V1" + botToken;
-                secretKey = MessageDigest.getInstance("SHA-256").digest(combined.getBytes(StandardCharsets.UTF_8));
-                log.info("Using secret key: sender/group/channel (SHA-256('WEB_APP_DATA_SECRET_V1'+botToken))");
-            }
+            // secret_key = HMAC_SHA256(key="WebAppData", message=bot_token)
+            Mac secretMac = Mac.getInstance("HmacSHA256");
+            secretMac.init(new SecretKeySpec("WebAppData".getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] secretKey = secretMac.doFinal(botToken.getBytes(StandardCharsets.UTF_8));
 
+            // computed_hash = HMAC_SHA256(key=secret_key, message=data_check_string)
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secretKey, "HmacSHA256"));
             byte[] calculated = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
             String calculatedHash = bytesToHex(calculated);
 
-            log.info("Calculated hash: {}", calculatedHash);
-            log.info("Received hash:   {}", receivedHash);
+            log.debug("Calculated hash: {}", calculatedHash);
+            log.debug("Received hash:   {}", receivedHash);
 
             return calculatedHash.equals(receivedHash);
 

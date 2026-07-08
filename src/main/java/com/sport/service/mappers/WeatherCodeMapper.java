@@ -35,7 +35,7 @@ public class WeatherCodeMapper {
             WEATHER_DESCRIPTIONS.put(code, WeatherConstants.SNOW);
         }
 
-        WEATHER_DESCRIPTIONS.put(77, WeatherConstants.HAIL);
+        WEATHER_DESCRIPTIONS.put(77, WeatherConstants.SNOW);
 
         WEATHER_DESCRIPTIONS.put(80, WeatherConstants.SHOWERS);
         WEATHER_DESCRIPTIONS.put(81, WeatherConstants.SHOWERS);

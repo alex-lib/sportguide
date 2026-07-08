@@ -22,7 +22,7 @@ public class NotificationListener implements MessageListener {
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        String channel = new String(pattern);
+        String channel = new String(message.getChannel());
         log.info("Received message on channel: {}", channel);
         String userIdString = new String(message.getBody());
         Long userId = Long.parseLong(userIdString);
@@ -31,9 +31,12 @@ public class NotificationListener implements MessageListener {
         Set<String> keys = notificationRedisTemplate.keys(keyPrefix);
 
         for (String key : keys) {
-            Notification notification = (Notification) notificationRedisTemplate.opsForValue().get(key);
-            sendNotification(notification);
-            notificationRedisTemplate.delete(key);
+            // Atomically claim the key so that with multiple instances only one
+            // consumer sends the notification and losers get null and skip.
+            Notification notification = (Notification) notificationRedisTemplate.opsForValue().getAndDelete(key);
+            if (notification != null) {
+                sendNotification(notification);
+            }
         }
     }
 

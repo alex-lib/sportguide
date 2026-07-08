@@ -59,8 +59,15 @@ public class CoachService {
         }
 
         List<Place> workPlaces = new ArrayList<>();
-        for (String workPlaceName : request.getWorkPlacesNames()) {
-            workPlaces.add(placeService.findByName(workPlaceName));
+        List<String> workPlacesNames = request.getWorkPlacesNames();
+        if (workPlacesNames != null) {
+            for (String workPlaceName : workPlacesNames) {
+                Place place = placeService.findByName(workPlaceName);
+                if (place == null) {
+                    throw new NotFoundException("Place with name " + workPlaceName + " was not found");
+                }
+                workPlaces.add(place);
+            }
         }
 
         coachRepository.save(coachMapper.coachRequestToCoach(request, photoBytes, subscriber, trainingPrograms, workPlaces));
@@ -102,8 +109,15 @@ public class CoachService {
         }
 
         List<Place> workPlaces = new ArrayList<>();
-        for (String workPlaceName : request.getWorkPlacesNames()) {
-            workPlaces.add(placeService.findByName(workPlaceName));
+        List<String> workPlacesNames = request.getWorkPlacesNames();
+        if (workPlacesNames != null) {
+            for (String workPlaceName : workPlacesNames) {
+                Place place = placeService.findByName(workPlaceName);
+                if (place == null) {
+                    throw new NotFoundException("Place with name " + workPlaceName + " was not found");
+                }
+                workPlaces.add(place);
+            }
         }
         Coach updatedCoach = coachMapper.coachRequestToCoach(request, photoBytes, subscriber, trainingPrograms, workPlaces);
         BeanUtils.copyNonNullProperties(updatedCoach, coach);
