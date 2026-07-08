@@ -32,7 +32,8 @@ class ApiService {
      (error) => {
         if (error.response?.status === 401) {
             this.clearAuth();
-            console.warn('Unauthorized, redirecting to auth flow');
+            console.warn('Unauthorized, restarting auth flow');
+            window.location.reload();
         }
         return Promise.reject(error);
       }

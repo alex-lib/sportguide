@@ -22,6 +22,11 @@ public class JwtService {
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration}") Long expirationMs) {
+        if (secret == null || secret.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                    "jwt.secret must be at least 32 bytes for HS256; the resource-server (Nimbus) "
+                            + "decoder rejects shorter keys, so tokens would issue but every /api request would fail");
+        }
         this.secret = secret;
         this.expirationMs = expirationMs;
         this.algorithm = Algorithm.HMAC256(secret);

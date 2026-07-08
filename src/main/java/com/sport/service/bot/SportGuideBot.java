@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -38,6 +39,13 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
     private final JointTrainingService jointTrainingService;
     private final JointTrainingRejectingSession jointTrainingRejectingSession;
     private final TelegramMessageSender sender;
+
+    private final ScheduledExecutorService messageDeletionScheduler =
+            Executors.newSingleThreadScheduledExecutor(runnable -> {
+                Thread thread = new Thread(runnable, "message-deletion-scheduler");
+                thread.setDaemon(true);
+                return thread;
+            });
 
     @Value("${telegram.mainAdminId}")
     private String adminId;
@@ -87,7 +95,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             if (data.startsWith("APPROVE_JT:")) {
                 Long id = Long.valueOf(data.replace("APPROVE_JT:", ""));
                 jointTrainingService.approveJointTraining(id);
-                sender.sendMessageWithoutPhoto(Long.valueOf(secondAdminId),"✔️ Одобрено");
+                sender.sendMessageWithoutPhoto(userId, "✔️ Одобрено");
                 return;
             }
 
@@ -117,13 +125,13 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             long userId = message.getFrom().getId();
             String text = message.getText();
 
-            if (jointTrainingRejectingSession.isWaiting(Long.valueOf(secondAdminId))) {
-                var session = jointTrainingRejectingSession.get(Long.valueOf(secondAdminId));
+            if (jointTrainingRejectingSession.isWaiting(userId)) {
+                var session = jointTrainingRejectingSession.get(userId);
                 Long jtId = session.getJointTrainingId();
                 jointTrainingService.rejectJointTraining(jtId, text);
-                sender.sendMessageWithoutPhoto(Long.valueOf(secondAdminId),
+                sender.sendMessageWithoutPhoto(userId,
                         "❌ Заявка #" + jtId + " отклонена.\nПричина отправлена пользователю:\n" + text);
-                jointTrainingRejectingSession.clear(Long.valueOf(secondAdminId));
+                jointTrainingRejectingSession.clear(userId);
                 return;
             }
 
@@ -169,7 +177,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             loadingMarkup.setReplyMarkup(loadingKeyboard);
             execute(loadingMarkup);
 
-            Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            messageDeletionScheduler.schedule(() -> {
                 try {
                     DeleteMessage deleteMessage = new DeleteMessage();
                     deleteMessage.setChatId(message.getChatId());

@@ -17,11 +17,12 @@ public class UtilMethods {
     public static byte[] downloadPhoto(AbsSender absSender, String fileId, String botToken) {
         GetFile getFileMethod = new GetFile();
         getFileMethod.setFileId(fileId);
-        File file = null;
+        File file;
         try {
             file = absSender.execute(getFileMethod);
         } catch (TelegramApiException e) {
             log.error("Error download photo", e);
+            throw new RuntimeException("Failed to fetch file metadata: " + e.getMessage(), e);
         }
         String fileUrl = "https://api.telegram.org/file/bot" + botToken + "/" + file.getFilePath();
         log.info("Downloading photo from: {}", fileUrl);

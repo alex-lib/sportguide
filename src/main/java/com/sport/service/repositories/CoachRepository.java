@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -16,6 +17,6 @@ public interface CoachRepository extends JpaRepository<Coach, Long>, JpaSpecific
     @Query("""
             UPDATE Coach c
             SET c.showInWeb = false
-            WHERE c.expiredDateForSubscriptionToBeCoach > :targetDate""")
-    void turnOffToShowInWebByExpiredDateForSubscriptionToBeCoach(LocalDate date);
+            WHERE c.expiredDateForSubscriptionToBeCoach < :date""")
+    void turnOffToShowInWebByExpiredDateForSubscriptionToBeCoach(@Param("date") LocalDate date);
 }

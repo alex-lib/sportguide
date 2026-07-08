@@ -163,11 +163,11 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 notificationSenderService.sendAdminToSubscriberNotification(dto.getMessage(), dto.getPhoto(), subscriberIds);
                 messageSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
+                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT);
             } else {
                 answer.setText(CommandsConstants.SEND_PHOTO_TO_SEND_TO_ALL_USERS_2);
+                absSender.execute(answer);
             }
-            sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT);
-            absSender.execute(answer);
         } catch (Exception e) {
             log.error("Error processing photo", e);
             messageSession.clear(chatId);
