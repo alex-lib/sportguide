@@ -16,6 +16,6 @@ public interface CoachRepository extends JpaRepository<Coach, Long>, JpaSpecific
     @Query("""
             UPDATE Coach c
             SET c.showInWeb = false
-            WHERE c.expiredDateForSubscriptionToBeCoach > :targetDate""")
+            WHERE c.expiredDateForSubscriptionToBeCoach > :date""")
     void turnOffToShowInWebByExpiredDateForSubscriptionToBeCoach(LocalDate date);
 }
