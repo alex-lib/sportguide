@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS } from '../constants/filters.js';
+import { toLocalISODate } from '../utils/date.js';
 import {
   Page,
   PageHeader,
@@ -32,7 +33,10 @@ const Events = () => {
     date: null,
   });
 
+  const latestRequest = useRef(0);
+
   const loadEvents = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
@@ -41,13 +45,15 @@ const Events = () => {
       if (filter.date) filterParams.date = filter.date;
 
       const response = await apiService.getEvents(filterParams);
+      if (requestId !== latestRequest.current) return;
       setEvents(response?.list || []);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Failed to load events:', error);
       setError(error.message || 'Не удалось загрузить события');
       setEvents([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, [filter]);
 
@@ -64,8 +70,8 @@ const Events = () => {
   };
 
   const dateOptions = [
-    { value: new Date().toISOString().split('T')[0], label: 'Сегодня' },
-    { value: new Date(Date.now() + 86400000).toISOString().split('T')[0], label: 'Завтра' },
+    { value: toLocalISODate(new Date()), label: 'Сегодня' },
+    { value: toLocalISODate(new Date(Date.now() + 86400000)), label: 'Завтра' },
   ];
 
   const filterConfig = [
