@@ -4,9 +4,10 @@ import com.sport.service.constants.Constants;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.Subscriber;
+import com.sport.service.entities.enums.common.District;
 import com.sport.service.mappers.event.EventMapper;
+import com.sport.service.mappers.string.DistrictStringMapper;
 import com.sport.service.repositories.EventRepository;
-import com.sport.service.specifications.EventSpecification;
 import com.sport.service.web.models.event.EventFilter;
 import com.sport.service.web.models.event.ListEventResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,14 @@ public class EventService {
     }
 
     public ListEventResponse findAllEventsWithFilter(EventFilter filter) {
-        return eventMapper.listEventToListEventResponse(eventRepository.findAll(EventSpecification.withFilter(filter)));
+        District district = null;
+        if (filter.getDistrict() != null && !filter.getDistrict().isEmpty()) {
+            district = DistrictStringMapper.districtStringToDistrictEnum(filter.getDistrict());
+        }
+        LocalDate date = filter.getDate() != null && !filter.getDate().isEmpty() ? LocalDate.parse(filter.getDate()) : null;
+
+        return eventMapper.listEventToListEventResponse(
+                eventRepository.findWithFilters(district, date));
     }
 
     @Transactional
