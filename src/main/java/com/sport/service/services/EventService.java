@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -63,7 +64,7 @@ public class EventService {
     @Transactional
     @Scheduled(cron = Constants.CRON_DELETE_EVENT, zone = Constants.TIME_ZONE)
     public void deleteEventByExpiredDate() {
-        LocalDate currentDate = LocalDate.now();
+        LocalDate currentDate = LocalDate.now(ZoneId.of(Constants.TIME_ZONE));
         eventRepository.deleteByDateBefore(currentDate);
     }
 

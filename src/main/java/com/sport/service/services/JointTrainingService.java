@@ -4,6 +4,7 @@ import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import com.sport.service.entities.enums.subscriber.RoleType;
+import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.joint_training.JointTrainingMapper;
 import com.sport.service.processors.JointTrainingProcessor;
 import com.sport.service.repositories.JointTrainingRepository;
@@ -13,6 +14,7 @@ import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.JointTrainingFilter;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,12 +58,12 @@ public class JointTrainingService {
     public void updateJointTrainingById(CreateJointTrainingRequest request, Long id, Long userId) {
         Subscriber subscriber = subscriberService.findById(userId);
 
-        JointTraining jointTraining =
-                jointTrainingRepository.findById(id).orElse(null);
+        JointTraining jointTraining = jointTrainingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("JointTraining with id " + id + " was not found"));
 
         if (!jointTraining.getSubscriber().getId().equals(userId)
                 && subscriber.getRole() != RoleType.ADMIN) {
-            throw new RuntimeException("You don't have permission to update this joint training");
+            throw new AccessDeniedException("You don't have permission to update this joint training");
         }
 
         JointTraining updatedJointTraining =
@@ -80,11 +82,12 @@ public class JointTrainingService {
         Subscriber subscriber = subscriberService.findById(userId);
 
         JointTraining jointTraining =
-                jointTrainingRepository.findById(id).orElse(null);
+                jointTrainingRepository.findById(id)
+                        .orElseThrow(() -> new NotFoundException("JointTraining with id " + id + " was not found"));
 
         if (!jointTraining.getSubscriber().getId().equals(userId)
                 && subscriber.getRole() != RoleType.ADMIN) {
-            throw new RuntimeException("You don't have permission to delete this joint training");
+            throw new AccessDeniedException("You don't have permission to delete this joint training");
         }
 
         jointTrainingRepository.deleteById(id);
