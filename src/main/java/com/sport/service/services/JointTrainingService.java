@@ -2,13 +2,16 @@ package com.sport.service.services;
 
 import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Subscriber;
+import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.common.SportType;
 import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import com.sport.service.entities.enums.subscriber.RoleType;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.joint_training.JointTrainingMapper;
+import com.sport.service.mappers.string.DistrictStringMapper;
+import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.processors.JointTrainingProcessor;
 import com.sport.service.repositories.JointTrainingRepository;
-import com.sport.service.specifications.JointTrainingSpecification;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.JointTrainingFilter;
@@ -18,7 +21,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.sport.service.entities.enums.joint_training.ApprovalStatus.PENDING;
 
@@ -34,8 +39,12 @@ public class JointTrainingService {
     private final JointTrainingProcessor processor;
 
     public ListJointTrainingResponse findAllJointTrainings(JointTrainingFilter filter) {
+        District district = filter.getDistrict() != null && !filter.getDistrict().isEmpty() ? DistrictStringMapper.districtStringToDistrictEnum(filter.getDistrict()) : null;
+        LocalDate date = filter.getDate() != null && !filter.getDate().isEmpty() ? LocalDate.parse(filter.getDate()) : null;
+        List<SportType> sportTypes = filter.getSportType() != null ? SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(filter.getSportType()) : null;
+
         return jointTrainingMapper.jointTrainingListToListJointTrainingResponse(
-                jointTrainingRepository.findAll(JointTrainingSpecification.withFilter(filter)));
+                jointTrainingRepository.findWithFilters(district, date, sportTypes));
     }
 
     @Transactional
