@@ -5,17 +5,32 @@ import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface PlaceRepository extends JpaRepository<Place, Long>, JpaSpecificationExecutor<Place> {
+public interface PlaceRepository extends JpaRepository<Place, Long> {
 
     Place findByName(String name);
 
     boolean existsByName(String name);
+
+    @Query("""
+            SELECT p FROM Place p
+            WHERE (:district IS NULL OR p.district = :district)
+              AND (:subDistrict IS NULL OR p.subDistrict = :subDistrict)
+              AND (:outdoor IS NULL OR p.outdoor = :outdoor)
+              AND (:placeType IS NULL OR p.placeType = :placeType)
+            """)
+    List<Place> findWithFilters(
+            @Param("district") District district,
+            @Param("subDistrict") SubDistrict subDistrict,
+            @Param("outdoor") Boolean outdoor,
+            @Param("placeType") PlaceType placeType
+    );
 
     List<Place> findAllByPlaceType(PlaceType placeType);
 
