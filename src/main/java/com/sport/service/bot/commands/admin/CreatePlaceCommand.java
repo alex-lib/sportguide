@@ -99,7 +99,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
         answer.setChatId(chatId.toString());
 
 		try {
-			if (KeyboardConstants.BACK.equals(data)) { //user wants to back the previous menu to reconsider his choice
+			if (KeyboardConstants.BACK.equals(data)) { //User wants to back the previous menu to reconsider his choice
 				answer.setText(CommandsConstants.CREATING_TYPE);
 				switch (dto.getStep()) {
 					case 2 -> { //If user chose in subdistricts menu to choose district again
@@ -260,7 +260,6 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 
 		try {
 			if (message.hasPhoto()) {
-
 				List<PhotoSize> photos = message.getPhoto();
 				PhotoSize bestPhoto = photos.get(photos.size() - 1);
 				String fileId = bestPhoto.getFileId();
@@ -273,8 +272,8 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 				placeService.create(dto);
 				placeSession.clear(chatId);
 				commandStateStore.clearCurrentCommand(userId);
+				sender.sendMessageWithoutPhoto(chatId, CommandsConstants.PLACE_CREATED);
 			}
-			sender.sendMessageWithoutPhoto(chatId, CommandsConstants.PLACE_CREATED);
 		} catch (Exception e) {
 			log.error("Error processing photo", e);
 			placeSession.clear(chatId);

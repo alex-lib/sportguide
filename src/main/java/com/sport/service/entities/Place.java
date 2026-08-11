@@ -32,7 +32,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@ToString(exclude = "photo")
+@ToString(exclude = {"photo", "coaches"})
 public class Place {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

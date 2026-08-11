@@ -145,12 +145,8 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 .map(Subscriber::getId)
                 .toList();
 
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
-
         try {
             if (message.hasPhoto()) {
-
                 List<PhotoSize> photos = message.getPhoto();
                 PhotoSize bestPhoto = photos.get(photos.size() - 1);
                 String fileId = bestPhoto.getFileId();
@@ -163,11 +159,10 @@ public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessabl
                 notificationSenderService.sendAdminToSubscriberNotification(dto.getMessage(), dto.getPhoto(), subscriberIds);
                 messageSession.clear(chatId);
                 commandStateStore.clearCurrentCommand(userId);
+                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT);
             } else {
-                answer.setText(CommandsConstants.SEND_PHOTO_TO_SEND_TO_ALL_USERS_2);
+                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.SEND_PHOTO_TO_SEND_TO_ALL_USERS_2);
             }
-            sender.sendMessageWithoutPhoto(chatId, CommandsConstants.MESSAGE_SENT);
-            absSender.execute(answer);
         } catch (Exception e) {
             log.error("Error processing photo", e);
             messageSession.clear(chatId);
