@@ -5,10 +5,13 @@ import com.sport.service.entities.Coach;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TrainingProgram;
+import com.sport.service.entities.enums.coach.Sex;
+import com.sport.service.entities.enums.common.SportType;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.coach.CoachMapper;
+import com.sport.service.mappers.string.SexStringMapper;
+import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.repositories.CoachRepository;
-import com.sport.service.specifications.CoachSpecification;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.coach.CoachFilter;
 import com.sport.service.web.models.coach.CoachRequest;
@@ -36,8 +39,17 @@ public class CoachService {
     private final CoachMapper coachMapper;
 
     public ListCoachResponse findAllCoaches(CoachFilter filter) {
+        List<SportType> sportTypes = null;
+        if (filter.getSportTypes() != null) {
+            sportTypes = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(filter.getSportTypes());
+        }
+        Sex sex = filter.getSex() != null ? SexStringMapper.sexStringToSexEnum(filter.getSex()) : null;
         return coachMapper.listCoachToListCoachResponse(
-                coachRepository.findAll(CoachSpecification.withFilter(filter)));
+                coachRepository.findWithFilters(
+                        sportTypes,
+                        sex,
+                        filter.getAge(),
+                        filter.getYearsOfExperience()));
     }
 
     @Transactional
