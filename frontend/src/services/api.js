@@ -8,6 +8,7 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
+      paramsSerializer: { indexes: null },
     });
 
     // Load token from localStorage on initialization
@@ -32,7 +33,8 @@ class ApiService {
      (error) => {
         if (error.response?.status === 401) {
             this.clearAuth();
-            console.warn('Unauthorized, redirecting to auth flow');
+            console.warn('Unauthorized, restarting auth flow');
+            window.location.reload();
         }
         return Promise.reject(error);
       }

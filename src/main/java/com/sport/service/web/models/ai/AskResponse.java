@@ -1,20 +1,13 @@
 package com.sport.service.web.models.ai;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class AskResponse {
+
     private String answer;
-
-    public AskResponse() {
-    }
-
-    public AskResponse(String answer) {
-        this.answer = answer;
-    }
-
-    public String getAnswer() {
-        return answer;
-    }
-
-    public void setAnswer(String answer) {
-        this.answer = answer;
-    }
 }

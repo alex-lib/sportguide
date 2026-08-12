@@ -3,10 +3,11 @@ package com.sport.service.services;
 import com.sport.service.entities.Coach;
 import com.sport.service.entities.TrainingProgram;
 import com.sport.service.exceptions.NotFoundException;
+import com.sport.service.entities.enums.common.SportType;
+import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.mappers.training_program.TrainingProgramMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.repositories.TrainingProgramRepository;
-import com.sport.service.specifications.ProgramTrainingSpecification;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.training_program.CreateTrainingProgramRequest;
 import com.sport.service.web.models.training_program.ListTrainingProgramResponse;
@@ -35,12 +36,13 @@ public class TrainingProgramService {
     }
 
     public ListTrainingProgramResponse findAll(TrainingProgramFilter filter) {
-        List<TrainingProgram> programs =
-                trainingProgramRepository.findAll(
-                        ProgramTrainingSpecification.withFilter(filter));
+        List<SportType> sportTypes = null;
+        if (filter.getSportTypes() != null) {
+            sportTypes = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(filter.getSportTypes());
+        }
+        List<TrainingProgram> programs = trainingProgramRepository.findWithFilters(sportTypes);
 
-        return trainingProgramMapper
-                .listTrainingProgramToListTrainingProgramResponse(programs);
+        return trainingProgramMapper.listTrainingProgramToListTrainingProgramResponse(programs);
     }
 
     @Transactional
@@ -65,7 +67,8 @@ public class TrainingProgramService {
 
     @Transactional
     public void update(CreateTrainingProgramRequest request, Long id) {
-        TrainingProgram program = findById(id);
+        TrainingProgram program = trainingProgramRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Training program with id " + id + " was not found"));
 
         List<Coach> creators = new ArrayList<>();
         for (Long coachId : request.getCoachesId()) {

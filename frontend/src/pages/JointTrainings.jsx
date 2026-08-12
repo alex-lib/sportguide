@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS, SPORT_TYPES } from '../constants/filters.js';
+import { toLocalISODate } from '../utils/date.js';
 import WebApp from '@twa-dev/sdk';
 import {
   Page,
@@ -63,7 +64,10 @@ const JointTrainings = () => {
   const [filter, setFilter] = useState({ date: null, sportType: [], district: null });
   const [formData, setFormData] = useState(EMPTY_FORM);
 
+  const latestRequest = useRef(0);
+
   const loadTrainings = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
@@ -73,14 +77,15 @@ const JointTrainings = () => {
       if (filter.district) filterParams.district = filter.district;
 
       const response = await apiService.getJointTrainings(filterParams);
+      if (requestId !== latestRequest.current) return;
       setTrainings(response?.list || []);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Failed to load joint trainings:', error);
       setError(error.message || 'Не удалось загрузить тренировки');
       setTrainings([]);
-      WebApp.showAlert('Не удалось загрузить тренировки');
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, [filter]);
 
@@ -155,7 +160,7 @@ const JointTrainings = () => {
       } else if (typeof training.date === 'string') {
         formattedDate = training.date;
       } else {
-        formattedDate = new Date(training.date).toISOString().split('T')[0];
+        formattedDate = toLocalISODate(training.date);
       }
     }
     if (training.time && typeof training.time === 'string' && training.time.includes(':')) {

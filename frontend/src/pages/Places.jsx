@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS, PLACE_TYPES, OUTDOOR_OPTIONS } from '../constants/filters.js';
@@ -35,7 +35,10 @@ const Places = () => {
     placeType: null,
   });
 
+  const latestRequest = useRef(0);
+
   const loadPlaces = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
@@ -46,13 +49,15 @@ const Places = () => {
       if (filter.placeType) filterParams.placeType = filter.placeType;
 
       const response = await apiService.getPlaces(filterParams);
+      if (requestId !== latestRequest.current) return;
       setPlaces(response?.list || []);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Failed to load places:', error);
       setError(error.message || 'Не удалось загрузить места');
       setPlaces([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, [filter]);
 
