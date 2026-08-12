@@ -32,7 +32,7 @@ public class NotificationSendingRecovery {
             String type = parts[1];
             Long userId = Long.parseLong(parts[2]);
             String topic = Constants.KEY_OF_CHANNEL_NAME + type;
-            notificationRedisTemplate.convertAndSend(topic, userId.toString());
+            notificationRedisTemplate.convertAndSend(topic, userId);
         }
     }
 }

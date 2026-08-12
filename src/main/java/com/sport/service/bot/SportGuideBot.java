@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -44,6 +45,13 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
 
     @Value("${telegram.secondAdminId}")
     private String secondAdminId;
+
+    private final ScheduledExecutorService messageDeletionScheduler =
+            Executors.newSingleThreadScheduledExecutor(runnable -> {
+                Thread thread = new Thread(runnable, "message-deletion-scheduler");
+                thread.setDaemon(true);
+                return thread;
+            });
 
     public SportGuideBot(
             @Value("${telegram.bot.token}") String botToken,
@@ -169,7 +177,7 @@ public class SportGuideBot extends TelegramLongPollingCommandBot {
             loadingMarkup.setReplyMarkup(loadingKeyboard);
             execute(loadingMarkup);
 
-            Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            messageDeletionScheduler.schedule(() -> {
                 try {
                     DeleteMessage deleteMessage = new DeleteMessage();
                     deleteMessage.setChatId(message.getChatId());

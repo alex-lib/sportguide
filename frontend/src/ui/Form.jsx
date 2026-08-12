@@ -35,7 +35,7 @@ export const Range = ({ value, min = 0, max = 100, suffix = '', placeholder = 'â
       className="range"
       min={min}
       max={max}
-      value={value ?? min}
+      value={value == null || value === '' ? min : value}
       onChange={onChange}
       {...rest}
     />

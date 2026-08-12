@@ -72,7 +72,7 @@ public class NotificationCreatorService {
         context.setVariable("place", place);
         context.setVariable("mapLink", mapLink);
 
-        if (place.getWebSite().equals("-")) {
+        if (place.getWebSite() == null || place.getWebSite().equals("-")) {
             return templateEngine.process("place_without_link_message.txt", context);
         }
 

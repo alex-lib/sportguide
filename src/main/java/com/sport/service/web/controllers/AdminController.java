@@ -30,7 +30,8 @@ public class AdminController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/coaches")
     public void createCoach(@RequestPart("data") @Valid CoachRequest request,
-                            @RequestPart("photo") MultipartFile photo) {
+                            @RequestPart("photo") MultipartFile photo
+    ) {
         coachService.createCoach(request, photo);
     }
 
@@ -53,16 +54,18 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/program-trainings")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createTrainingProgram(@Valid @RequestBody CreateTrainingProgramRequest request) {
+    public void createTrainingProgram(
+            @Valid @RequestBody CreateTrainingProgramRequest request
+    ) {
         trainingProgramService.create(request);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/program-trainings/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
     public void updateTrainingProgram(
             @PathVariable Long id,
-            @Valid @RequestBody CreateTrainingProgramRequest request) {
+            @Valid @RequestBody CreateTrainingProgramRequest request
+    ) {
         trainingProgramService.update(request, id);
     }
 

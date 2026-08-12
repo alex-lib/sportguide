@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { SPORT_TYPES } from '../constants/filters.js';
@@ -35,7 +35,10 @@ const TrainingPrograms = () => {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState({ sportTypes: [] });
 
+  const latestRequest = useRef(0);
+
   const loadPrograms = useCallback(async () => {
+    const requestId = ++latestRequest.current;
     try {
       setLoading(true);
       setError(null);
@@ -43,13 +46,15 @@ const TrainingPrograms = () => {
       if (filter.sportTypes && filter.sportTypes.length > 0) filterParams.sportTypes = filter.sportTypes;
 
       const response = await apiService.getTrainingPrograms(filterParams);
+      if (requestId !== latestRequest.current) return;
       setPrograms(response?.list || []);
     } catch (error) {
+      if (requestId !== latestRequest.current) return;
       console.error('Failed to load training programs:', error);
       setError(error.message || 'Не удалось загрузить программы');
       setPrograms([]);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, [filter]);
 
