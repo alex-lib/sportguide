@@ -4,7 +4,6 @@ import com.sport.service.entities.Coach;
 import com.sport.service.entities.TrainingProgram;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.mappers.training_program.TrainingProgramMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.repositories.TrainingProgramRepository;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +37,10 @@ public class TrainingProgramService {
 
     public ListTrainingProgramResponse findAll(TrainingProgramFilter filter) {
         List<SportType> sportTypes = null;
-        if (filter.getSportTypes() != null) {
-            sportTypes = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(filter.getSportTypes());
+        if (filter.getSportTypes() != null && !filter.getSportTypes().isEmpty()) {
+            sportTypes = filter.getSportTypes().stream()
+                    .map(SportType::valueOf)
+                    .collect(Collectors.toList());
         }
         List<TrainingProgram> programs = trainingProgramRepository.findWithFilters(sportTypes);
 
@@ -50,7 +52,7 @@ public class TrainingProgramService {
         List<Coach> creators = new ArrayList<>();
         for (Long id : request.getCoachesId()) {
             Coach coach = coachRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("Coach with id " + id + " was not found"));
+                    .orElseThrow(() -> new NotFoundException("Coach with id " + id + " not found"));
             creators.add(coach);
         }
 
@@ -68,12 +70,12 @@ public class TrainingProgramService {
     @Transactional
     public void update(CreateTrainingProgramRequest request, Long id) {
         TrainingProgram program = trainingProgramRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Training program with id " + id + " was not found"));
+                .orElseThrow(() -> new NotFoundException("Training program with id " + id + " not found"));
 
         List<Coach> creators = new ArrayList<>();
         for (Long coachId : request.getCoachesId()) {
             Coach coach = coachRepository.findById(coachId)
-                    .orElseThrow(() -> new NotFoundException("Coach with id " + coachId + " was not found"));
+                    .orElseThrow(() -> new NotFoundException("Coach with id " + coachId + " not found"));
             creators.add(coach);
         }
 

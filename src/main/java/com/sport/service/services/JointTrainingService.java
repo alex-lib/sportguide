@@ -8,8 +8,6 @@ import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import com.sport.service.entities.enums.subscriber.RoleType;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.joint_training.JointTrainingMapper;
-import com.sport.service.mappers.string.DistrictStringMapper;
-import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.processors.JointTrainingProcessor;
 import com.sport.service.repositories.JointTrainingRepository;
 import com.sport.service.utils.BeanUtils;
@@ -24,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.sport.service.entities.enums.joint_training.ApprovalStatus.PENDING;
 
@@ -39,9 +38,19 @@ public class JointTrainingService {
     private final JointTrainingProcessor processor;
 
     public ListJointTrainingResponse findAllJointTrainings(JointTrainingFilter filter) {
-        District district = filter.getDistrict() != null && !filter.getDistrict().isEmpty() ? DistrictStringMapper.districtStringToDistrictEnum(filter.getDistrict()) : null;
+        District district;
+        if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
+            district = null;
+        } else {
+            district = District.valueOf(filter.getDistrict());
+        }
         LocalDate date = filter.getDate() != null && !filter.getDate().isEmpty() ? LocalDate.parse(filter.getDate()) : null;
-        List<SportType> sportTypes = filter.getSportType() != null ? SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(filter.getSportType()) : null;
+        List<SportType> sportTypes = null;
+        if (filter.getSportType() != null && !filter.getSportType().isEmpty()) {
+            sportTypes = filter.getSportType().stream()
+                    .map(SportType::valueOf)
+                    .collect(Collectors.toList());
+        }
 
         return jointTrainingMapper.jointTrainingListToListJointTrainingResponse(
                 jointTrainingRepository.findWithFilters(district, date, sportTypes));
@@ -68,7 +77,7 @@ public class JointTrainingService {
         Subscriber subscriber = subscriberService.findById(userId);
 
         JointTraining jointTraining = jointTrainingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("JointTraining with id " + id + " was not found"));
+                .orElseThrow(() -> new NotFoundException("JointTraining with id " + id + " not found"));
 
         if (!jointTraining.getSubscriber().getId().equals(userId)
                 && subscriber.getRole() != RoleType.ADMIN) {
@@ -92,7 +101,7 @@ public class JointTrainingService {
 
         JointTraining jointTraining =
                 jointTrainingRepository.findById(id)
-                        .orElseThrow(() -> new NotFoundException("JointTraining with id " + id + " was not found"));
+                        .orElseThrow(() -> new NotFoundException("JointTraining with id " + id + " not found"));
 
         if (!jointTraining.getSubscriber().getId().equals(userId)
                 && subscriber.getRole() != RoleType.ADMIN) {
