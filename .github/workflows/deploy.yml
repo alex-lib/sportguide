@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Deploy to server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -22,5 +22,5 @@ jobs:
             ./gradlew clean build
             docker-compose down app
             docker system prune -a -f
-            docker-compose up build app
-            docker-compose up app -d
+            docker-compose build app
+            docker-compose up -d app
