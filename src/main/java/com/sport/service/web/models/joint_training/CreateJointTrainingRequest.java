@@ -13,14 +13,14 @@ import lombok.AllArgsConstructor;
 public class CreateJointTrainingRequest {
 
     @Size(
-            min = 5,
+            min = 3,
             max = 35,
             message = "Title must contains between {min} and {max} characters"
     )
     private String title;
 
     @Size(
-            min = 10,
+            min = 5,
             max = 100,
             message = "Description must contains between {min} and {max} characters"
     )

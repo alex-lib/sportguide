@@ -12,6 +12,7 @@ import com.sport.service.web.models.training_program.CreateTrainingProgramReques
 import com.sport.service.web.models.training_program.ListTrainingProgramResponse;
 import com.sport.service.web.models.training_program.TrainingProgramFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TrainingProgramService {
     private final TrainingProgramRepository trainingProgramRepository;
     private final CoachRepository coachRepository;
@@ -36,6 +38,7 @@ public class TrainingProgramService {
     }
 
     public ListTrainingProgramResponse findAll(TrainingProgramFilter filter) {
+        log.info("findAll TrainingPrograms | sportTypes={}", filter.getSportTypes());
         List<SportType> sportTypes = null;
         if (filter.getSportTypes() != null && !filter.getSportTypes().isEmpty()) {
             sportTypes = filter.getSportTypes().stream()
@@ -43,6 +46,7 @@ public class TrainingProgramService {
                     .collect(Collectors.toList());
         }
         List<TrainingProgram> programs = trainingProgramRepository.findWithFilters(sportTypes);
+        log.info("findAll TrainingPrograms | filtered sportTypes={} | found={} programs", sportTypes, programs.size());
 
         return trainingProgramMapper.listTrainingProgramToListTrainingProgramResponse(programs);
     }
