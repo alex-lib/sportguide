@@ -41,6 +41,8 @@ public class PlaceService {
     }
 
     public ListPlaceResponse findAll(PlaceFilter filter) {
+        log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}",
+                filter.getDistrict(), filter.getSubDistrict(), filter.getOutdoor(), filter.getPlaceType());
         District district;
         if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
             district = null;
@@ -67,7 +69,10 @@ public class PlaceService {
             placeType = PlaceType.valueOf(filter.getPlaceType());
         }
 
-        return placeMapper.listPlaceToListPlaceResponse(placeRepository.findWithFilters(district, subDistrict, outdoor, placeType));
+        var result = placeRepository.findWithFilters(district, subDistrict, outdoor, placeType);
+        log.info("findAll Places | resolved district={}, subDistrict={}, outdoor={}, placeType={} | found={} entities",
+                district, subDistrict, outdoor, placeType, result.size());
+        return placeMapper.listPlaceToListPlaceResponse(result);
     }
 
     public Place findByName(String name) {

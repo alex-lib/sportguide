@@ -47,7 +47,7 @@ const EMPTY_FORM = {
 
 const formatDateTime = (date, time) => {
   try {
-    const d = new Date(date);
+    const d = new Date((date || '').split(' ')[0].replace(/-/g, '/'));
     const base = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     return time ? `${base} · ${time}` : base;
   } catch {

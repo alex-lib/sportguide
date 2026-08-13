@@ -38,6 +38,7 @@ public class EventService {
     }
 
     public ListEventResponse findAllEventsWithFilter(EventFilter filter) {
+        log.info("findAll Events | district={}, date={}", filter.getDistrict(), filter.getDate());
         District district;
         if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
             district = null;

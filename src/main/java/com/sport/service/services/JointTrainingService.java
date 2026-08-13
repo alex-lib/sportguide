@@ -15,6 +15,7 @@ import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.JointTrainingFilter;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import static com.sport.service.entities.enums.joint_training.ApprovalStatus.PEN
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JointTrainingService {
     private final JointTrainingRepository jointTrainingRepository;
 
@@ -38,6 +40,8 @@ public class JointTrainingService {
     private final JointTrainingProcessor processor;
 
     public ListJointTrainingResponse findAllJointTrainings(JointTrainingFilter filter) {
+        log.info("findAll JointTrainings | district={}, date={}, sportTypes={}",
+                filter.getDistrict(), filter.getDate(), filter.getSportType());
         District district;
         if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
             district = null;

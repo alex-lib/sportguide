@@ -15,6 +15,7 @@ import com.sport.service.web.models.coach.CoachFilter;
 import com.sport.service.web.models.coach.CoachRequest;
 import com.sport.service.web.models.coach.ListCoachResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CoachService {
     private final CoachRepository coachRepository;
 
@@ -38,6 +40,8 @@ public class CoachService {
     private final CoachMapper coachMapper;
 
     public ListCoachResponse findAllCoaches(CoachFilter filter) {
+        log.info("findAll Coaches | sportTypes={}, sex={}, age={}, yearsOfExperience={}",
+                filter.getSportTypes(), filter.getSex(), filter.getAge(), filter.getYearsOfExperience());
         List<SportType> sportTypes = null;
         if (filter.getSportTypes() != null && !filter.getSportTypes().isEmpty()) {
             sportTypes = filter.getSportTypes().stream()
@@ -45,12 +49,14 @@ public class CoachService {
                     .collect(Collectors.toList());
         }
         Sex sex = filter.getSex() != null ? Sex.valueOf(filter.getSex()) : null;
-        return coachMapper.listCoachToListCoachResponse(
-                coachRepository.findWithFilters(
-                        sportTypes,
-                        sex,
-                        filter.getAge(),
-                        filter.getYearsOfExperience()));
+        var result = coachRepository.findWithFilters(
+                sportTypes,
+                sex,
+                filter.getAge(),
+                filter.getYearsOfExperience());
+        log.info("findAll Coaches | filtered sportTypes={}, sex={}, age={}, yearsOfExperience={} | found={} coaches",
+                sportTypes, sex, filter.getAge(), filter.getYearsOfExperience(), result.size());
+        return coachMapper.listCoachToListCoachResponse(result);
     }
 
     @Transactional
