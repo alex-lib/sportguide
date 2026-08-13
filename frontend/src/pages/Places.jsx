@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
-import { DISTRICTS, PLACE_TYPES, OUTDOOR_OPTIONS } from '../constants/filters.js';
+import { DISTRICTS, SUBDISTRICTS, PLACE_TYPES, OUTDOOR_OPTIONS } from '../constants/filters.js';
 import {
   Page,
   PageHeader,
@@ -76,6 +76,7 @@ const Places = () => {
   const filterConfig = [
     { type: 'chip', key: 'placeType', title: 'Тип места', options: PLACE_TYPES, value: filter.placeType },
     { type: 'chip', key: 'district', title: 'Район', options: DISTRICTS, value: filter.district },
+    { type: 'chip', key: 'subDistrict', title: 'Подрайон', options: SUBDISTRICTS, value: filter.subDistrict },
     { type: 'chip', key: 'outdoor', title: 'Расположение', options: OUTDOOR_OPTIONS, value: filter.outdoor },
   ];
 
