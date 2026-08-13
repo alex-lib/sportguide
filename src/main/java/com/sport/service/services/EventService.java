@@ -6,7 +6,6 @@ import com.sport.service.entities.Event;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.mappers.event.EventMapper;
-import com.sport.service.mappers.string.DistrictStringMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.web.models.event.EventFilter;
 import com.sport.service.web.models.event.ListEventResponse;
@@ -39,9 +38,11 @@ public class EventService {
     }
 
     public ListEventResponse findAllEventsWithFilter(EventFilter filter) {
-        District district = null;
-        if (filter.getDistrict() != null && !filter.getDistrict().isEmpty()) {
-            district = DistrictStringMapper.districtStringToDistrictEnum(filter.getDistrict());
+        District district;
+        if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
+            district = null;
+        } else {
+            district = District.valueOf(filter.getDistrict());
         }
         LocalDate date = filter.getDate() != null && !filter.getDate().isEmpty() ? LocalDate.parse(filter.getDate()) : null;
 
