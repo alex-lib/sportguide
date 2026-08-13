@@ -6,10 +6,6 @@ import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.mappers.place.PlaceMapper;
-import com.sport.service.mappers.string.DistrictStringMapper;
-import com.sport.service.mappers.string.OutdoorStringMapper;
-import com.sport.service.mappers.string.PlaceTypeStringMapper;
-import com.sport.service.mappers.string.SubDistrictStringMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceFilter;
@@ -25,7 +21,6 @@ import java.util.List;
 @Slf4j
 public class PlaceService {
     private final PlaceRepository placeRepository;
-
     private final PlaceMapper placeMapper;
 
     @Transactional
@@ -46,10 +41,31 @@ public class PlaceService {
     }
 
     public ListPlaceResponse findAll(PlaceFilter filter) {
-        District district = filter.getDistrict() != null && !filter.getDistrict().isEmpty() ? DistrictStringMapper.districtStringToDistrictEnum(filter.getDistrict()) : null;
-        SubDistrict subDistrict = filter.getSubDistrict() != null && !filter.getSubDistrict().isEmpty() ? SubDistrictStringMapper.subDistrictStringToSubDistrictEnum(filter.getSubDistrict()) : null;
-        Boolean outdoor = filter.getOutdoor() != null && !filter.getOutdoor().isEmpty() ? OutdoorStringMapper.outdoorStringToOutdoorEnum(filter.getOutdoor()) : null;
-        PlaceType placeType = filter.getPlaceType() != null && !filter.getPlaceType().isEmpty() ? PlaceTypeStringMapper.placeTypeStringToPlaceTypeEnum(filter.getPlaceType()) : null;
+        District district;
+        if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
+            district = null;
+        } else {
+            district = District.valueOf(filter.getDistrict());
+        }
+
+        SubDistrict subDistrict;
+        if (filter.getSubDistrict() == null || filter.getSubDistrict().isEmpty() || filter.getSubDistrict().equals("ALL_SUBDISTRICTS")) {
+            subDistrict = null;
+        } else {
+            subDistrict = SubDistrict.valueOf(filter.getSubDistrict());
+        }
+
+        Boolean outdoor = null;
+        if (filter.getOutdoor() != null && !filter.getOutdoor().isEmpty()) {
+            outdoor = Boolean.parseBoolean(filter.getOutdoor());
+        }
+
+        PlaceType placeType;
+        if (filter.getPlaceType() == null || filter.getPlaceType().isEmpty()) {
+            placeType = null;
+        } else {
+            placeType = PlaceType.valueOf(filter.getPlaceType());
+        }
 
         return placeMapper.listPlaceToListPlaceResponse(placeRepository.findWithFilters(district, subDistrict, outdoor, placeType));
     }

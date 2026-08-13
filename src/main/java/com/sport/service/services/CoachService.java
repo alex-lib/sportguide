@@ -9,8 +9,6 @@ import com.sport.service.entities.enums.coach.Sex;
 import com.sport.service.entities.enums.common.SportType;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.coach.CoachMapper;
-import com.sport.service.mappers.string.SexStringMapper;
-import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.coach.CoachFilter;
@@ -26,6 +24,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +39,12 @@ public class CoachService {
 
     public ListCoachResponse findAllCoaches(CoachFilter filter) {
         List<SportType> sportTypes = null;
-        if (filter.getSportTypes() != null) {
-            sportTypes = SportTypeStringMapper.listSportTypeStringToListSportTypeEnum(filter.getSportTypes());
+        if (filter.getSportTypes() != null && !filter.getSportTypes().isEmpty()) {
+            sportTypes = filter.getSportTypes().stream()
+                    .map(SportType::valueOf)
+                    .collect(Collectors.toList());
         }
-        Sex sex = filter.getSex() != null ? SexStringMapper.sexStringToSexEnum(filter.getSex()) : null;
+        Sex sex = filter.getSex() != null ? Sex.valueOf(filter.getSex()) : null;
         return coachMapper.listCoachToListCoachResponse(
                 coachRepository.findWithFilters(
                         sportTypes,
