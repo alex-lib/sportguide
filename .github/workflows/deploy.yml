@@ -24,3 +24,9 @@ jobs:
             docker system prune -a -f
             docker-compose build app
             docker-compose up -d app
+            cd frontend
+            rm -rf node_modules dist .vite
+            npm install
+            npm run build
+            rm -rf /var/www/sportguide/*
+            cp -r dist/* /var/www/sportguide/
