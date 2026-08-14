@@ -7,7 +7,6 @@ import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
-import com.sport.service.web.models.event.EventFilter;
 import com.sport.service.web.models.event.ListEventResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,18 +36,19 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public ListEventResponse findAllEventsWithFilter(EventFilter filter) {
-        log.info("findAll Events | district={}, date={}", filter.getDistrict(), filter.getDate());
+    public ListEventResponse findAllEventsWithFilter(String districtStr, String dateStr) {
+        log.info("findAll Events | district={}, date={}", districtStr, dateStr);
         District district;
-        if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
+        if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
             district = null;
         } else {
-            district = District.valueOf(filter.getDistrict());
+            district = District.valueOf(districtStr);
         }
-        LocalDate date = filter.getDate() != null && !filter.getDate().isEmpty() ? LocalDate.parse(filter.getDate()) : null;
+        LocalDate date = dateStr != null && !dateStr.isEmpty() ? LocalDate.parse(dateStr) : null;
 
-        return eventMapper.listEventToListEventResponse(
-                eventRepository.findWithFilters(district, date));
+        var result = eventRepository.findWithFilters(district, date);
+        log.info("findAll Events | resolved district={} | found={} events", district, result.size());
+        return eventMapper.listEventToListEventResponse(result);
     }
 
     @Transactional

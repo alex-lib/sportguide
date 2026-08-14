@@ -10,7 +10,6 @@ import com.sport.service.repositories.TrainingProgramRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.training_program.CreateTrainingProgramRequest;
 import com.sport.service.web.models.training_program.ListTrainingProgramResponse;
-import com.sport.service.web.models.training_program.TrainingProgramFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,11 +36,11 @@ public class TrainingProgramService {
         return trainingProgramRepository.findById(id).orElse(null);
     }
 
-    public ListTrainingProgramResponse findAll(TrainingProgramFilter filter) {
-        log.info("findAll TrainingPrograms | sportTypes={}", filter.getSportTypes());
+    public ListTrainingProgramResponse findAll(List<String> sportTypesRequest) {
+        log.info("findAll TrainingPrograms | sportTypes={}", sportTypesRequest);
         List<SportType> sportTypes = null;
-        if (filter.getSportTypes() != null && !filter.getSportTypes().isEmpty()) {
-            sportTypes = filter.getSportTypes().stream()
+        if (sportTypesRequest != null && !sportTypesRequest.isEmpty()) {
+            sportTypes = sportTypesRequest.stream()
                     .map(SportType::valueOf)
                     .collect(Collectors.toList());
         }

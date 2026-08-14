@@ -2,10 +2,10 @@ package com.sport.service.web.controllers;
 
 import com.sport.service.services.JointTrainingService;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
-import com.sport.service.web.models.joint_training.JointTrainingFilter;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,18 +16,28 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/joint-trainings")
 @RequiredArgsConstructor
+@Slf4j
 public class JointTrainingController {
 
     private final JointTrainingService jointTrainingService;
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @GetMapping
-    public ListJointTrainingResponse getAllJointTrainings(JointTrainingFilter filter) {
-        return jointTrainingService.findAllJointTrainings(filter);
+    public ListJointTrainingResponse getAllJointTrainings(
+        @RequestParam(required = false) String district,
+        @RequestParam(required = false) String date,
+        @RequestParam(required = false) List<String> sportType
+    ) {
+        log.info("[API] GET /api/joint-trainings | district={}, date={}, sportType={}",
+                district, date, sportType);
+        return jointTrainingService.findAllJointTrainings(district, date, sportType);
     }
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")

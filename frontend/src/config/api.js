@@ -13,4 +13,3 @@ export const API_ENDPOINTS = {
   TRAINING_PROGRAMS: `${API_BASE_URL}/api/training-programs`,
   COACHES: `${API_BASE_URL}/api/coaches`,
 };
-

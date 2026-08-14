@@ -11,7 +11,6 @@ import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.coach.CoachMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.utils.BeanUtils;
-import com.sport.service.web.models.coach.CoachFilter;
 import com.sport.service.web.models.coach.CoachRequest;
 import com.sport.service.web.models.coach.ListCoachResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,23 +38,23 @@ public class CoachService {
 
     private final CoachMapper coachMapper;
 
-    public ListCoachResponse findAllCoaches(CoachFilter filter) {
-        log.info("findAll Coaches | sportTypes={}, sex={}, age={}, yearsOfExperience={}",
-                filter.getSportTypes(), filter.getSex(), filter.getAge(), filter.getYearsOfExperience());
+    public ListCoachResponse findAllCoaches(List<String> sportTypesRequest, Integer age, String sex, Integer yearsOfExperience) {
+        log.info("findAll Coaches | sportTypes={}, age={}, sex={}, yearsOfExperience={}",
+                sportTypesRequest, age, sex, yearsOfExperience);
         List<SportType> sportTypes = null;
-        if (filter.getSportTypes() != null && !filter.getSportTypes().isEmpty()) {
-            sportTypes = filter.getSportTypes().stream()
+        if (sportTypesRequest != null && !sportTypesRequest.isEmpty()) {
+            sportTypes = sportTypesRequest.stream()
                     .map(SportType::valueOf)
                     .collect(Collectors.toList());
         }
-        Sex sex = filter.getSex() != null ? Sex.valueOf(filter.getSex()) : null;
+        Sex sexEnum = sex != null ? Sex.valueOf(sex) : null;
         var result = coachRepository.findWithFilters(
                 sportTypes,
-                sex,
-                filter.getAge(),
-                filter.getYearsOfExperience());
+                sexEnum,
+                age,
+                yearsOfExperience);
         log.info("findAll Coaches | filtered sportTypes={}, sex={}, age={}, yearsOfExperience={} | found={} coaches",
-                sportTypes, sex, filter.getAge(), filter.getYearsOfExperience(), result.size());
+                sportTypes, sexEnum, age, yearsOfExperience, result.size());
         return coachMapper.listCoachToListCoachResponse(result);
     }
 
