@@ -12,7 +12,6 @@ import com.sport.service.processors.JointTrainingProcessor;
 import com.sport.service.repositories.JointTrainingRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
-import com.sport.service.web.models.joint_training.JointTrainingFilter;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,25 +38,27 @@ public class JointTrainingService {
 
     private final JointTrainingProcessor processor;
 
-    public ListJointTrainingResponse findAllJointTrainings(JointTrainingFilter filter) {
+    public ListJointTrainingResponse findAllJointTrainings(String districtStr, String dateStr, List<String> sportTypeRequest) {
         log.info("findAll JointTrainings | district={}, date={}, sportTypes={}",
-                filter.getDistrict(), filter.getDate(), filter.getSportType());
+                districtStr, dateStr, sportTypeRequest);
         District district;
-        if (filter.getDistrict() == null || filter.getDistrict().isEmpty() || filter.getDistrict().equals("ALL_DISTRICTS")) {
+        if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
             district = null;
         } else {
-            district = District.valueOf(filter.getDistrict());
+            district = District.valueOf(districtStr);
         }
-        LocalDate date = filter.getDate() != null && !filter.getDate().isEmpty() ? LocalDate.parse(filter.getDate()) : null;
+        LocalDate date = dateStr != null && !dateStr.isEmpty() ? LocalDate.parse(dateStr) : null;
         List<SportType> sportTypes = null;
-        if (filter.getSportType() != null && !filter.getSportType().isEmpty()) {
-            sportTypes = filter.getSportType().stream()
+        if (sportTypeRequest != null && !sportTypeRequest.isEmpty()) {
+            sportTypes = sportTypeRequest.stream()
                     .map(SportType::valueOf)
                     .collect(Collectors.toList());
         }
 
-        return jointTrainingMapper.jointTrainingListToListJointTrainingResponse(
-                jointTrainingRepository.findWithFilters(district, date, sportTypes));
+        var result = jointTrainingRepository.findWithFilters(district, date, sportTypes);
+        log.info("findAll JointTrainings | resolved district={}, date={}, sportTypes={} | found={} trainings",
+                district, date, sportTypes, result.size());
+        return jointTrainingMapper.jointTrainingListToListJointTrainingResponse(result);
     }
 
     @Transactional
