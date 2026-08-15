@@ -21,11 +21,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Modifying
     void deleteByDateBefore(LocalDate currentDate);
 
-    @Query("""
-              SELECT e FROM Event e
-              WHERE (:district IS NULL OR e.district = :district)
-                AND (:date IS NULL OR e.date = :date)
-              ORDER BY e.date, e.time
+    @Query(nativeQuery = true, value = """ 
+            SELECT e.* FROM events e
+            WHERE (:district IS NULL OR e.district = :district) 
+              AND (:date::date IS NULL OR e.date = :date) 
+            ORDER BY e.date, e.time
             """)
     List<Event> findWithFilters(
             @Param("district") District district,
