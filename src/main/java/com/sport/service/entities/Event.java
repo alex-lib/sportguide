@@ -52,7 +52,7 @@ public class Event {
     @Column(name = "link")
     private String link;
 
-    @Column(name = "date")
+    @Column(name = "date", columnDefinition = "DATE")
     private LocalDate date;
 
     @Column(name = "time", columnDefinition = "TIME")
