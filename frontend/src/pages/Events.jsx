@@ -6,7 +6,7 @@ import { toLocalISODate } from '../utils/date.js';
 import {
   Page,
   PageHeader,
-  IconButton,
+  // IconButton,
   Card,
   CardRow,
   CardTitle,
@@ -89,7 +89,7 @@ const Events = () => {
       <PageHeader
         eyebrow={eyebrow}
         title="События"
-        action={<IconButton icon="arrow-up-down" label="Сортировка" />}
+        // action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
       <Page>
         <FilterPanel

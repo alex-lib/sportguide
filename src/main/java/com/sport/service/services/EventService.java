@@ -38,13 +38,15 @@ public class EventService {
 
     public ListEventResponse findAllEventsWithFilter(String districtStr, String dateStr) {
         log.info("findAll Events | district={}, date={}", districtStr, dateStr);
-        District district;
-        if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
-            district = null;
-        } else {
+        District district = null;
+        LocalDate date = null;
+
+        if (districtStr != null && !districtStr.isEmpty() && !districtStr.equals("ALL_DISTRICTS")) {
             district = District.valueOf(districtStr);
         }
-        LocalDate date = dateStr != null && !dateStr.isEmpty() ? LocalDate.parse(dateStr) : null;
+        if (dateStr != null && !dateStr.isEmpty()) {
+            date = LocalDate.parse(dateStr);
+        }
 
         var result = eventRepository.findWithFilters(district, date);
         log.info("findAll Events | resolved district={} | found={} events", district, result.size());
