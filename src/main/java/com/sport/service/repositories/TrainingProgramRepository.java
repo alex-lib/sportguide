@@ -17,7 +17,7 @@ public interface TrainingProgramRepository extends JpaRepository<TrainingProgram
 
     @Query(nativeQuery = true, value = """
             SELECT DISTINCT tp.* FROM training_programs tp
-            WHERE (:sportTypes::text[] IS NULL OR tp.sport_types && :sportTypes::text[])
+            WHERE (:sportTypes IS NULL OR tp.sport_types && :sportTypes)
             """)
     List<TrainingProgram> findWithFilters(
             @Param("sportTypes") List<SportType> sportTypes

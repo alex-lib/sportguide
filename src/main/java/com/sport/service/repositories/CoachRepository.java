@@ -24,7 +24,7 @@ public interface CoachRepository extends JpaRepository<Coach, Long> {
 
     @Query(nativeQuery = true, value = """
             SELECT DISTINCT c.* FROM coaches c
-            WHERE (:sportTypes::text[] IS NULL OR c.sport_types && :sportTypes::text[])
+            WHERE (:sportTypes IS NULL OR c.sport_types && :sportTypes)
               AND (:sex IS NULL OR c.sex = :sex)
               AND (:age IS NULL OR c.age = :age)
               AND (:yearsOfExperience IS NULL OR c.years_of_experience = :yearsOfExperience)
