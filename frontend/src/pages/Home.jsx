@@ -1,13 +1,16 @@
+import { useTheme } from '../context/ThemeContext';
 import { Page, PageHeader, IconButton, Hero, SectionLabel, Tiles, Tile } from '../ui';
 
 const Home = () => {
+  const { toggle } = useTheme();
+
   return (
     <>
       <PageHeader
         eyebrow="Воронеж"
         eyebrowIcon="map-pin"
         title="Привет, чем займёмся?"
-        action={<IconButton icon="settings" label="Настройки" />}
+        action={<IconButton icon="settings" label="Настройки" onClick={toggle} />}
       />
       <Page>
         <Hero
