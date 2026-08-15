@@ -38,12 +38,15 @@ public class EventService {
 
     public ListEventResponse findAllEventsWithFilter(String districtStr, String dateStr) {
         log.info("findAll Events | district={}, date={}", districtStr, dateStr);
-        District district = null;
         LocalDate date = null;
 
-        if (districtStr != null && !districtStr.isEmpty() && !districtStr.equals("ALL_DISTRICTS")) {
+        District district;
+        if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
+            district = null;
+        } else {
             district = District.valueOf(districtStr);
         }
+
         if (dateStr != null && !dateStr.isEmpty()) {
             date = LocalDate.parse(dateStr);
         }
