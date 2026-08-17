@@ -19,6 +19,7 @@ import {
   EmptyState,
   ErrorBanner,
   SkeletonList,
+  MapView,
 } from '../ui';
 import { pluralRu } from '../utils/plural.js';
 
@@ -28,6 +29,7 @@ const Places = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mapOpen, setMapOpen] = useState(false);
   const [filter, setFilter] = useState({
     district: null,
     subDistrict: null,
@@ -80,12 +82,9 @@ const Places = () => {
     { type: 'chip', key: 'outdoor', title: 'Расположение', options: OUTDOOR_OPTIONS, value: filter.outdoor },
   ];
 
-  const mapsUrl = (place) =>
-    `https://yandex.ru/maps/?text=${encodeURIComponent([place.name, place.address].filter(Boolean).join(' '))}`;
-
   const eyebrow =
     !loading && places.length > 0
-      ? `${places.length} ${pluralRu(places.length, ['место', 'места', 'мест'])} рядом`
+      ? `${places.length} ${pluralRu(places.length, ['место', 'места', 'мест'])}`
       : undefined;
 
   return (
@@ -93,7 +92,7 @@ const Places = () => {
       <PageHeader
         eyebrow={eyebrow}
         title="Места"
-        action={<IconButton icon="map" label="Карта" />}
+        action={<IconButton icon="map" label="Карта" onClick={() => setMapOpen(true)} />}
       />
       <Page>
         <FilterPanel
@@ -145,10 +144,10 @@ const Places = () => {
 
                 <Divider />
                 <CardActions>
-                  <Button href={mapsUrl(place)} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
+                  <Button href={place.coordinates} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
                     На карте
                   </Button>
-                  {place.webSite && (
+                  {place.webSite && place.webSite !== '-' && (
                     <Button href={place.webSite} target="_blank" rel="noopener noreferrer" variant="tint" size="sm" fullWidth>
                       Сайт
                     </Button>
@@ -159,6 +158,7 @@ const Places = () => {
           </div>
         )}
       </Page>
+      <MapView places={places} open={mapOpen} onClose={() => setMapOpen(false)} />
     </>
   );
 };
