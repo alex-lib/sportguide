@@ -81,7 +81,7 @@ const Events = () => {
 
   const eyebrow =
     !loading && events.length > 0
-      ? `${events.length} ${pluralRu(events.length, ['событие', 'события', 'событий'])} рядом`
+      ? `${events.length} ${pluralRu(events.length, ['событие', 'события', 'событий'])}`
       : undefined;
 
   return (
