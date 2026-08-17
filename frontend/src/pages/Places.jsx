@@ -80,12 +80,9 @@ const Places = () => {
     { type: 'chip', key: 'outdoor', title: 'Расположение', options: OUTDOOR_OPTIONS, value: filter.outdoor },
   ];
 
-  const mapsUrl = (place) =>
-    `https://yandex.ru/maps/?text=${encodeURIComponent([place.name, place.address].filter(Boolean).join(' '))}`;
-
   const eyebrow =
     !loading && places.length > 0
-      ? `${places.length} ${pluralRu(places.length, ['место', 'места', 'мест'])} рядом`
+      ? `${places.length} ${pluralRu(places.length, ['место', 'места', 'мест'])}`
       : undefined;
 
   return (
@@ -145,10 +142,10 @@ const Places = () => {
 
                 <Divider />
                 <CardActions>
-                  <Button href={mapsUrl(place)} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
+                  <Button href={place.coordinates} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
                     На карте
                   </Button>
-                  {place.webSite && (
+                  {place.webSite && place.webSite !== '-' && (
                     <Button href={place.webSite} target="_blank" rel="noopener noreferrer" variant="tint" size="sm" fullWidth>
                       Сайт
                     </Button>
