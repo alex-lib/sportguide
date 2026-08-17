@@ -41,6 +41,7 @@ const MapView = ({ places, open, onClose }) => {
   return (
     <Modal open={open} title="Карта" onCancel={onClose}>
       <div className="map-container">
+        <style>{`.map-container .leaflet-control-attribution { display: none !important; }`}</style>
         <MapContainer
           center={center}
           zoom={13}
@@ -48,7 +49,6 @@ const MapView = ({ places, open, onClose }) => {
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {validPlaces.map((place, i) => (
             <Marker key={place.id || i} position={place.latLng} icon={defaultIcon}>
