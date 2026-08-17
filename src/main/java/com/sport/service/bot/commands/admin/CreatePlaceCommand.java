@@ -228,7 +228,7 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 				dto.setStep(8);
 			}
 			case 8 -> {
-				dto.setWebSite(text);
+				dto.setWebSite(text.equals("-") ? null : text);
 				answer.setText(CommandsConstants.ENTER_PLACE_COORDINATES);
 				dto.setStep(9);
 			}
