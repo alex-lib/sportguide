@@ -956,3 +956,14 @@
     gap: 10px;
   }
 }
+
+/* --------------------------------------------------------- Map */
+.map-container {
+  height: 65vh;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0;
+}
+.leaflet-container {
+  background: #f0f0f0;
+}
