@@ -8,6 +8,7 @@
  * Usage: import { Page, Card, Button, Pill, Icon } from '../ui';
  */
 import './ui.css';
+import 'leaflet/dist/leaflet.css';
 
 export { default as Icon, sportIconName } from './Icon.jsx';
 export { default as Button } from './Button.jsx';
@@ -35,3 +36,4 @@ export { default as Fab } from './Fab.jsx';
 export { default as Sheet, SheetSection } from './Sheet.jsx';
 export { default as Modal } from './Modal.jsx';
 export { default as TabBar } from './TabBar.jsx';
+export { default as MapView } from './MapView.jsx';

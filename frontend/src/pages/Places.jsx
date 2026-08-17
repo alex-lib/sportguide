@@ -19,6 +19,7 @@ import {
   EmptyState,
   ErrorBanner,
   SkeletonList,
+  MapView,
 } from '../ui';
 import { pluralRu } from '../utils/plural.js';
 
@@ -28,6 +29,7 @@ const Places = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mapOpen, setMapOpen] = useState(false);
   const [filter, setFilter] = useState({
     district: null,
     subDistrict: null,
@@ -90,7 +92,7 @@ const Places = () => {
       <PageHeader
         eyebrow={eyebrow}
         title="Места"
-        action={<IconButton icon="map" label="Карта" />}
+        action={<IconButton icon="map" label="Карта" onClick={() => setMapOpen(true)} />}
       />
       <Page>
         <FilterPanel
@@ -156,6 +158,7 @@ const Places = () => {
           </div>
         )}
       </Page>
+      <MapView places={places} open={mapOpen} onClose={() => setMapOpen(false)} />
     </>
   );
 };
