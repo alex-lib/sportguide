@@ -38,7 +38,7 @@ public class JointTrainingService {
 
     private final JointTrainingProcessor processor;
 
-    public ListJointTrainingResponse findAllJointTrainings(String districtStr, String dateStr, List<String> sportTypeRequest) {
+    public ListJointTrainingResponse findAllJointTrainings(String districtStr, String dateStr, List<String> sportTypeRequest, String search) {
         log.info("findAll JointTrainings | district={}, date={}, sportTypes={}",
                 districtStr, dateStr, sportTypeRequest);
         District district;
@@ -55,9 +55,9 @@ public class JointTrainingService {
                     .collect(Collectors.toList());
         }
 
-        var result = jointTrainingRepository.findWithFilters(district, date, sportTypes);
-        log.info("findAll JointTrainings | resolved district={}, date={}, sportTypes={} | found={} trainings",
-                district, date, sportTypes, result.size());
+        var result = jointTrainingRepository.findWithFilters(district, date, sportTypes, search);
+        log.info("findAll JointTrainings | resolved district={}, date={}, sportTypes={}, search={} | found={} trainings",
+                district, date, sportTypes, search, result.size());
         return jointTrainingMapper.jointTrainingListToListJointTrainingResponse(result);
     }
 

@@ -7,7 +7,7 @@ import WebApp from '@twa-dev/sdk';
 import {
   Page,
   PageHeader,
-  IconButton,
+  // IconButton,
   Card,
   CardTitle,
   CardText,
@@ -63,6 +63,7 @@ const JointTrainings = () => {
   const [editingId, setEditingId] = useState(null);
   const [filter, setFilter] = useState({ date: null, sportType: [], district: null });
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [searchText, setSearchText] = useState('');
 
   const latestRequest = useRef(0);
 
@@ -72,6 +73,7 @@ const JointTrainings = () => {
       setLoading(true);
       setError(null);
       const filterParams = {};
+      if (searchText) filterParams.search = searchText;
       if (filter.date) filterParams.date = filter.date;
       if (filter.sportType && filter.sportType.length > 0) filterParams.sportType = filter.sportType;
       if (filter.district) filterParams.district = filter.district;
@@ -87,7 +89,7 @@ const JointTrainings = () => {
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }
-  }, [filter]);
+  }, [filter, searchText]);
 
   useEffect(() => {
     loadTrainings();
@@ -186,7 +188,7 @@ const JointTrainings = () => {
 
   const eyebrow =
     !loading && trainings.length > 0
-      ? `${trainings.length} ${pluralRu(trainings.length, ['группа', 'группы', 'групп'])} ${
+      ? `${trainings.length} ${pluralRu(trainings.length, ['тренировка', 'тренировки', 'тренировок'])} ${
           pluralRu(trainings.length, ['ищет', 'ищут', 'ищут'])
         } участников`
       : undefined;
@@ -195,8 +197,8 @@ const JointTrainings = () => {
     <>
       <PageHeader
         eyebrow={eyebrow}
-        title="Группы"
-        action={<IconButton icon="arrow-up-down" label="Сортировка" />}
+        title="Тренировки"
+        // action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
       <Page>
         <FilterPanel
@@ -204,6 +206,9 @@ const JointTrainings = () => {
           onFilterChange={handleFilterChange}
           onReset={handleResetFilters}
           searchPlaceholder="Поиск тренировок"
+          hideQuickChips
+          search={searchText}
+          onSearch={(e) => setSearchText(e.target.value)}
         />
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
@@ -324,13 +329,24 @@ const JointTrainings = () => {
             <Input type="text" value={formData.address} onChange={setField('address')} required />
           </Field>
           <Field label="Телефон">
-            <Input
-              type="tel"
-              placeholder="+7XXXXXXXXXX"
-              value={formData.phoneNumber}
-              onChange={setField('phoneNumber')}
-              required
-            />
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+              <span style={{ fontSize: 'var(--text-md)', color: 'var(--label-3)', padding: '0 10px 0 14px', border: '1px solid var(--fill-2)', borderRight: 'none', borderRadius: 'var(--radius-input) 0 0 var(--radius-input)', height: '48px', lineHeight: '48px', userSelect: 'none', background: 'var(--fill-2)', display: 'flex', alignItems: 'center' }}>
+                +7
+              </span>
+              <Input
+                type="tel"
+                placeholder="XXXXXXXXXX"
+                value={formData.phoneNumber}
+                onChange={(e) => {
+                  const input = e.target.value.replace(/\D/g, '');
+                  if (input.length <= 10) {
+                    setFormData(prev => ({ ...prev, phoneNumber: input }));
+                  }
+                }}
+                style={{ borderLeft: 'none', borderRadius: '0 var(--radius-input) var(--radius-input) 0' }}
+                required
+              />
+            </div>
           </Field>
         </form>
       </Modal>
