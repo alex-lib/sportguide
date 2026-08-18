@@ -17,15 +17,16 @@ public interface JointTrainingRepository extends JpaRepository<JointTraining, Lo
     @Query("""
         SELECT jt FROM JointTraining jt
         WHERE jt.approvalStatus = ApprovalStatus.APPROVED
-          AND (:district IS NULL OR jt.district = :district)
-          AND (:date IS NULL OR jt.date = :date)
-          AND (:sportTypes IS NULL OR jt.sportType IN :sportTypes)
-          AND (:search IS NULL OR LOWER(jt.title) LIKE CONCAT(CONCAT('%', :search), '%')
-                OR LOWER(jt.description) LIKE CONCAT(CONCAT('%', :search), '%')
-                OR LOWER(jt.placeName) LIKE CONCAT(CONCAT('%', :search), '%')
-                OR LOWER(jt.address) LIKE CONCAT(CONCAT('%', :search), '%')
-                OR LOWER(jt.creatorName) LIKE CONCAT(CONCAT('%', :search), '%'))
-        """)
+            AND (:district IS NULL OR jt.district = :district)
+            AND (:date IS NULL OR jt.date = :date)
+            AND (:sportTypes IS NULL OR jt.sportType IN :sportTypes)
+            AND (:search IS NULL
+                OR LOWER(jt.title) LIKE CONCAT('%', CAST(:search AS String), '%')
+                OR LOWER(jt.description) LIKE CONCAT('%', CAST(:search AS String), '%')
+                OR LOWER(jt.placeName) LIKE CONCAT('%', CAST(:search AS String), '%')
+                OR LOWER(jt.address) LIKE CONCAT('%', CAST(:search AS String), '%')
+                OR LOWER(jt.creatorName) LIKE CONCAT('%', CAST(:search AS String), '%'))
+    """)
     List<JointTraining> findWithFilters(
             @Param("district") District district,
             @Param("date") LocalDate date,
