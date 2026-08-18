@@ -6,7 +6,7 @@ const NAV_ITEMS = [
   { path: '/', label: 'Главная', icon: 'home' },
   { path: '/events', label: 'События', icon: 'calendar' },
   { path: '/places', label: 'Места', icon: 'map-pin' },
-  { path: '/joint-trainings', label: 'Группы', icon: 'users' },
+  { path: '/joint-trainings', label: 'Тренировки', icon: 'users' },
   { path: '/coaches', label: 'Тренеры', icon: 'graduation-cap' },
 ];
 
