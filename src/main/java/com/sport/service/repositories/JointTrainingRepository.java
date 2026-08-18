@@ -15,15 +15,21 @@ import java.util.List;
 public interface JointTrainingRepository extends JpaRepository<JointTraining, Long> {
 
     @Query("""
-            SELECT jt FROM JointTraining jt
-            WHERE jt.approvalStatus = ApprovalStatus.APPROVED
-              AND (:district IS NULL OR jt.district = :district)
-              AND (:date IS NULL OR jt.date = :date)
-              AND (:sportTypes IS NULL OR jt.sportType IN :sportTypes)
-            """)
+        SELECT jt FROM JointTraining jt
+        WHERE jt.approvalStatus = ApprovalStatus.APPROVED
+          AND (:district IS NULL OR jt.district = :district)
+          AND (:date IS NULL OR jt.date = :date)
+          AND (:sportTypes IS NULL OR jt.sportType IN :sportTypes)
+          AND (:search IS NULL OR LOWER(jt.title) LIKE CONCAT(CONCAT('%', :search), '%')
+                OR LOWER(jt.description) LIKE CONCAT(CONCAT('%', :search), '%')
+                OR LOWER(jt.placeName) LIKE CONCAT(CONCAT('%', :search), '%')
+                OR LOWER(jt.address) LIKE CONCAT(CONCAT('%', :search), '%')
+                OR LOWER(jt.creatorName) LIKE CONCAT(CONCAT('%', :search), '%'))
+        """)
     List<JointTraining> findWithFilters(
             @Param("district") District district,
             @Param("date") LocalDate date,
-            @Param("sportTypes") List<SportType> sportTypes
+            @Param("sportTypes") List<SportType> sportTypes,
+            @Param("search") String search
     );
 }

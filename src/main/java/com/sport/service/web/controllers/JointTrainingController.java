@@ -33,11 +33,12 @@ public class JointTrainingController {
     public ListJointTrainingResponse getAllJointTrainings(
         @RequestParam(required = false) String district,
         @RequestParam(required = false) String date,
-        @RequestParam(required = false) List<String> sportType
+        @RequestParam(required = false) List<String> sportType,
+        @RequestParam(required = false) String search
     ) {
-        log.info("[API] GET /api/joint-trainings | district={}, date={}, sportType={}",
-                district, date, sportType);
-        return jointTrainingService.findAllJointTrainings(district, date, sportType);
+        log.info("[API] GET /api/joint-trainings | district={}, date={}, sportType={}, search={}",
+                district, date, sportType, search);
+        return jointTrainingService.findAllJointTrainings(district, date, sportType, search);
     }
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")

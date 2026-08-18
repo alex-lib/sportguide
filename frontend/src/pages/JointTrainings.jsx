@@ -63,6 +63,7 @@ const JointTrainings = () => {
   const [editingId, setEditingId] = useState(null);
   const [filter, setFilter] = useState({ date: null, sportType: [], district: null });
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [searchText, setSearchText] = useState('');
 
   const latestRequest = useRef(0);
 
@@ -72,6 +73,7 @@ const JointTrainings = () => {
       setLoading(true);
       setError(null);
       const filterParams = {};
+      if (searchText) filterParams.search = searchText;
       if (filter.date) filterParams.date = filter.date;
       if (filter.sportType && filter.sportType.length > 0) filterParams.sportType = filter.sportType;
       if (filter.district) filterParams.district = filter.district;
@@ -87,7 +89,7 @@ const JointTrainings = () => {
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }
-  }, [filter]);
+  }, [filter, searchText]);
 
   useEffect(() => {
     loadTrainings();
@@ -205,6 +207,8 @@ const JointTrainings = () => {
           onReset={handleResetFilters}
           searchPlaceholder="Поиск тренировок"
           hideQuickChips
+          search={searchText}
+          onSearch={(e) => setSearchText(e.target.value)}
         />
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
