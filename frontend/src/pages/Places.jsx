@@ -100,6 +100,7 @@ const Places = () => {
           onFilterChange={handleFilterChange}
           onReset={handleResetFilters}
           searchPlaceholder="Поиск мест"
+          hideQuickChips
         />
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
