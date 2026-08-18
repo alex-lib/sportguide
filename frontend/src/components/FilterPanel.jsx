@@ -29,7 +29,7 @@ const filterActive = (f) => {
   return f.value !== null && f.value !== undefined && f.value !== '';
 };
 
-const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'Поиск' }) => {
+const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'Поиск', hideQuickChips = false }) => {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   if (!filters || !Array.isArray(filters) || filters.length === 0) return null;
@@ -103,7 +103,7 @@ const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'П
             Все
           </FilterChip>
         )}
-        {quick?.options?.map((opt) =>
+        {!hideQuickChips && quick?.options?.map((opt) =>
           opt && opt.value ? (
             <FilterChip
               key={opt.value}
