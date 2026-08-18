@@ -29,7 +29,7 @@ const filterActive = (f) => {
   return f.value !== null && f.value !== undefined && f.value !== '';
 };
 
-const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'Поиск', hideQuickChips = false }) => {
+const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'Поиск', hideQuickChips = false, search = '', onSearch }) => {
   const [sheetOpen, setSheetOpen] = useState(false);
 
   if (!filters || !Array.isArray(filters) || filters.length === 0) return null;
@@ -95,7 +95,7 @@ const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'П
 
   return (
     <>
-      <SearchField placeholder={searchPlaceholder} value="" onChange={() => {}} readOnly />
+      <SearchField placeholder={searchPlaceholder} value={search} onChange={onSearch} />
 
       <ChipRail>
         {quick && (

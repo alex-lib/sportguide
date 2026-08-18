@@ -19,17 +19,21 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
     boolean existsByName(String name);
 
     @Query("""
-            SELECT p FROM Place p
-            WHERE (:district IS NULL OR p.district = :district)
-              AND (:subDistrict IS NULL OR p.subDistrict = :subDistrict)
-              AND (:outdoor IS NULL OR p.outdoor = :outdoor)
-              AND (:placeType IS NULL OR p.placeType = :placeType)
-            """)
+        SELECT p FROM Place p
+        WHERE (:district IS NULL OR p.district = :district)
+          AND (:subDistrict IS NULL OR p.subDistrict = :subDistrict)
+          AND (:outdoor IS NULL OR p.outdoor = :outdoor)
+          AND (:placeType IS NULL OR p.placeType = :placeType)
+          AND (:search IS NULL OR LOWER(p.name) LIKE CONCAT(CONCAT('%', :search), '%')
+                OR LOWER(p.description) LIKE CONCAT(CONCAT('%', :search), '%')
+                OR LOWER(p.address) LIKE CONCAT(CONCAT('%', :search), '%'))
+        """)
     List<Place> findWithFilters(
             @Param("district") District district,
             @Param("subDistrict") SubDistrict subDistrict,
             @Param("outdoor") Boolean outdoor,
-            @Param("placeType") PlaceType placeType
+            @Param("placeType") PlaceType placeType,
+            @Param("search") String search
     );
 
     List<Place> findAllByPlaceType(PlaceType placeType);

@@ -36,6 +36,7 @@ const Places = () => {
     outdoor: null,
     placeType: null,
   });
+  const [searchText, setSearchText] = useState('');
 
   const latestRequest = useRef(0);
 
@@ -45,6 +46,7 @@ const Places = () => {
       setLoading(true);
       setError(null);
       const filterParams = {};
+      if (searchText) filterParams.search = searchText;
       if (filter.district) filterParams.district = filter.district;
       if (filter.subDistrict) filterParams.subDistrict = filter.subDistrict;
       if (filter.outdoor) filterParams.outdoor = filter.outdoor;
@@ -61,7 +63,7 @@ const Places = () => {
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }
-  }, [filter]);
+  }, [filter, searchText]);
 
   useEffect(() => {
     loadPlaces();
@@ -101,6 +103,8 @@ const Places = () => {
           onReset={handleResetFilters}
           searchPlaceholder="Поиск мест"
           hideQuickChips
+          search={searchText}
+          onSearch={(e) => setSearchText(e.target.value)}
         />
 
         {error && <ErrorBanner>{error}</ErrorBanner>}

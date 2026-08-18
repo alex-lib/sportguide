@@ -34,6 +34,7 @@ import java.util.List;
 @Builder
 @ToString(exclude = {"photo", "coaches"})
 public class Place {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

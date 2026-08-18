@@ -23,10 +23,11 @@ public class PlaceController {
         @RequestParam(required = false) String district,
         @RequestParam(required = false) String subDistrict,
         @RequestParam(required = false) String outdoor,
-        @RequestParam(required = false) String placeType
+        @RequestParam(required = false) String placeType,
+        @RequestParam(required = false) String search
     ) {
-        log.info("[API] GET /api/places | district={}, subDistrict={}, outdoor={}, placeType={}",
-                district, subDistrict, outdoor, placeType);
-        return placeService.findAll(district, subDistrict, outdoor, placeType);
+        log.info("[API] GET /api/places | district={}, subDistrict={}, outdoor={}, placeType={}, search={}",
+                district, subDistrict, outdoor, placeType, search);
+        return placeService.findAll(district, subDistrict, outdoor, placeType, search);
     }
 }
