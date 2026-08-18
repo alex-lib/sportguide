@@ -39,9 +39,9 @@ public class PlaceService {
         return placeRepository.findByDistrictAndPlaceType(district, placeType);
     }
 
-    public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType) {
-        log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}",
-                districtStr, subDistrictStr, outdoor, placeType);
+    public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) {
+        log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}, search={}",
+                districtStr, subDistrictStr, outdoor, placeType, search);
         District district;
         if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
             district = null;
@@ -68,9 +68,9 @@ public class PlaceService {
             placeTypeEnum = PlaceType.valueOf(placeType);
         }
 
-        var result = placeRepository.findWithFilters(district, subDistrict, outdoorVal, placeTypeEnum);
-        log.info("findAll Places | resolved district={}, subDistrict={}, outdoor={}, placeType={} | found={} entities",
-                district, subDistrict, outdoorVal, placeTypeEnum, result.size());
+        var result = placeRepository.findWithFilters(district, subDistrict, outdoorVal, placeTypeEnum, search);
+        log.info("findAll Places | resolved district={}, subDistrict={}, outdoor={}, placeType={}, search={} | found={} entities",
+                district, subDistrict, outdoorVal, placeTypeEnum, search, result.size());
         return placeMapper.listPlaceToListPlaceResponse(result);
     }
 

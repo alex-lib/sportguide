@@ -33,6 +33,7 @@ import java.time.LocalTime;
 @Builder
 @ToString
 public class JointTraining {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
