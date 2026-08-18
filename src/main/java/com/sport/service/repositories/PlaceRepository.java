@@ -24,9 +24,10 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
           AND (:subDistrict IS NULL OR p.subDistrict = :subDistrict)
           AND (:outdoor IS NULL OR p.outdoor = :outdoor)
           AND (:placeType IS NULL OR p.placeType = :placeType)
-          AND (:search IS NULL OR LOWER(p.name) LIKE CONCAT(CONCAT('%', :search), '%')
-                OR LOWER(p.description) LIKE CONCAT(CONCAT('%', :search), '%')
-                OR LOWER(p.address) LIKE CONCAT(CONCAT('%', :search), '%'))
+          AND (:search IS NULL
+                OR LOWER(p.name) LIKE CONCAT('%', CAST(:search AS String), '%')
+                OR LOWER(p.description) LIKE CONCAT('%', CAST(:search AS String), '%')
+                OR LOWER(p.address) LIKE CONCAT('%', CAST(:search AS String), '%'))
         """)
     List<Place> findWithFilters(
             @Param("district") District district,
