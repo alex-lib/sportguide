@@ -5,7 +5,7 @@ import { SPORT_TYPES, SEX_OPTIONS } from '../constants/filters.js';
 import {
   Page,
   PageHeader,
-  IconButton,
+  // IconButton,
   Card,
   CardTitle,
   CardText,
@@ -94,7 +94,7 @@ const Coaches = () => {
       <PageHeader
         eyebrow={eyebrow}
         title="Тренеры"
-        action={<IconButton icon="arrow-up-down" label="Сортировка" />}
+        // action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
       <Page>
         <FilterPanel
