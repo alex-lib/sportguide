@@ -21,9 +21,10 @@ public class EventController {
     @GetMapping
     public ListEventResponse getAllEvents(
         @RequestParam(required = false) String district,
-        @RequestParam(required = false) String date
+        @RequestParam(required = false) String date,
+        @RequestParam(required = false) String search
     ) {
-        log.info("[API] GET /api/events | district={}, date={}", district, date);
-        return eventService.findAllEventsWithFilter(district, date);
+        log.info("[API] GET /api/events | district={}, date={}, search={}", district, date, search);
+        return eventService.findAllEventsWithFilter(district, date, search);
     }
 }
