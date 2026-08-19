@@ -121,12 +121,20 @@ const JointTrainings = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = { ...formData };
+    if (payload.phoneNumber) {
+      if (!payload.phoneNumber.startsWith('+')) {
+        payload.phoneNumber = '+7' + payload.phoneNumber.replace(/\D/g, '');
+      } else {
+        payload.phoneNumber = '+7' + payload.phoneNumber.replace('+7', '').replace(/\D/g, '');
+      }
+    }
     try {
       if (editingId) {
-        await apiService.updateJointTraining(editingId, formData);
+        await apiService.updateJointTraining(editingId, payload);
         WebApp.showAlert('Тренировка обновлена');
       } else {
-        await apiService.createJointTraining(formData);
+        await apiService.createJointTraining(payload);
         WebApp.showAlert('Тренировка создана');
       }
       closeForm();
@@ -337,9 +345,10 @@ const JointTrainings = () => {
                 placeholder="XXXXXXXXXX"
                 value={formData.phoneNumber}
                 onChange={(e) => {
-                  const input = e.target.value.replace(/\D/g, '');
-                  if (input.length <= 10) {
-                    setFormData(prev => ({ ...prev, phoneNumber: input }));
+                  const digits = e.target.value.replace(/\D/g, '');
+                  if (digits.length <= 10) {
+                    const formatted = digits.length > 0 ? '+7' + digits : '';
+                    setFormData(prev => ({ ...prev, phoneNumber: formatted }));
                   }
                 }}
                 style={{ borderLeft: 'none', borderRadius: '0 var(--radius-input) var(--radius-input) 0' }}
