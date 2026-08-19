@@ -60,7 +60,7 @@ public abstract class JointTrainingMapperDelegate implements JointTrainingMapper
     public JointTraining createJointTrainingRequestToJointTraining(CreateJointTrainingRequest request, Subscriber subscriber) {
         String sportTypeRaw = request.getSportType();
         SportType sportType = SportType.valueOf(sportTypeRaw);
-        District district = DistrictStringMapper.districtStringToDistrictEnum(String.valueOf(Objects.requireNonNull(request.getDistrict())));
+        District district = DistrictStringMapper.districtStringToDistrictEnumFromWeb(String.valueOf(Objects.requireNonNull(request.getDistrict())));
 
         return JointTraining.builder()
                 .title(request.getTitle())
