@@ -37,15 +37,17 @@ const Coaches = () => {
     sex: null,
     yearsOfExperience: null,
   });
+  const [searchText, setSearchText] = useState('');
 
   const latestRequest = useRef(0);
 
   const loadCoaches = useCallback(async () => {
     const requestId = ++latestRequest.current;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
       const filterParams = {};
+      if (searchText) filterParams.search = searchText;
       if (filter.sportTypes && filter.sportTypes.length > 0) filterParams.sportTypes = filter.sportTypes;
       if (filter.age) filterParams.age = filter.age;
       if (filter.sex) filterParams.sex = filter.sex;
@@ -58,11 +60,10 @@ const Coaches = () => {
       if (requestId !== latestRequest.current) return;
       console.error('Failed to load coaches:', error);
       setError(error.message || 'Не удалось загрузить тренеров');
-      setCoaches([]);
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }
-  }, [filter]);
+  }, [filter, searchText]);
 
   useEffect(() => {
     loadCoaches();
@@ -101,6 +102,8 @@ const Coaches = () => {
           onFilterChange={handleFilterChange}
           onReset={handleResetFilters}
           searchPlaceholder="Поиск тренеров"
+          search={searchText}
+          onSearch={(e) => setSearchText(e.target.value)}
         />
 
         {error && <ErrorBanner>{error}</ErrorBanner>}

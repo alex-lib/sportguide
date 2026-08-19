@@ -36,8 +36,8 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public ListEventResponse findAllEventsWithFilter(String districtStr, String dateStr) {
-        log.info("findAll Events | district={}, date={}", districtStr, dateStr);
+    public ListEventResponse findAllEventsWithFilter(String districtStr, String dateStr, String search) {
+        log.info("findAll Events | district={}, date={}, search={}", districtStr, dateStr, search);
         LocalDate date = null;
 
         District district;
@@ -51,7 +51,7 @@ public class EventService {
             date = LocalDate.parse(dateStr);
         }
 
-        var result = eventRepository.findWithFilters(district, date);
+        var result = eventRepository.findWithFilters(district, date, search);
         log.info("findAll Events | resolved district={} | found={} events", district, result.size());
         return eventMapper.listEventToListEventResponse(result);
     }
