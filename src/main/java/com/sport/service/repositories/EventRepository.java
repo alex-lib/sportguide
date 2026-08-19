@@ -26,10 +26,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         FROM events e
         WHERE (CAST(:district AS varchar) IS NULL OR e.district = :district)
           AND (CAST(:date AS date) IS NULL OR e.date = :date)
+          AND (CAST(:search AS varchar) IS NULL
+               OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%'))
+                OR LOWER(e.description) LIKE LOWER(CONCAT('%', :search, '%'))
+                OR LOWER(e.place_name) LIKE LOWER(CONCAT('%', :search, '%'))
+                OR LOWER(e.address) LIKE LOWER(CONCAT('%', :search, '%')))
         ORDER BY e.date, e.time
         """)
     List<Event> findWithFilters(
             @Param("district") District district,
-            @Param("date") LocalDate date
+            @Param("date") LocalDate date,
+            @Param("search") String search
     );
 }

@@ -35,6 +35,7 @@ import java.util.List;
 @Builder
 @ToString(exclude = "payments")
 public class TrainingProgram {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

@@ -38,25 +38,26 @@ public class CoachService {
 
     private final CoachMapper coachMapper;
 
-    public ListCoachResponse findAllCoaches(List<String> sportTypesRequest, Integer age, String sex, Integer yearsOfExperience) {
-        log.info("findAll Coaches | sportTypes={}, age={}, sex={}, yearsOfExperience={}",
-                sportTypesRequest, age, sex, yearsOfExperience);
-        List<SportType> sportTypes = null;
-        if (sportTypesRequest != null && !sportTypesRequest.isEmpty()) {
-            sportTypes = sportTypesRequest.stream()
-                    .map(SportType::valueOf)
-                    .collect(Collectors.toList());
-        }
-        Sex sexEnum = sex != null ? Sex.valueOf(sex) : null;
-        var result = coachRepository.findWithFilters(
-                sportTypes,
-                sexEnum,
-                age,
-                yearsOfExperience);
-        log.info("findAll Coaches | filtered sportTypes={}, sex={}, age={}, yearsOfExperience={} | found={} coaches",
-                sportTypes, sexEnum, age, yearsOfExperience, result.size());
-        return coachMapper.listCoachToListCoachResponse(result);
-    }
+      public ListCoachResponse findAllCoaches(List<String> sportTypesRequest, Integer age, String sex, Integer yearsOfExperience, String search) {
+          log.info("findAll Coaches | sportTypes={}, age={}, sex={}, yearsOfExperience={}, search={}",
+                  sportTypesRequest, age, sex, yearsOfExperience, search);
+          List<SportType> sportTypes = null;
+          if (sportTypesRequest != null && !sportTypesRequest.isEmpty()) {
+              sportTypes = sportTypesRequest.stream()
+                      .map(SportType::valueOf)
+                      .collect(Collectors.toList());
+          }
+          Sex sexEnum = sex != null ? Sex.valueOf(sex) : null;
+          var result = coachRepository.findWithFilters(
+                  sportTypes,
+                  sexEnum,
+                  age,
+                  yearsOfExperience,
+                  search);
+          log.info("findAll Coaches | filtered sportTypes={}, sex={}, age={}, yearsOfExperience={}, search={} | found={} coaches",
+                  sportTypes, sexEnum, age, yearsOfExperience, search, result.size());
+          return coachMapper.listCoachToListCoachResponse(result);
+      }
 
     @Transactional
     public void createCoach(CoachRequest request, MultipartFile photo) {

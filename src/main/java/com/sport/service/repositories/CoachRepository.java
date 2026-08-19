@@ -22,17 +22,22 @@ public interface CoachRepository extends JpaRepository<Coach, Long> {
             WHERE c.expiredDateForSubscriptionToBeCoach > :date""")
     void turnOffToShowInWebByExpiredDateForSubscriptionToBeCoach(LocalDate date);
 
-    @Query(nativeQuery = true, value = """
-            SELECT DISTINCT c.* FROM coaches c
-            WHERE (CAST(:sportTypes AS varchar[]) IS NULL OR c.sport_types && CAST(:sportTypes AS varchar[]))
-              AND (CAST(:sex AS varchar) IS NULL OR c.sex = :sex)
-              AND (:age IS NULL OR c.age = :age)
-              AND (:yearsOfExperience IS NULL OR c.years_of_experience = :yearsOfExperience)
-            """)
-    List<Coach> findWithFilters(
-            @Param("sportTypes") List<SportType> sportTypes,
-            @Param("sex") Sex sex,
-            @Param("age") Integer age,
-            @Param("yearsOfExperience") Integer yearsOfExperience
-    );
+      @Query(nativeQuery = true, value = """
+              SELECT DISTINCT c.* FROM coaches c 
+              WHERE (CAST(:sportTypes AS varchar[]) IS NULL OR c.sport_types && CAST(:sportTypes AS varchar[]))
+                AND (CAST(:sex AS varchar) IS NULL OR c.sex = :sex)
+                AND (:age IS NULL OR c.age = :age)
+                AND (:yearsOfExperience IS NULL OR c.years_of_experience = :yearsOfExperience)
+                AND (CAST(:search AS varchar) IS NULL
+                     OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
+                     OR LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%'))
+                     OR LOWER(c.education) LIKE LOWER(CONCAT('%', :search, '%')))
+              """)
+      List<Coach> findWithFilters(
+              @Param("sportTypes") List<SportType> sportTypes,
+              @Param("sex") Sex sex,
+              @Param("age") Integer age,
+              @Param("yearsOfExperience") Integer yearsOfExperience,
+              @Param("search") String search
+      );
 }
