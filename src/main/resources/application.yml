@@ -135,3 +135,6 @@ app:
     data-loader:
       enabled: true
 
+webapp:
+  url: ${WEBAPP_URL:https://sportguide.online}
+
