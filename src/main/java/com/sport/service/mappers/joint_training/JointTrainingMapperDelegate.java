@@ -33,9 +33,8 @@ public abstract class JointTrainingMapperDelegate implements JointTrainingMapper
         List<JointTrainingResponse> jointTrainingResponses = new ArrayList<>();
 
         for (JointTraining jointTraining : jointTrainings) {
-            String sportTypeString = SportTypeStringMapper
-                    .listSportTypeEnumToListSportTypeString(List.of(jointTraining.getSportType())).getFirst();
-            String districtString = DistrictStringMapper.districtEnumToDistrictString(jointTraining.getDistrict());
+            String sportTypeString = jointTraining.getSportType().name();
+            String districtString = jointTraining.getDistrict().name();
             String username = jointTraining.getSubscriber().getUsername();
             String linkToChatWithCreator = String.format("[@%s](%s)", username, "https://t.me/" + username);
 
