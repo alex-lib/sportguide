@@ -45,11 +45,16 @@ const EMPTY_FORM = {
   phoneNumber: '',
 };
 
+const getSportLabel = (sportType) => {
+  const sport = SPORT_TYPES.find(s => s.value === sportType);
+  return sport ? sport.label : sportType;
+};
+
 const formatDateTime = (date, time) => {
   try {
     const d = new Date((date || '').split(' ')[0].replace(/-/g, '/'));
-    const base = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-    return time ? `${base} · ${time}` : base;
+    const datePart = d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return time ? `${datePart}, ${time}` : datePart;
   } catch {
     return `${date} ${time}`;
   }
@@ -238,6 +243,7 @@ const JointTrainings = () => {
                 </div>
 
                 <Pills>
+                  {training.sportType && <Pill tone="brand">{getSportLabel(training.sportType)}</Pill>}
                   <Pill tone="brand" icon="calendar">
                     {formatDateTime(training.date, training.time)}
                   </Pill>
