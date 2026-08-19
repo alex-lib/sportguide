@@ -123,11 +123,7 @@ const JointTrainings = () => {
     e.preventDefault();
     const payload = { ...formData };
     if (payload.phoneNumber) {
-      if (!payload.phoneNumber.startsWith('+')) {
-        payload.phoneNumber = '+7' + payload.phoneNumber.replace(/\D/g, '');
-      } else {
-        payload.phoneNumber = '+7' + payload.phoneNumber.replace('+7', '').replace(/\D/g, '');
-      }
+      payload.phoneNumber = '+7' + payload.phoneNumber.replace(/\D/g, '');
     }
     try {
       if (editingId) {
@@ -185,7 +181,7 @@ const JointTrainings = () => {
       placeName: training.placeName || '',
       district: training.district || '',
       address: training.address || '',
-      phoneNumber: training.phoneNumber || '',
+      phoneNumber: (training.phoneNumber || '').replace('+7', ''),
     });
     setEditingId(training.id || null);
     setShowForm(true);
@@ -347,8 +343,7 @@ const JointTrainings = () => {
                 onChange={(e) => {
                   const digits = e.target.value.replace(/\D/g, '');
                   if (digits.length <= 10) {
-                    const formatted = digits.length > 0 ? '+7' + digits : '';
-                    setFormData(prev => ({ ...prev, phoneNumber: formatted }));
+                    setFormData(prev => ({ ...prev, phoneNumber: digits }));
                   }
                 }}
                 style={{ borderLeft: 'none', borderRadius: '0 var(--radius-input) var(--radius-input) 0' }}
