@@ -34,4 +34,12 @@ public class DistrictStringMapper {
         }
         return district;
     }
+
+    public static District districtStringToDistrictEnumFromWeb(String districtString) {
+        try {
+            return District.valueOf(districtString);
+        } catch (IllegalArgumentException e) {
+            return District.ALL_DISTRICTS;
+        }
+    }
 }
