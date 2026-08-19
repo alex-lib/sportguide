@@ -27,6 +27,7 @@ import java.util.List;
 @Builder
 @ToString(exclude = {"jointTrainings", "payments"})
 public class Subscriber {
+
     @Id
     @Column(name = "id")
     public Long id;

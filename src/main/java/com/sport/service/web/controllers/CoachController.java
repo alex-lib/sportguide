@@ -21,14 +21,15 @@ public class CoachController {
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @GetMapping
-    public ListCoachResponse getAllCoaches(
-        @RequestParam(required = false) List<String> sportTypes,
-        @RequestParam(required = false) Integer age,
-        @RequestParam(required = false) String sex,
-        @RequestParam(required = false) Integer yearsOfExperience
-    ) {
-        log.info("[API] GET /api/coaches | sportTypes={}, age={}, sex={}, yearsOfExperience={}",
-                sportTypes, age, sex, yearsOfExperience);
-        return coachService.findAllCoaches(sportTypes, age, sex, yearsOfExperience);
-    }
+      public ListCoachResponse getAllCoaches(
+          @RequestParam(required = false) List<String> sportTypes,
+          @RequestParam(required = false) Integer age,
+          @RequestParam(required = false) String sex,
+          @RequestParam(required = false) Integer yearsOfExperience,
+          @RequestParam(required = false) String search
+      ) {
+          log.info("[API] GET /api/coaches | sportTypes={}, age={}, sex={}, yearsOfExperience={}, search={}",
+                  sportTypes, age, sex, yearsOfExperience, search);
+          return coachService.findAllCoaches(sportTypes, age, sex, yearsOfExperience, search);
+      }
 }

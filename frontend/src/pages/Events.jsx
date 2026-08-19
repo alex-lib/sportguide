@@ -32,15 +32,17 @@ const Events = () => {
     district: null,
     date: null,
   });
+  const [searchText, setSearchText] = useState('');
 
   const latestRequest = useRef(0);
 
   const loadEvents = useCallback(async () => {
     const requestId = ++latestRequest.current;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
       const filterParams = {};
+      if (searchText) filterParams.search = searchText;
       if (filter.district) filterParams.district = filter.district;
       if (filter.date) filterParams.date = filter.date;
 
@@ -51,11 +53,10 @@ const Events = () => {
       if (requestId !== latestRequest.current) return;
       console.error('Failed to load events:', error);
       setError(error.message || 'Не удалось загрузить события');
-      setEvents([]);
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }
-  }, [filter]);
+  }, [filter, searchText]);
 
   useEffect(() => {
     loadEvents();
@@ -97,6 +98,8 @@ const Events = () => {
           onFilterChange={handleFilterChange}
           onReset={handleResetFilters}
           searchPlaceholder="Поиск событий"
+          search={searchText}
+          onSearch={(e) => setSearchText(e.target.value)}
         />
 
         {error && <ErrorBanner>{error}</ErrorBanner>}

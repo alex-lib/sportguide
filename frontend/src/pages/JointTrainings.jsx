@@ -69,9 +69,9 @@ const JointTrainings = () => {
 
   const loadTrainings = useCallback(async () => {
     const requestId = ++latestRequest.current;
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
       const filterParams = {};
       if (searchText) filterParams.search = searchText;
       if (filter.date) filterParams.date = filter.date;
@@ -85,7 +85,6 @@ const JointTrainings = () => {
       if (requestId !== latestRequest.current) return;
       console.error('Failed to load joint trainings:', error);
       setError(error.message || 'Не удалось загрузить тренировки');
-      setTrainings([]);
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }

@@ -28,6 +28,7 @@ import java.time.LocalTime;
 @Builder
 @ToString
 public class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

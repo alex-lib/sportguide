@@ -38,6 +38,7 @@ import java.util.List;
 @Builder
 @ToString(exclude = {"photo", "trainingPrograms"})
 public class Coach {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
