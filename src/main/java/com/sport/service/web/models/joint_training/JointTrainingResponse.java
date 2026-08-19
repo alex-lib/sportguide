@@ -1,5 +1,6 @@
 package com.sport.service.web.models.joint_training;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,9 @@ public class JointTrainingResponse {
     private Long id;
     private String title;
     private String description;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
     private String sportType;
     private String placeName;
