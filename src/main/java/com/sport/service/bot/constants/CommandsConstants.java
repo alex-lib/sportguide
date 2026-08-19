@@ -141,4 +141,7 @@ public final class CommandsConstants {
             
             <i>Я пока только изучаю город, поэтому если ты знаешь интересное спортивное место - будет здорово если ты сообщишь об этом моему напарнику /menu, заранее спасибо :)</i>
             \s""";
+
+    public static final String APP = "app";
+    public static final String APP_DESCRIPTION = "Open Sportguide Web App";
 }
