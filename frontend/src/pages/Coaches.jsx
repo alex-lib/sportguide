@@ -102,6 +102,7 @@ const Coaches = () => {
           onFilterChange={handleFilterChange}
           onReset={handleResetFilters}
           searchPlaceholder="Поиск тренеров"
+          hideQuickChips
           search={searchText}
           onSearch={(e) => setSearchText(e.target.value)}
         />
