@@ -1,4 +1,4 @@
-package com.sport.service.redis_store.commands_store;
+package com.sport.service.store.commands;
 
 public interface RedisCrud {
     <T> T get(String key, Class<T> type);

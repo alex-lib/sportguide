@@ -1,7 +1,7 @@
-package com.sport.service.redis_store.commands_store.sessions;
+package com.sport.service.store.commands.sessions;
 
 import com.sport.service.dto.EventDto;
-import com.sport.service.redis_store.commands_store.RedisCrud;
+import com.sport.service.store.commands.RedisCrud;
 import org.springframework.stereotype.Component;
 
 @Component

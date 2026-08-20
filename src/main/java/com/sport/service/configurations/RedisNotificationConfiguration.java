@@ -3,7 +3,7 @@ package com.sport.service.configurations;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.sport.service.constants.Constants;
-import com.sport.service.redis_store.notifications_broker.NotificationListener;
+import com.sport.service.store.notifications.NotificationListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
