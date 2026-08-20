@@ -1,4 +1,4 @@
-package com.sport.service.redis_store.notifications_broker;
+package com.sport.service.store.notifications;
 
 import com.sport.service.bot.TelegramMessageSender;
 import lombok.RequiredArgsConstructor;

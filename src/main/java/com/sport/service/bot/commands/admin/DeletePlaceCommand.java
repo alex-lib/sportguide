@@ -5,7 +5,7 @@ import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
-import com.sport.service.redis_store.commands_store.CommandStateStore;
+import com.sport.service.store.commands.CommandStateStore;
 import com.sport.service.services.PlaceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

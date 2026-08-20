@@ -1,7 +1,7 @@
 package com.sport.service.services;
 
-import com.sport.service.redis_store.notifications_broker.Notification;
-import com.sport.service.redis_store.notifications_broker.NotificationPublisher;
+import com.sport.service.store.notifications.Notification;
+import com.sport.service.store.notifications.NotificationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
