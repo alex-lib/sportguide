@@ -1,5 +1,6 @@
 package com.sport.service.services;
 
+import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
@@ -8,19 +9,23 @@ import com.sport.service.entities.enums.joint_training.ApprovalStatus;
 import com.sport.service.entities.enums.subscriber.RoleType;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.mappers.joint_training.JointTrainingMapper;
-import com.sport.service.processors.JointTrainingProcessor;
 import com.sport.service.repositories.JointTrainingRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,12 +36,13 @@ import static com.sport.service.entities.enums.joint_training.ApprovalStatus.PEN
 @Slf4j
 public class JointTrainingService {
     private final JointTrainingRepository jointTrainingRepository;
-
     private final JointTrainingMapper jointTrainingMapper;
-
     private final SubscriberService subscriberService;
+    private final NotificationCreatorService notificationCreatorService;
+    private final TelegramMessageSender sender;
 
-    private final JointTrainingProcessor processor;
+    @Value("${telegram.secondAdminId}")
+    private String secondAdminId;
 
     public ListJointTrainingResponse findAllJointTrainings(String districtStr, String dateStr, List<String> sportTypeRequest, String search) {
         log.info("findAll JointTrainings | district={}, date={}, sportTypes={}",
@@ -64,17 +70,14 @@ public class JointTrainingService {
     @Transactional
     public void createJointTraining(CreateJointTrainingRequest request, Long userId) {
         Subscriber subscriber = subscriberService.findById(userId);
-
         JointTraining jointTraining =
                 jointTrainingMapper.createJointTrainingRequestToJointTraining(request, subscriber);
 
         jointTraining.setApprovalStatus(PENDING);
-
         jointTraining = jointTrainingRepository.save(jointTraining);
-
         jointTraining.setSubscriber(subscriber);
 
-        processor.processRequestToApproveJointTraining(jointTraining);
+        processJointTrainingApprovalRequest(jointTraining);
     }
 
     @Transactional
@@ -97,7 +100,7 @@ public class JointTrainingService {
         jointTraining.setApprovalStatus(ApprovalStatus.PENDING);
         jointTrainingRepository.save(jointTraining);
 
-        processor.processRequestToApproveJointTraining(jointTraining);
+        processJointTrainingApprovalRequest(jointTraining);
     }
 
     @Transactional
@@ -127,7 +130,7 @@ public class JointTrainingService {
         jt.setApprovalStatus(ApprovalStatus.APPROVED);
         jt.setApprovedAt(LocalDateTime.now());
         jointTrainingRepository.save(jt);
-        processor.notifyUserApproved(jt);
+        notifyUserApproved(jt);
     }
 
     @Transactional
@@ -141,6 +144,50 @@ public class JointTrainingService {
         jt.setApprovalStatus(ApprovalStatus.REJECTED);
         jt.setRejectionReason(reason);
         jointTrainingRepository.save(jt);
-        processor.notifyUserRejected(jt, reason);
+        notifyUserRejected(jt, reason);
+    }
+
+    private void processJointTrainingApprovalRequest(JointTraining jointTraining) {
+        String requestToApprove = notificationCreatorService.createRequestToApproveJointTraining(jointTraining);
+        InlineKeyboardMarkup markup = createKeyboardToChooseApprovingOptions(jointTraining.getId());
+
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(secondAdminId)
+                .text(requestToApprove)
+                .replyMarkup(markup)
+                .build();
+
+        sender.sendMessageWithoutPhoto(sendMessage);
+        sender.sendMessageWithoutPhoto(jointTraining.getSubscriber().getId(),
+                "Ваш запрос на создание/обновление совместной тренировки отправлен на проверку админу");
+    }
+
+    private InlineKeyboardMarkup createKeyboardToChooseApprovingOptions(Long jointTrainingId) {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        InlineKeyboardButton approve = new InlineKeyboardButton();
+        approve.setText("✔️ Одобрить");
+        approve.setCallbackData("APPROVE_JT:" + jointTrainingId);
+        InlineKeyboardButton reject = new InlineKeyboardButton();
+        reject.setText("❌ Отклонить");
+        reject.setCallbackData("REJECT_JT:" + jointTrainingId);
+        rows.add(List.of(approve, reject));
+        markup.setKeyboard(rows);
+        return markup;
+    }
+
+    private void notifyUserApproved(JointTraining jt) {
+        sender.sendMessageWithoutPhoto(
+                jt.getSubscriber().getId(),
+                "🎉 Ваша тренировка одобрена!\n" +
+                        "Название: " + jt.getTitle()
+        );
+    }
+
+    private void notifyUserRejected(JointTraining jt, String reason) {
+        sender.sendMessageWithoutPhoto(
+                jt.getSubscriber().getId(),
+                "❌ Ваша тренировка отклонена\nПричина: " + reason
+        );
     }
 }
