@@ -1,0 +1,4 @@
+🔴 <b>Redis is still DOWN!</b>
+⚠️ Напоминание (последнее сообщение было [[${minutesSinceLastAlert}]] мин назад).
+🕐 Время: [[${timestamp}]]
+📱 Service: SportGuide
