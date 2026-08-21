@@ -141,7 +141,7 @@ const Events = () => {
 
                 {event.address && <MetaLine>{event.address}</MetaLine>}
 
-                {event.link && (
+                {event.link && event.link !== '-' && (
                   <>
                     <Divider />
                     <CardActions>

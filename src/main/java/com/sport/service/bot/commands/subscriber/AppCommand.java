@@ -44,6 +44,7 @@ public class AppCommand implements IBotCommand {
 
         SendMessage answer = new SendMessage();
         answer.setChatId(message.getChatId());
+        answer.setText("🚀 Приложение Sportguide");
 
         KeyboardButton webAppButton = KeyboardButton.builder()
                 .text("🚀 Sportguide")
