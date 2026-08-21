@@ -1,0 +1,4 @@
+🟢 <b>Redis is back UP!</b>
+✅ Сервис SportGuide восстановил подключение к Redis.
+🕐 Время: [[${timestamp}]]
+📱 Service: SportGuide

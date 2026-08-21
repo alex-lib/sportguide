@@ -42,7 +42,7 @@ public class Subscriber {
     public String lastName;
 
     @Column(name = "get_events")
-    private Boolean getEvents;
+    public Boolean getEvents;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)

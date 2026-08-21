@@ -25,6 +25,7 @@ public class Notification implements Serializable {
         EVENT,
         WEATHER,
         ADMIN_TO_SUBSCRIBER,
-        SUBSCRIBER_TO_ADMIN
+        SUBSCRIBER_TO_ADMIN,
+        ADMIN_ALERT
     }
 }
