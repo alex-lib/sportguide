@@ -1,6 +1,6 @@
 package com.sport.service.store.commands.sessions;
 
-import com.sport.service.dto.PlaceDto;
+import com.sport.service.entities.enums.place.PlaceState;
 import com.sport.service.store.commands.RedisCrud;
 import org.springframework.stereotype.Component;
 
@@ -23,17 +23,17 @@ public class PlaceSession {
         store.delete(key(chatId));
     }
 
-    public PlaceDto createSession(Long chatId) {
-        PlaceDto dto = new PlaceDto();
-        store.put(key(chatId), dto, TTL_SECONDS);
-        return dto;
+    public PlaceState createSession(Long chatId) {
+        PlaceState state = new PlaceState();
+        store.put(key(chatId), state, TTL_SECONDS);
+        return state;
     }
 
-    public PlaceDto getIfExists(Long chatId) {
-        return store.get(key(chatId), PlaceDto.class);
+    public PlaceState getIfExists(Long chatId) {
+        return store.get(key(chatId), PlaceState.class);
     }
 
-    public void save(Long chatId, PlaceDto dto) {
-        store.put(key(chatId), dto, TTL_SECONDS);
+    public void save(Long chatId, PlaceState state) {
+        store.put(key(chatId), state, TTL_SECONDS);
     }
 }

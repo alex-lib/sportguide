@@ -4,11 +4,10 @@ import com.sport.service.annotations.AdminOnly;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
-import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
-import com.sport.service.dto.EventDto;
-import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.event.CreateEventStep;
+import com.sport.service.entities.enums.event.EventState;
 import com.sport.service.store.commands.CommandStateStore;
 import com.sport.service.store.commands.sessions.EventSession;
 import com.sport.service.services.EventService;
@@ -21,15 +20,15 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
-@Slf4j
 public class CreateEventCommand implements IBotCommand, TextProcessable, CallbackProcessable {
     private final EventSession eventSession;
     private final EventService eventService;
     private final CommandStateStore commandStateStore;
-
     private final TelegramMessageSender sender;
 
     @Override
@@ -51,15 +50,15 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         log.info("Call command create_event by userId={}, username={}", userId, user.getUserName());
 
         try {
-            EventDto dto = eventSession.createSession(chatId);
-            dto.setStep(1);
-            eventSession.save(chatId, dto);
+            EventState state = eventSession.createSession(chatId);
             commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
 
             SendMessage answer = new SendMessage();
             answer.setChatId(chatId.toString());
             answer.setText(CommandsConstants.CREATING_TYPE);
-            answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+
+            InlineKeyboardMarkup keyboard = CreateEventStep.DISTRICT.buildKeyboard(answer, state);
+            answer.setReplyMarkup(keyboard);
 
             sender.sendMessageWithoutPhoto(answer);
         } catch (Exception e) {
@@ -75,36 +74,41 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         Long chatId = callback.getMessage().getChatId();
         Long userId = callback.getFrom().getId();
 
-        EventDto dto = eventSession.getIfExists(chatId);
-        if (!ifSessionValid(chatId, dto)) {
+        EventState state = eventSession.getIfExists(chatId);
+        if (!ifSessionValid(chatId, state, userId)) {
             return;
         }
 
         String data = callback.getData();
-        log.info("Processing callback for create_event: step={}, data={}", dto.getStep(), data);
+        log.info("Processing callback for create_event: step={}, data={}", state.getStep(), data);
 
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
         try {
-            if (dto.getStep() == 1) {
-                handleDistrictStep(dto, data, answer);
-            } else {
-                handleUnknownStep(chatId, userId, answer);
+            if (state.getStep().isCallbackStep()) {
+                CreateEventStep nextStep = state.getStep().onCallback(data, state, eventService);
+                state.setStep(nextStep);
+
+                InlineKeyboardMarkup keyboard = nextStep.buildKeyboard(answer, state);
+                answer.setReplyMarkup(keyboard);
+
+                if (nextStep.isFinished()) {
+                    eventService.createEvent(state);
+                    answer.setText(CommandsConstants.EVENT_CREATED);
+                    eventSession.clear(chatId);
+                    commandStateStore.clearCurrentCommand(userId);
+                }
             }
-            eventSession.save(chatId, dto);
+
+            eventSession.save(chatId, state);
             sender.sendMessageWithoutPhoto(answer);
         } catch (Exception e) {
             log.error("Error processing callback", e);
             eventSession.clear(chatId);
+            commandStateStore.clearCurrentCommand(userId);
             sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
-    }
-
-    private void handleDistrictStep(EventDto dto, String data, SendMessage answer) {
-        dto.setDistrict(District.valueOf(data));
-        answer.setText(CommandsConstants.ENTER_EVENT_NAME);
-        dto.setStep(2);
     }
 
     @Override
@@ -112,25 +116,43 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         Long chatId = message.getChatId();
         Long userId = message.getFrom().getId();
 
-        EventDto dto = eventSession.getIfExists(chatId);
-        if (!ifSessionValid(chatId, dto)) {
+        EventState state = eventSession.getIfExists(chatId);
+        if (!ifSessionValid(chatId, state, userId)) {
             return;
         }
 
         SendMessage answer = new SendMessage();
         answer.setChatId(chatId.toString());
 
-        try {
-            handleTextInput(message, dto, answer);
-            eventSession.save(chatId, dto);
-            absSender.execute(answer);
+        String text = message.getText();
 
-            if (dto.getStep() > 8) {
-                eventService.createEvent(dto);
-                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.EVENT_CREATED);
-                log.info("Event created successfully by userId={}, eventName={}", userId, dto.getName());
-                eventSession.clear(chatId);
-                commandStateStore.clearCurrentCommand(userId);
+        try {
+            if (state.getStep().isTextStep()) {
+                String nextStepName = state.getStep().handleText(answer, text, state, eventService);
+
+                if (nextStepName != null) {
+                    CreateEventStep nextStep = CreateEventStep.valueOf(nextStepName);
+                    state.setStep(nextStep);
+
+                    InlineKeyboardMarkup keyboard = nextStep.buildKeyboard(answer, state);
+                    answer.setReplyMarkup(keyboard);
+                }
+
+                eventSession.save(chatId, state);
+
+                if (state.getStep().isFinished()) {
+                    eventService.createEvent(state);
+                    answer.setText(CommandsConstants.EVENT_CREATED);
+                    eventSession.clear(chatId);
+                    commandStateStore.clearCurrentCommand(userId);
+                    sender.sendMessageWithoutPhoto(answer);
+                    log.info("Event created successfully by userId={}, eventName={}", userId, state.getName());
+                } else if (!answer.getText().isEmpty()) {
+                    sender.sendMessageWithoutPhoto(answer);
+                }
+            } else {
+                handleUnknownStep(chatId, userId, answer);
+                sender.sendMessageWithoutPhoto(answer);
             }
         } catch (Exception e) {
             log.error("Error processing text input", e);
@@ -140,89 +162,25 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
         }
     }
 
-    private void handleTextInput(Message message, EventDto dto, SendMessage answer) {
-        Long chatId = message.getChatId();
-        Long userId = message.getFrom().getId();
-        String text = message.getText();
-
-        switch (dto.getStep()) {
-            case 2 -> {
-                if (!eventService.existsEventByName(text)) {
-                    dto.setName(text);
-                    answer.setText(CommandsConstants.ENTER_EVENT_ADDRESS);
-                    dto.setStep(3);
-                } else {
-                    answer.setText(CommandsConstants.EVENT_NAME_IS_EXISTED);
-                }
-            }
-            case 3 -> {
-                dto.setAddress(text);
-                answer.setText(CommandsConstants.ENTER_EVENT_DESCRIPTION);
-                dto.setStep(4);
-            }
-            case 4 -> {
-                dto.setDescription(text);
-                answer.setText(CommandsConstants.ENTER_EVENT_LINK);
-                dto.setStep(5);
-            }
-            case 5 -> {
-                dto.setLink(text);
-                answer.setText(CommandsConstants.ENTER_EVENT_PLACE);
-                dto.setStep(6);
-            }
-            case 6 -> {
-                dto.setPlaceName(text);
-                answer.setText(CommandsConstants.ENTER_EVENT_DATE);
-                dto.setStep(7);
-            }
-            case 7 -> {
-                if (isValidDate(text)) {
-                    dto.setDate(text);
-                    answer.setText(CommandsConstants.ENTER_EVENT_TIME);
-                    dto.setStep(8);
-                } else {
-                    answer.setText(CommandsConstants.EVENT_DATE_IS_INVALID);
-                }
-            }
-            case 8 -> {
-                if (isValidTime(text)) {
-                    dto.setTime(text);
-                    answer.setText(CommandsConstants.DATA_IS_RECEIVED);
-                    dto.setStep(9);
-                } else {
-                    answer.setText(CommandsConstants.EVENT_TIME_IS_INVALID);
-                }
-            }
-            default -> handleUnknownStep(chatId, userId, answer);
-        }
-    }
-
     private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
         answer.setText(ErrorConstants.UNKNOWN_STEP);
         eventSession.clear(chatId);
         commandStateStore.clearCurrentCommand(userId);
     }
 
-    private boolean isValidDate(String date) {
-        return CommandsConstants.DATE_PATTERN.matcher(date).matches();
-    }
+    private boolean ifSessionValid(Long chatId, EventState state, Long userId) {
+        if (state == null) {
+            log.warn("No session found for chatId: {}", chatId);
+            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
+            return false;
+        }
 
-    private boolean isValidTime(String time) {
-        return CommandsConstants.TIME_PATTERN.matcher(time).matches();
-    }
-
-    private boolean ifSessionValid(Long chatId, EventDto dto) {
-        if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(chatId))) {
+        String currentCommand = commandStateStore.getCurrentCommand(userId);
+        if (!getCommandIdentifier().equals(currentCommand)) {
             log.warn("User {} is not in create_event session", chatId);
             return false;
         }
 
-        if (dto == null) {
-            log.warn("No session found for chatId: {}", chatId);
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-            commandStateStore.clearCurrentCommand(chatId);
-            return false;
-        }
         return true;
     }
 }

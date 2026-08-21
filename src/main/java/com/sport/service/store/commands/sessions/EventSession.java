@@ -1,6 +1,6 @@
 package com.sport.service.store.commands.sessions;
 
-import com.sport.service.dto.EventDto;
+import com.sport.service.entities.enums.event.EventState;
 import com.sport.service.store.commands.RedisCrud;
 import org.springframework.stereotype.Component;
 
@@ -23,17 +23,18 @@ public class EventSession {
         store.delete(key(chatId));
     }
 
-    public EventDto createSession(Long chatId) {
-        EventDto dto = new EventDto();
-        store.put(key(chatId), dto, TTL_SECONDS);
-        return dto;
+    public EventState createSession(Long chatId) {
+        EventState state = new EventState();
+        state.setStep(CreateEventStep.DISTRICT);
+        store.put(key(chatId), state, TTL_SECONDS);
+        return state;
     }
 
-    public EventDto getIfExists(Long chatId) {
-        return store.get(key(chatId), EventDto.class);
+    public EventState getIfExists(Long chatId) {
+        return store.get(key(chatId), EventState.class);
     }
 
-    public void save(Long chatId, EventDto dto) {
-        store.put(key(chatId), dto, TTL_SECONDS);
+    public void save(Long chatId, EventState state) {
+        store.put(key(chatId), state, TTL_SECONDS);
     }
 }

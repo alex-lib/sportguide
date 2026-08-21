@@ -5,6 +5,7 @@ import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
+import com.sport.service.entities.enums.event.EventState;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.web.models.event.ListEventResponse;

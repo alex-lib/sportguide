@@ -6,14 +6,12 @@ import com.sport.service.bot.commands.UtilMethods;
 import com.sport.service.bot.commands.interfaces.CallbackProcessable;
 import com.sport.service.bot.commands.interfaces.PhotoProcessable;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
-import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.bot.constants.KeyboardConstants;
-import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.enums.common.District;
-import com.sport.service.entities.enums.place.PlaceType;
-import com.sport.service.entities.enums.place.SubDistrict;
+import com.sport.service.entities.enums.place.CreatePlaceStep;
+import com.sport.service.entities.enums.place.PlaceState;
 import com.sport.service.store.commands.CommandStateStore;
 import com.sport.service.store.commands.sessions.PlaceSession;
 import com.sport.service.services.PlaceService;
@@ -28,6 +26,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -63,20 +63,22 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		log.info("Call command create_place by userId={}, username={}", userId, user.getUserName());
 
 		try {
-			PlaceDto dto = placeSession.createSession(chatId);
-			dto.setStep(1);
-			placeSession.save(chatId, dto);
+			PlaceState state = new PlaceState();
+			state.setStep(CreatePlaceStep.DISTRICT);
+			placeSession.save(chatId, state);
 			commandStateStore.setCurrentCommand(userId, getCommandIdentifier());
 
 			SendMessage answer = new SendMessage();
 			answer.setChatId(chatId.toString());
 			answer.setText(CommandsConstants.CREATING_TYPE);
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
+
+			InlineKeyboardMarkup keyboard = CreatePlaceStep.DISTRICT.buildKeyboard(answer, state);
+			answer.setReplyMarkup(keyboard);
 
 			sender.sendMessageWithoutPhoto(answer);
 		} catch (Exception e) {
 			log.error("Error to start processing message", e);
-			placeSession.clear(userId);
+			placeSession.clear(chatId);
 			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
@@ -87,94 +89,80 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = callback.getMessage().getChatId();
 		Long userId = callback.getFrom().getId();
 
-		PlaceDto dto = placeSession.getIfExists(chatId);
-		if (!ifSessionValid(chatId, dto)) {
+		PlaceState state = placeSession.getIfExists(chatId);
+		if (!ifSessionValid(chatId, state)) {
 			return;
 		}
 
 		String data = callback.getData();
-		log.info("Processing callback for create_place: step={}, data={}", dto.getStep(), data);
+		log.info("Processing callback for create_place: step={}, data={}", state.getStep(), data);
 
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
+		SendMessage answer = new SendMessage();
+		answer.setChatId(chatId.toString());
+		answer.setText(CommandsConstants.CREATING_TYPE);
 
 		try {
-			if (KeyboardConstants.BACK.equals(data)) { //User wants to back the previous menu to reconsider his choice
-				answer.setText(CommandsConstants.CREATING_TYPE);
-				switch (dto.getStep()) {
-					case 2 -> { //If user chose in subdistricts menu to choose district again
-						dto.setSubdistrict(null);
-						dto.setDistrict(null);
-						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
-						dto.setStep(1);
-					}
-					case 3 -> { //If user chose in types of place menu to choose district/subdistrict again
-						dto.setPlaceType(null);
-						if (dto.getDistrict().hasSubdistricts()) {
-							answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
-							dto.setStep(2);
-						} else {
-							answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createDistrictKeyboard(answer));
-							dto.setStep(1);
-						}
-					}
-					case 4 -> { //If user chose in outdoor/inside places menu to choose type of place again
-						dto.setOutdoor(null);
-						answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
-						dto.setStep(3);
-					}
-				}
-				placeSession.save(chatId, dto);
+			if (KeyboardConstants.BACK.equals(data)) {
+				handleBack(state, answer);
+				placeSession.save(chatId, state);
 				sender.sendMessageWithoutPhoto(answer);
 				return;
 			}
 
-			answer.setText(CommandsConstants.CREATING_TYPE);
-			switch (dto.getStep()) {
-				case 1 -> handleDistrictStep(dto, data, answer);
-				case 2 -> handleSubdistrictStep(dto, data, answer);
-				case 3 -> handlePlaceTypeStep(dto, data, answer);
-				case 4 -> handleOutdoorStep(dto, data, answer);
-				default -> handleUnknownStep(chatId, userId, answer);
+			CreatePlaceStep currentStep = state.getStep();
+			if (currentStep.isCallbackStep()) {
+				CreatePlaceStep nextStep = currentStep.onCallback(data, state, placeService);
+				state.setStep(nextStep);
+				InlineKeyboardMarkup keyboard = nextStep.buildKeyboard(answer, state);
+				answer.setReplyMarkup(keyboard);
+			} else {
+				handleUnknownStep(chatId, userId, answer);
 			}
-			placeSession.save(chatId, dto);
+
+			placeSession.save(chatId, state);
 			sender.sendMessageWithoutPhoto(answer);
 		} catch (Exception e) {
 			log.error("Error processing callback", e);
-			placeSession.clear(userId);
+			placeSession.clear(chatId);
 			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
 		}
 	}
 
-	private void handleDistrictStep(PlaceDto dto, String data, SendMessage answer) {
-        dto.setDistrict(District.valueOf(data));
-		if (dto.getDistrict().hasSubdistricts()) {
-			answer.setReplyMarkup(dto.getDistrict().buildSubdistrictsKeyboard(answer));
-			dto.setStep(2);
-		} else {
-			dto.setSubdistrict(null);
-			answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
-			dto.setStep(3);
+	private void handleBack(PlaceState state, SendMessage answer) {
+		CreatePlaceStep currentStep = state.getStep();
+		CreatePlaceStep previousStep = currentStep.PREV;
+
+		if (previousStep == null) {
+			return;
 		}
-	}
 
-	private void handleSubdistrictStep(PlaceDto dto, String data, SendMessage answer) {
-        dto.setSubdistrict(SubDistrict.valueOf(data));
-		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createPlaceTypeKeyboard(answer));
-		dto.setStep(3);
-	}
+		state.setStep(previousStep);
 
-	private void handlePlaceTypeStep(PlaceDto dto, String data, SendMessage answer) {
-        dto.setPlaceType(PlaceType.valueOf(data));
-		answer.setReplyMarkup(ChoosingPlaceOptionsMenu.createOutdoorKeyboard(answer));
-		dto.setStep(4);
-	}
-
-	private void handleOutdoorStep(PlaceDto dto, String data, SendMessage answer) {
-		dto.setOutdoor(Boolean.parseBoolean(data));
-        answer.setText(CommandsConstants.ENTER_PLACE_NAME);
-		dto.setStep(5);
+		// Reset state based on previous step
+		switch (previousStep) {
+			case DISTRICT:
+				state.setSubDistrict(null);
+				state.setPlaceType(null);
+				state.setOutdoor(null);
+				state.setDistrict(null);
+				answer.setReplyMarkup(previousStep.buildKeyboard(answer, state));
+				break;
+			case SUBDISTRICT:
+				state.setPlaceType(null);
+				state.setOutdoor(null);
+				answer.setReplyMarkup(previousStep.buildKeyboard(answer, state));
+				break;
+			case PLACE_TYPE:
+				state.setOutdoor(null);
+				answer.setReplyMarkup(previousStep.buildKeyboard(answer, state));
+				break;
+			case OUTDOOR:
+				answer.setReplyMarkup(previousStep.buildKeyboard(answer, state));
+				break;
+			default:
+				break;
+		}
 	}
 
 	@Override
@@ -182,70 +170,46 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		PlaceDto dto = placeSession.getIfExists(chatId);
-		if (!ifSessionValid(chatId, dto)) {
+		PlaceState state = placeSession.getIfExists(chatId);
+		if (!ifSessionValid(chatId, state)) {
 			return;
 		}
 
-        SendMessage answer = new SendMessage();
-        answer.setChatId(chatId.toString());
+		SendMessage answer = new SendMessage();
+		answer.setChatId(chatId.toString());
+		answer.setText(CommandsConstants.CREATING_TYPE);
+
+		String text = message.getText();
 
 		try {
-			handleTextInput(message, dto, answer);
-			placeSession.save(chatId, dto);
-			sender.sendMessageWithoutPhoto(answer);
+			CreatePlaceStep currentStep = state.getStep();
+
+			if (currentStep.isTextStep()) {
+				String nextStepName = currentStep.handleText(answer, text, state, placeService);
+
+				if (nextStepName != null) {
+					CreatePlaceStep nextStep = CreatePlaceStep.valueOf(nextStepName);
+					state.setStep(nextStep);
+
+					InlineKeyboardMarkup keyboard = nextStep.buildKeyboard(answer, state);
+					answer.setReplyMarkup(keyboard);
+				}
+
+				placeSession.save(chatId, state);
+
+				if (!answer.getText().isEmpty()) {
+					sender.sendMessageWithoutPhoto(answer);
+				}
+			} else {
+				handleUnknownStep(chatId, userId, answer);
+				sender.sendMessageWithoutPhoto(answer);
+			}
 		} catch (Exception e) {
 			log.error("Error processing text input", e);
-			placeSession.clear(userId);
+			placeSession.clear(chatId);
 			commandStateStore.clearCurrentCommand(userId);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ENTERING_ERROR);
 		}
-	}
-
-	private void handleTextInput(Message message, PlaceDto dto, SendMessage answer) {
-		Long chatId = message.getChatId();
-		Long userId = message.getFrom().getId();
-		String text = message.getText();
-
-		switch (dto.getStep()) {
-			case 5 -> {
-				if (!placeService.existsByName(text)) {
-					dto.setName(text);
-                    answer.setText(CommandsConstants.ENTER_PLACE_ADDRESS);
-					dto.setStep(6);
-				} else {
-                    answer.setText(CommandsConstants.PLACE_NAME_IS_EXISTED);
-				}
-			}
-			case 6 -> {
-				dto.setAddress(text);
-                answer.setText(CommandsConstants.ENTER_PLACE_DESCRIPTION);
-				dto.setStep(7);
-			}
-			case 7 -> {
-				dto.setDescription(text);
-				answer.setText(CommandsConstants.ENTER_PLACE_LINK);
-				dto.setStep(8);
-			}
-			case 8 -> {
-				dto.setWebSite(text.equals("-") ? null : text);
-				answer.setText(CommandsConstants.ENTER_PLACE_COORDINATES);
-				dto.setStep(9);
-			}
-			case 9 -> {
-                dto.setCoordinates(text);
-                answer.setText(CommandsConstants.SEND_PLACE_PHOTO);
-				dto.setStep(10);
-			}
-			case 10 -> answer.setText(CommandsConstants.SEND_PLACE_PHOTO_2);
-			default -> handleUnknownStep(chatId, userId, answer);
-		}
-	}
-
-	private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
-		answer.setText(ErrorConstants.UNKNOWN_STEP);
-		placeSession.clear(chatId);
-		commandStateStore.clearCurrentCommand(userId);
 	}
 
 	@Override
@@ -253,8 +217,8 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		Long chatId = message.getChatId();
 		Long userId = message.getFrom().getId();
 
-		PlaceDto dto = placeSession.getIfExists(chatId);
-		if (!ifSessionValid(chatId, dto)) {
+		PlaceState state = placeSession.getIfExists(chatId);
+		if (!ifSessionValid(chatId, state)) {
 			return;
 		}
 
@@ -268,11 +232,13 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 				byte[] photoBytes = UtilMethods.downloadPhoto(absSender, fileId, botToken);
 				log.info("Downloaded photo: {} bytes", photoBytes.length);
 
-				dto.setPhoto(photoBytes);
-				placeService.create(dto);
+				state.setPhoto(photoBytes);
+				placeService.create(state);
 				placeSession.clear(chatId);
 				commandStateStore.clearCurrentCommand(userId);
 				sender.sendMessageWithoutPhoto(chatId, CommandsConstants.PLACE_CREATED);
+			} else {
+				sender.sendMessageWithoutPhoto(chatId, CommandsConstants.SEND_PLACE_PHOTO_2);
 			}
 		} catch (Exception e) {
 			log.error("Error processing photo", e);
@@ -282,16 +248,16 @@ public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextPr
 		}
 	}
 
-	private boolean ifSessionValid(Long chatId, PlaceDto dto) {
-		if (!getCommandIdentifier().equals(commandStateStore.getCurrentCommand(chatId))) {
-			log.warn("User {} is not in create_place session", chatId);
-			return false;
-		}
+	private void handleUnknownStep(Long chatId, Long userId, SendMessage answer) {
+		answer.setText(ErrorConstants.UNKNOWN_STEP);
+		placeSession.clear(chatId);
+		commandStateStore.clearCurrentCommand(userId);
+	}
 
-		if (dto == null) {
+	private boolean ifSessionValid(Long chatId, PlaceState state) {
+		if (state == null) {
 			log.warn("No session found for chatId: {}", chatId);
 			sender.sendMessageWithoutPhoto(chatId, ErrorConstants.SESSION_EXPIRED);
-			commandStateStore.clearCurrentCommand(chatId);
 			return false;
 		}
 		return true;
