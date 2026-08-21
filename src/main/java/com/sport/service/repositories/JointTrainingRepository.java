@@ -4,15 +4,27 @@ import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
 public interface JointTrainingRepository extends JpaRepository<JointTraining, Long> {
+
+    @Modifying
+    @Query("""
+        DELETE FROM JointTraining jt
+        WHERE jt.date < :nowDate
+            OR (jt.date = :nowDate
+                AND jt.time IS NOT NULL
+                AND jt.time < :nowTime)
+    """)
+    void deleteByDateAndTimeBefore(@Param("nowDate") LocalDate currentDate, @Param("nowTime") LocalTime currentTime);
 
     @Query("""
         SELECT jt FROM JointTraining jt
