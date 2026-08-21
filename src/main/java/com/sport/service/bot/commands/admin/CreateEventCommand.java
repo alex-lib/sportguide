@@ -29,7 +29,6 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
     private final EventSession eventSession;
     private final EventService eventService;
     private final CommandStateStore commandStateStore;
-
     private final TelegramMessageSender sender;
 
     @Override
@@ -166,7 +165,7 @@ public class CreateEventCommand implements IBotCommand, TextProcessable, Callbac
                 dto.setStep(5);
             }
             case 5 -> {
-                dto.setLink(text);
+                dto.setLink(text.equals("-") ? null : text);
                 answer.setText(CommandsConstants.ENTER_EVENT_PLACE);
                 dto.setStep(6);
             }

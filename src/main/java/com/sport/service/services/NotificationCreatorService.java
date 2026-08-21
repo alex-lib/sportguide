@@ -53,7 +53,11 @@ public class NotificationCreatorService {
         context.setVariable("eventDistrict", event.getDistrict());
         context.setVariable("eventAddress", event.getAddress());
         context.setVariable("eventPlaceName", event.getPlaceName());
-        context.setVariable("eventLink", event.getLink());
+
+        if (event.getLink() != null && !event.getLink().equals("-")) {
+            context.setVariable("eventLink", event.getLink());
+        }
+
         return templateEngine.process("event_notification.txt", context);
     }
 
