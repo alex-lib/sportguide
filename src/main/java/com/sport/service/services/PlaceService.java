@@ -10,6 +10,8 @@ import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class PlaceService {
     private final PlaceMapper placeMapper;
 
     @Transactional
+    @CacheEvict(value = "places", allEntries = true)
     public void create(PlaceDto dto) {
         placeRepository.save(placeMapper.placeDtoToPlace(dto));
     }
@@ -39,6 +42,7 @@ public class PlaceService {
         return placeRepository.findByDistrictAndPlaceType(district, placeType);
     }
 
+    @Cacheable(value = "places")
     public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) {
         log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}, search={}",
                 districtStr, subDistrictStr, outdoor, placeType, search);
@@ -95,6 +99,7 @@ public class PlaceService {
     }
 
     @Transactional
+    @CacheEvict(value = "places", allEntries = true)
     public void deleteByName(String name) {
         Place place = placeRepository.findByName(name);
         if (place != null) placeRepository.delete(place);
