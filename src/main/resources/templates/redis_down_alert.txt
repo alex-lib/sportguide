@@ -1,0 +1,4 @@
+🔴 <b>CRITICAL: Redis is DOWN!</b>
+⚠️ Сервис SportGuide потерял подключение к Redis.
+🕐 Время: [[${timestamp}]]
+📱 Service: SportGuide

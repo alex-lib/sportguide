@@ -8,6 +8,7 @@ import com.sport.service.repositories.SubscriberRepository;
 import com.sport.service.utils.BeanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -20,19 +21,12 @@ import java.util.Optional;
 @Slf4j
 public class SubscriberService {
     private final SubscriberRepository subscriberRepository;
-
     private final TelegramMessageSender sender;
+    private final NotificationSenderService notificationSenderService;
+    private final NotificationCreatorService notificationCreatorService;
 
-//    public Subscriber findOrCreateDevUser() {
-//        return subscriberRepository.findById(1L)
-//                .orElseGet(() -> subscriberRepository.save(
-//                        Subscriber.builder()
-//                                .id(1L)
-//                                .username("dev")
-//                                .role(RoleType.ADMIN)
-//                                .build()
-//                ));
-//    }
+    @Value("${telegram.mainAdminId}")
+    private String adminId;
 
     @Transactional
     public void addSubscriber(User user) {
@@ -58,6 +52,8 @@ public class SubscriberService {
                     .build();
             subscriberRepository.save(transientSubscriber);
             log.info("New user is saved - {}", user.getId());
+
+            sendNewUserAlert(transientSubscriber);
 
             String greetingMessage = user.getUserName() != null ?
                     "<i>Привет</i> @" + user.getUserName() + " \uD83D\uDC4B" + "\n" + CommandsConstants.GREETING_MESSAGE :
@@ -97,5 +93,10 @@ public class SubscriberService {
 
     public List<Subscriber> findAll() {
         return subscriberRepository.findAll();
+    }
+
+    private void sendNewUserAlert(Subscriber subscriber) {
+        String message = notificationCreatorService.createNewUserAlert(subscriber);
+        notificationSenderService.sendAdminAlertNotification(message, Long.valueOf(adminId));
     }
 }

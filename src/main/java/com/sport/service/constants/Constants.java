@@ -6,6 +6,7 @@ public class Constants {
     public static final String EVENT_CHANNEL_NAME = "notification:event";
     public static final String SUBSCRIBER_TO_ADMIN_CHANNEL_NAME = "notification:subscriber_to_admin";
     public static final String ADMIN_TO_SUBSCRIBER_CHANNEL_NAME = "notification:admin_to_subscriber";
+    public static final String ADMIN_ALERT_CHANNEL_NAME = "notification:admin_alert";
     public static final String KEY_OF_CHANNEL_NAME = "notification:";
 
     public static final String CRON_DELETE_EVENT = "0 0 0 * * *";

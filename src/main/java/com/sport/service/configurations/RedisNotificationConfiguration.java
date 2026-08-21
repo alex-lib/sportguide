@@ -50,6 +50,7 @@ public class RedisNotificationConfiguration {
         container.addMessageListener(listener, eventTopic());
         container.addMessageListener(listener, subscriberToAdminTopic());
         container.addMessageListener(listener, adminToSubscriberTopic());
+        container.addMessageListener(listener, adminAlertTopic());
         return container;
     }
 
@@ -71,5 +72,10 @@ public class RedisNotificationConfiguration {
     @Bean
     public ChannelTopic adminToSubscriberTopic() {
         return new ChannelTopic(Constants.ADMIN_TO_SUBSCRIBER_CHANNEL_NAME);
+    }
+
+    @Bean
+    public ChannelTopic adminAlertTopic() {
+        return new ChannelTopic(Constants.ADMIN_ALERT_CHANNEL_NAME);
     }
 }
