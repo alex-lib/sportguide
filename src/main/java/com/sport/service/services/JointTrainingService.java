@@ -1,5 +1,6 @@
 package com.sport.service.services;
 
+import com.sport.service.constants.Constants;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Subscriber;
@@ -15,6 +16,7 @@ import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -145,6 +150,13 @@ public class JointTrainingService {
         jt.setRejectionReason(reason);
         jointTrainingRepository.save(jt);
         notifyUserRejected(jt, reason);
+    }
+
+    @Transactional
+    @Scheduled(cron = Constants.CRON_DELETE_JOINT_TRAINING, zone = Constants.TIME_ZONE)
+    public void deleteJointTrainingByExpiredDate() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Constants.TIME_ZONE));
+        jointTrainingRepository.deleteByDateAndTimeBefore(now.toLocalDate(), now.toLocalTime());
     }
 
     private void processJointTrainingApprovalRequest(JointTraining jointTraining) {
