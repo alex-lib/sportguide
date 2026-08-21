@@ -45,4 +45,13 @@ public class NotificationSenderService {
                 .build();
         publisher.publishToUsers(userIds, template);
     }
+
+    public void sendAdminAlertNotification(String message, Long adminId) {
+        Notification template = Notification.builder()
+                .userId(adminId)
+                .type(Notification.NotificationType.ADMIN_ALERT)
+                .message(message)
+                .build();
+        publisher.publish(template);
+    }
 }

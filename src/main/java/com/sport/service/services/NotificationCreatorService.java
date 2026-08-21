@@ -4,6 +4,7 @@ import com.sport.service.dto.WeatherDataAtSpecificHourDto;
 import com.sport.service.entities.Event;
 import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Place;
+import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TodayWeather;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -85,5 +86,36 @@ public class NotificationCreatorService {
 
         context.setVariable("jointTraining", jointTraining);
         return templateEngine.process("request_to_approve_joint_training.txt", context);
+    }
+
+    public String createNewUserAlert(Subscriber subscriber) {
+        Context context = new Context();
+
+        context.setVariable("id", subscriber.id);
+        context.setVariable("username", subscriber.username);
+        context.setVariable("firstName", subscriber.firstName);
+        context.setVariable("lastName", subscriber.lastName);
+        context.setVariable("getEvents", subscriber.getEvents);
+        context.setVariable("registrationDate", java.time.LocalDateTime.now());
+        return templateEngine.process("new_user.txt", context);
+    }
+
+    public String createRedisDownAlert(java.time.LocalDateTime timestamp) {
+        Context context = new Context();
+        context.setVariable("timestamp", timestamp);
+        return templateEngine.process("redis_down_alert.txt", context);
+    }
+
+    public String createRedisDownReminderAlert(long minutesSinceLastAlert) {
+        Context context = new Context();
+        context.setVariable("minutesSinceLastAlert", minutesSinceLastAlert);
+        context.setVariable("timestamp", java.time.LocalDateTime.now());
+        return templateEngine.process("redis_down_reminder_alert.txt", context);
+    }
+
+    public String createRedisUpAlert(java.time.LocalDateTime timestamp) {
+        Context context = new Context();
+        context.setVariable("timestamp", timestamp);
+        return templateEngine.process("redis_up_alert.txt", context);
     }
 }

@@ -1,0 +1,8 @@
+👤 <b>Новый пользователь!</b>
+
+ID: [[${id}]]
+Username: [[${username != null ? '@' + username : 'не указан'}]]
+Имя: [[${firstName != null ? firstName : 'не указано'}]]
+Фамилия: [[${lastName != null ? lastName : 'не указана'}]]
+Подписка на события: [[${getEvents ? 'Да' : 'Нет'}]]
+Дата регистрации: [[${registrationDate}]]
