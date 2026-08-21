@@ -25,14 +25,7 @@ const Home = () => {
           <Tile to="/events" icon="calendar" title="События" subtitle="Ближайшие спорт-события" />
           <Tile to="/places" icon="map-pin" accent title="Места" subtitle="Площадки и залы" />
           <Tile to="/joint-trainings" icon="users" title="Тренировки" subtitle="Найти партнёров" />
-          <Tile to="/training-programs" icon="clipboard-list" accent title="Программы" subtitle="Готовые планы" />
-          <Tile
-            to="/coaches"
-            icon="graduation-cap"
-            wide
-            title="Тренеры"
-            subtitle="Профессиональные инструкторы рядом с тобой"
-          />
+          <Tile to="/coaches" icon="graduation-cap" accent title="Тренеры" subtitle="Инструкторы рядом с тобой" />
         </Tiles>
       </Page>
     </>
