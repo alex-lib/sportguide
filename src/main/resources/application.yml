@@ -101,6 +101,8 @@ spring:
       enabled: false
   main:
     web-application-type: servlet
+  cache:
+    cache-names: places
 
 management:
   endpoints:
