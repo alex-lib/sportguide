@@ -1,6 +1,5 @@
 package com.sport.service.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
@@ -76,7 +75,6 @@ public class Place {
     @Column(name = "coordinates")
     private String coordinates;
 
-    @JsonIgnore
     @ManyToMany(mappedBy = "workPlaces", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<Coach> coaches;
 }
