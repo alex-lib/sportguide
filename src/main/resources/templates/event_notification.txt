@@ -6,8 +6,5 @@
 🗺 <b>Район:</b> [[${eventDistrict}]]
 📮 <b>Адрес:</b> [[${eventAddress}]]
 📍 <b>Место:</b> [[${eventPlaceName}]]
-[# th:if="${eventLink != null and eventLink != '-'}"]
-🔗 <b>Ссылка:</b> [[${eventLink}]]
-[/]
-
+[# th:if="${eventLink != null and eventLink != '-'}"]🔗 <b>Ссылка:</b> [[${eventLink}]][/]
 <i>#событие</i>
