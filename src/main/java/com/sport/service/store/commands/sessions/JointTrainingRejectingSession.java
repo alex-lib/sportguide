@@ -1,4 +1,4 @@
-package com.sport.service.redis_store.commands_store.sessions;
+package com.sport.service.store.commands.sessions;
 
 import com.sport.service.dto.JointTrainingRejectingDto;
 import lombok.RequiredArgsConstructor;
