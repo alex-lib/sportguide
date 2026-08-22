@@ -1,5 +1,6 @@
 package com.sport.service.mappers.place;
 
+import com.sport.service.configurations.MinioService;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.mappers.string.DistrictStringMapper;
@@ -8,11 +9,17 @@ import com.sport.service.mappers.string.PlaceTypeStringMapper;
 import com.sport.service.mappers.string.SubDistrictStringMapper;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public abstract class PlaceMapperDelegate implements PlaceMapper {
+
+    private final MinioService minioService;
 
     @Override
     public Place placeDtoToPlace(PlaceDto dto) {
@@ -25,7 +32,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                 .webSite(dto.getWebSite())
                 .outdoor(dto.getOutdoor())
                 .placeType(dto.getPlaceType())
-                .photo(dto.getPhoto())
+                .photoUrl(dto.getPhotoUrl())
                 .coordinates(dto.getCoordinates())
                 .build();
     }
@@ -39,22 +46,35 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
             String subDistrictString = SubDistrictStringMapper.subDistrictEnumToSubDistrictString(place.getSubDistrict());
             String outdoorString = OutdoorStringMapper.outdoorEnumToOutdoorString(place.getOutdoor());
             String placeTypeString = PlaceTypeStringMapper.placeTypeEnumToPlaceTypeString(place.getPlaceType());
-            String[] coordinatesArray = place.getCoordinates().split(",");
-            float latitude = Float.parseFloat(coordinatesArray[0].trim());
-            float longitude = Float.parseFloat(coordinatesArray[1].trim());
-            String coordinates = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
 
-            placeResponses.add(new PlaceResponse(
-                    place.getName(),
-                    districtString,
-                    subDistrictString,
-                    place.getAddress(),
-                    place.getDescription(),
-                    place.getWebSite(),
-                    outdoorString,
-                    placeTypeString,
-                    place.getPhoto(),
-                    coordinates));
+            String coordinates;
+            if (place.getCoordinates() != null) {
+                String[] coordinatesArray = place.getCoordinates().split(",");
+                float latitude = Float.parseFloat(coordinatesArray[0].trim());
+                float longitude = Float.parseFloat(coordinatesArray[1].trim());
+                coordinates = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+            } else {
+                coordinates = "Координаты места не указаны";
+            }
+
+            String photoUrl = null;
+            if (place.getPhotoUrl() != null) {
+                photoUrl = minioService.getPresignedObjectUrl(place.getPhotoUrl());
+            }
+
+            placeResponses.add(PlaceResponse.builder()
+                    .id(place.getId())
+                    .name(place.getName())
+                    .district(districtString)
+                    .subDistrict(subDistrictString)
+                    .address(place.getAddress())
+                    .description(place.getDescription())
+                    .webSite(place.getWebSite())
+                    .outdoor(outdoorString)
+                    .placeType(placeTypeString)
+                    .coordinates(coordinates)
+                    .photoUrl(photoUrl)
+                    .build());
         }
         return new ListPlaceResponse(placeResponses);
     }
