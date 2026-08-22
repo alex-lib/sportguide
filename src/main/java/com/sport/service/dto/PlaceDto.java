@@ -21,6 +21,7 @@ public class PlaceDto {
     private String address;
     private String description;
     private String webSite;
+    private String photoUrl;
     @ToString.Exclude
     private byte[] photo;
     private String coordinates;
