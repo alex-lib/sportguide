@@ -6,6 +6,7 @@ import com.sport.service.bot.commands.menu.ChoosingPlaceOptionsMenu;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
 import com.sport.service.bot.constants.KeyboardConstants;
+import com.sport.service.configurations.MinioService;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
@@ -25,6 +26,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +41,7 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     private final NotificationCreatorService notificationCreatorService;
 
     private final TelegramMessageSender sender;
+    private final MinioService minioService;
 
     @Override
     public String getCommandIdentifier() {
@@ -241,7 +244,16 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
     }
 
     private void sendPlaceInfo(Long chatId, Place place) {
-        byte[] photo = place.getPhoto();
+        byte[] photo = null;
+
+        if (place.getPhotoUrl() != null && !place.getPhotoUrl().isEmpty()) {
+            try {
+                photo = minioService.getFile(place.getPhotoUrl());
+            } catch (Exception e) {
+                log.error("Failed to fetch photo from MinIO for place '{}': {}", place.getName(), e.getMessage());
+            }
+        }
+
         String caption = createCaption(place);
         if (photo != null && photo.length > 0) {
             sender.sendMessageWithPhoto(chatId, photo, caption);

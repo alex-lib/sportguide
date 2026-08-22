@@ -1,6 +1,5 @@
 package com.sport.service.mappers.place;
 
-import com.sport.service.configurations.MinioService;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.mappers.string.DistrictStringMapper;
@@ -9,20 +8,11 @@ import com.sport.service.mappers.string.PlaceTypeStringMapper;
 import com.sport.service.mappers.string.SubDistrictStringMapper;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceResponse;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
 public abstract class PlaceMapperDelegate implements PlaceMapper {
-    private MinioService minioService;
-
-    @Autowired
-    public PlaceMapperDelegate(MinioService minioService) {
-        this.minioService = minioService;
-    }
 
     @Override
     public Place placeDtoToPlace(PlaceDto dto) {
@@ -60,11 +50,6 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                 coordinates = "Координаты места не указаны";
             }
 
-            String photoUrl = null;
-            if (place.getPhotoUrl() != null) {
-                photoUrl = minioService.getPresignedObjectUrl(place.getPhotoUrl());
-            }
-
             placeResponses.add(PlaceResponse.builder()
                     .id(place.getId())
                     .name(place.getName())
@@ -76,7 +61,7 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                     .outdoor(outdoorString)
                     .placeType(placeTypeString)
                     .coordinates(coordinates)
-                    .photoUrl(photoUrl)
+                    .photoUrl(place.getPhotoUrl())
                     .build());
         }
         return new ListPlaceResponse(placeResponses);
