@@ -1,5 +1,6 @@
 package com.sport.service.services;
 
+import com.sport.service.configurations.MinioService;
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.enums.common.District;
@@ -8,6 +9,7 @@ import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.web.models.place.ListPlaceResponse;
+import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,6 +17,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -23,11 +28,20 @@ import java.util.List;
 public class PlaceService {
     private final PlaceRepository placeRepository;
     private final PlaceMapper placeMapper;
+    private final MinioService minioService;
 
     @Transactional
     @CacheEvict(value = "places", allEntries = true)
     public void create(PlaceDto dto) {
-        placeRepository.save(placeMapper.placeDtoToPlace(dto));
+        Place place = placeMapper.placeDtoToPlace(dto);
+        placeRepository.save(place);
+        if (dto.getPhoto() != null && dto.getPhoto().length > 0) {
+            String objectName = "places/" + place.getId() + "/photo.jpg";
+            minioService.uploadFileBytes(objectName, dto.getPhoto(), "image/jpeg");
+            place.setPhotoUrl(objectName);
+            placeRepository.save(place);
+            log.info("Photo uploaded to MinIO for place '{}': {}", place.getName(), objectName);
+        }
     }
 
     public boolean existsByName(String name) {
@@ -43,7 +57,7 @@ public class PlaceService {
     }
 
     @Cacheable(value = "places")
-    public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) {
+    public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}, search={}",
                 districtStr, subDistrictStr, outdoor, placeType, search);
         District district;
@@ -102,6 +116,12 @@ public class PlaceService {
     @CacheEvict(value = "places", allEntries = true)
     public void deleteByName(String name) {
         Place place = placeRepository.findByName(name);
-        if (place != null) placeRepository.delete(place);
+        if (place != null) {
+            if (place.getPhotoUrl() != null) {
+                minioService.deleteFile(place.getPhotoUrl());
+                log.info("Photo deleted from MinIO for place '{}': {}", name, place.getPhotoUrl());
+            }
+            placeRepository.delete(place);
+        }
     }
 }
