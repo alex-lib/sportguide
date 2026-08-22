@@ -72,7 +72,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
-
+    implementation("io.minio:minio:8.5.9")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
