@@ -68,7 +68,11 @@ dependencies {
     implementation("org.telegram:telegrambots:6.9.7.1")
     implementation("org.telegram:telegrambotsextensions:6.9.7.1")
 
+    // DB
     runtimeOnly("org.postgresql:postgresql")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
+
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

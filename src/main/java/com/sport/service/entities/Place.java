@@ -72,6 +72,9 @@ public class Place {
     @Column(name = "photo")
     private byte[] photo;
 
+    @Column(name = "photo_url")
+    private String photoUrl;
+
     @Column(name = "coordinates")
     private String coordinates;
 
