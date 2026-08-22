@@ -9,17 +9,20 @@ import com.sport.service.mappers.string.PlaceTypeStringMapper;
 import com.sport.service.mappers.string.SubDistrictStringMapper;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
-@RequiredArgsConstructor
+@NoArgsConstructor
 public abstract class PlaceMapperDelegate implements PlaceMapper {
+    private MinioService minioService;
 
-    private final MinioService minioService;
+    @Autowired
+    public PlaceMapperDelegate(MinioService minioService) {
+        this.minioService = minioService;
+    }
 
     @Override
     public Place placeDtoToPlace(PlaceDto dto) {
