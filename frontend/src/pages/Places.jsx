@@ -9,7 +9,6 @@ import {
   Card,
   CardTitle,
   CardText,
-  Photo,
   PhotoPlaceholder,
   Pill,
   MetaLine,
@@ -24,6 +23,34 @@ import {
 import { pluralRu } from '../utils/plural.js';
 
 const isOutdoor = (place) => place.outdoor === 'true' || /улиц/i.test(place.outdoor || '');
+
+const PlacePhoto = ({ photoUrl }) => {
+  const [blob, setBlob] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let loaded = true;
+    if (!photoUrl) return;
+
+    (async () => {
+      try {
+        const file = await apiService.getPhoto(photoUrl);
+        if (!loaded) return;
+        setBlob(URL.createObjectURL(file));
+      } catch (e) {
+        if (!loaded) return;
+        setError(e);
+      }
+    })();
+
+    return () => { loaded = false; };
+  }, [photoUrl]);
+
+  if (error) return null;
+  if (!blob) return null;
+
+  return <img src={blob} alt="" className="card-photo" />;
+};
 
 const Places = () => {
   const [places, setPlaces] = useState([]);
@@ -54,8 +81,9 @@ const Places = () => {
 
       const response = await apiService.getPlaces(filterParams);
       if (requestId !== latestRequest.current) return;
-      console.log('Places response:', JSON.stringify(response?.list?.slice(0, 2), null, 2));
-      setPlaces(response?.list || []);
+      const items = response?.list || [];
+      setPlaces(items);
+      console.log('Places loaded:', items[0]?.id, items[0]?.name, items[0]?.photoUrl);
     } catch (error) {
       if (requestId !== latestRequest.current) return;
       console.error('Failed to load places:', error);
@@ -128,17 +156,10 @@ const Places = () => {
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0}>
                 {place.photoUrl ? (
-                  <Photo src={`/api/places/photo?photoUrl=${place.photoUrl}`} alt={place.name} onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const ph = e.currentTarget.nextElementSibling;
-                    if (ph) ph.removeAttribute('hidden');
-                  }} />
-                ) : null}
-                {place.photoUrl ? (
-                  <div hidden className="card-photo-ph" style={{ background: 'var(--color-surface-2)' }}>
-                    <PhotoPlaceholder icon="building-2" />
-                  </div>
-                ) : null}
+                  <PlacePhoto photoUrl={place.photoUrl} />
+                ) : (
+                  <PhotoPlaceholder icon="building-2" />
+                )}
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                   <div style={{ flex: 1 }}>
