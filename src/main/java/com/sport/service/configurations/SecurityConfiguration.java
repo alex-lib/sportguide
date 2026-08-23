@@ -124,7 +124,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/telegram").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/places/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/places/photo").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth
