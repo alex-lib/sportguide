@@ -239,7 +239,12 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
         }
 
         for (Place place : places) {
-            sendPlaceInfo(chatId, place);
+            try {
+                sendPlaceInfo(chatId, place);
+            } catch (Exception e) {
+                log.error("Failed to send place '{}' to chatId={}", place.getName(), chatId, e);
+                sender.sendMessageWithoutPhoto(chatId, "Ошибка при отправке места: " + place.getName());
+            }
         }
     }
 
@@ -264,14 +269,18 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
 
     private String createCaption(Place place) {
         String mapLink = null;
-        if (!place.getCoordinates().equals("-")) {
-            String[] coordinates = place.getCoordinates().split(",");
-            float latitude = Float.parseFloat(coordinates[0].trim());
-            float longitude = Float.parseFloat(coordinates[1].trim());
-            mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+        if (!place.getCoordinates().equals("-") && place.getCoordinates().contains(",")) {
+            try {
+                String[] coordinates = place.getCoordinates().split(",");
+                float latitude = Float.parseFloat(coordinates[0].trim());
+                float longitude = Float.parseFloat(coordinates[1].trim());
+                mapLink = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+            } catch (NumberFormatException e) {
+                log.warn("Invalid coordinates for place '{}': {}", place.getName(), place.getCoordinates());
+            }
         }
 
-       return notificationCreatorService.createPlaceMessage(place, mapLink);
+        return notificationCreatorService.createPlaceMessage(place, mapLink);
     }
 
     private void cleanupSession(Long chatId, Long userId) {
