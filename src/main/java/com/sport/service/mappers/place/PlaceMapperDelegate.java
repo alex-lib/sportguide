@@ -9,9 +9,12 @@ import com.sport.service.mappers.string.SubDistrictStringMapper;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import com.sport.service.web.models.place.PlaceResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public abstract class PlaceMapperDelegate implements PlaceMapper {
 
     @Override
@@ -64,6 +67,8 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                     .photoUrl(place.getPhotoUrl())
                     .build());
         }
+        log.info("listPlaceToListPlaceResponse | sent {} places, first photoUrl={}", placeResponses.size(),
+                placeResponses.isEmpty() ? "N/A" : placeResponses.get(0).getPhotoUrl());
         return new ListPlaceResponse(placeResponses);
     }
 }
