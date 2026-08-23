@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
   },
   EVENTS: `${API_BASE_URL}/api/events`,
   PLACES: `${API_BASE_URL}/api/places`,
+  PLACES_PHOTO: `${API_BASE_URL}/api/places/photo`,
   JOINT_TRAININGS: `${API_BASE_URL}/api/joint-trainings`,
   TRAINING_PROGRAMS: `${API_BASE_URL}/api/training-programs`,
   COACHES: `${API_BASE_URL}/api/coaches`,
