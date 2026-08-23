@@ -93,6 +93,14 @@ class ApiService {
     return response.data;
   }
 
+  async getPhoto(photoUrl) {
+    const response = await this.api.get(API_ENDPOINTS.PLACES_PHOTO, {
+      params: { photoUrl },
+      responseType: 'blob',
+    });
+    return response.data;
+  }
+
   // Joint Trainings
   async getJointTrainings(filter = {}) {
     const response = await this.api.get(
