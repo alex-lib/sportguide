@@ -126,14 +126,14 @@ const Places = () => {
           <div>
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0}>
-                {place.id ? (
-                  <Photo src={`/api/places/${place.id}/photo`} alt={place.name} onError={(e) => { 
+                {place.photoUrl ? (
+                    <Photo src={`/api/places/photo?photoUrl=${place.photoUrl}`} alt={place.name} onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     const ph = e.currentTarget.nextElementSibling;
                     if (ph) ph.removeAttribute('hidden');
                   }} />
                 ) : null}
-                {place.id ? (
+                {place.photoUrl ? (
                   <div hidden className="card-photo-ph" style={{ background: 'var(--color-surface-2)' }}>
                     <PhotoPlaceholder icon="building-2" />
                   </div>

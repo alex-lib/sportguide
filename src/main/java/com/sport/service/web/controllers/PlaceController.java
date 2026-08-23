@@ -25,16 +25,23 @@ public class PlaceController {
     private final PlaceService placeService;
     private final MinioService minioService;
 
-    @GetMapping("/{id}/photo")
-    public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
+    @GetMapping("/photo")
+    public ResponseEntity<byte[]> getPhoto(@RequestParam String photoUrl) {
         try {
-            String objectName = "places/" + id + "/photo.jpg";
-            byte[] photo = minioService.getFile(objectName);
+            if (photoUrl == null || photoUrl.isEmpty()) {
+                log.warn("No photoUrl provided");
+                return ResponseEntity.notFound().build();
+            }
+            byte[] photo = minioService.getFile(photoUrl);
+            if (photo == null || photo.length == 0) {
+                log.warn("No photo found in MinIO for URL: {}", photoUrl);
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_JPEG)
                     .body(photo);
         } catch (Exception e) {
-            log.warn("Photo not found for place {}: {}", id, e.getMessage());
+            log.error("Failed to get photo for URL {}: {}", photoUrl, e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
