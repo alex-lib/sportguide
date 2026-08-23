@@ -9,7 +9,6 @@ import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.web.models.place.ListPlaceResponse;
-import com.sport.service.web.models.place.PlaceResponse;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,17 +90,6 @@ public class PlaceService {
         log.info("findAll Places | resolved district={}, subDistrict={}, outdoor={}, placeType={}, search={} | found={} entities",
                 district, subDistrict, outdoorVal, placeTypeEnum, search, result.size());
         ListPlaceResponse response = placeMapper.listPlaceToListPlaceResponse(result);
-        
-        for (PlaceResponse placeResponse : response.getList()) {
-            if (placeResponse.getPhotoUrl() != null && !placeResponse.getPhotoUrl().isEmpty()) {
-                try {
-                    placeResponse.setPhotoUrl(minioService.getFileUrl(placeResponse.getPhotoUrl()));
-                } catch (Exception e) {
-                    log.warn("Failed to build MinIO URL for place '{}': {}", placeResponse.getName(), placeResponse.getPhotoUrl());
-                }
-            }
-        }
-        
         return response;
     }
 
