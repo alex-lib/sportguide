@@ -25,7 +25,6 @@ public class PlaceController {
     private final PlaceService placeService;
     private final MinioService minioService;
 
-    @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @GetMapping("/{id}/photo")
     public ResponseEntity<byte[]> getPhoto(@PathVariable Long id) {
         try {
