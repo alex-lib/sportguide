@@ -27,6 +27,8 @@ public class PlaceController {
 
     @GetMapping("/photo")
     public ResponseEntity<byte[]> getPhoto(@RequestParam String photoUrl) {
+        log.info("Request for photo: photoUrl={}", photoUrl);
+
         try {
             if (photoUrl == null || photoUrl.isEmpty()) {
                 log.warn("No photoUrl provided");
