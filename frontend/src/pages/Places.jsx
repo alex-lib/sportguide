@@ -127,7 +127,7 @@ const Places = () => {
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0}>
                 {place.photoUrl ? (
-                    <Photo src={`/api/places/photo?photoUrl=${place.photoUrl}`} alt={place.name} onError={(e) => {
+                    <Photo src={`/api/places/photo?photoUrl=${encodeURIComponent(place.photoUrl)}`} alt={place.name} onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     const ph = e.currentTarget.nextElementSibling;
                     if (ph) ph.removeAttribute('hidden');
