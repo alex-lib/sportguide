@@ -127,9 +127,17 @@ const Places = () => {
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0}>
                 {place.id ? (
-                  <Photo src={`/api/places/${place.id}/photo`} alt={place.name} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.removeAttribute('hidden'); }} />
+                  <Photo src={`/api/places/${place.id}/photo`} alt={place.name} onError={(e) => { 
+                    e.currentTarget.style.display = 'none';
+                    const ph = e.currentTarget.nextElementSibling;
+                    if (ph) ph.removeAttribute('hidden');
+                  }} />
                 ) : null}
-                {!place.id && <PhotoPlaceholder icon="building-2" />}
+                {place.id ? (
+                  <div hidden className="card-photo-ph" style={{ background: 'var(--color-surface-2)' }}>
+                    <PhotoPlaceholder icon="building-2" />
+                  </div>
+                ) : null}
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                   <div style={{ flex: 1 }}>
