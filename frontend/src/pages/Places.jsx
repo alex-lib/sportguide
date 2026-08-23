@@ -126,12 +126,10 @@ const Places = () => {
           <div>
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0}>
-                {place.photoUrl ? (
-                  <Photo src={place.photoUrl} alt={place.name} />
-                ) : place.id ? (
+                {place.id ? (
                   <Photo src={`/api/places/${place.id}/photo`} alt={place.name} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.removeAttribute('hidden'); }} />
                 ) : null}
-                {(!place.photoUrl && !place.id) && <PhotoPlaceholder icon="building-2" />}
+                {!place.id && <PhotoPlaceholder icon="building-2" />}
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                   <div style={{ flex: 1 }}>
