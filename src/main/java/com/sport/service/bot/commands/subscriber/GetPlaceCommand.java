@@ -34,14 +34,12 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
-    private final CommandStateStore commandStateStore;
-    private final PlaceSession placeSession;
-
-    private final PlaceService placeService;
     private final NotificationCreatorService notificationCreatorService;
-
-    private final TelegramMessageSender sender;
     private final MinioService minioService;
+    private final PlaceService placeService;
+    private final CommandStateStore commandStateStore;
+    private final TelegramMessageSender sender;
+    private final PlaceSession placeSession;
 
     @Override
     public String getCommandIdentifier() {
@@ -243,27 +241,19 @@ public class GetPlaceCommand implements IBotCommand, CallbackProcessable {
                 sendPlaceInfo(chatId, place);
             } catch (Exception e) {
                 log.error("Failed to send place '{}' to chatId={}", place.getName(), chatId, e);
-                sender.sendMessageWithoutPhoto(chatId, "Ошибка при отправке места: " + place.getName());
             }
         }
     }
 
     private void sendPlaceInfo(Long chatId, Place place) {
-        byte[] photo = null;
-
-        if (place.getPhotoUrl() != null && !place.getPhotoUrl().isEmpty()) {
-            try {
-                photo = minioService.getFile(place.getPhotoUrl());
-            } catch (Exception e) {
-                log.error("Failed to fetch photo from MinIO for place '{}': {}", place.getName(), e.getMessage());
-            }
+        if (place.getPhotoUrl() == null || place.getPhotoUrl().isEmpty()) {
+            throw new RuntimeException("No photo for place: " + place.getName());
         }
 
-        String caption = createCaption(place);
+        byte[] photo = minioService.getFile(place.getPhotoUrl());
         if (photo != null && photo.length > 0) {
+            String caption = createCaption(place);
             sender.sendMessageWithPhoto(chatId, photo, caption);
-        } else {
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
         }
     }
 
