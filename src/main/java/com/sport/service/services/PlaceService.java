@@ -9,12 +9,6 @@ import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.web.models.place.ListPlaceResponse;
-import io.minio.errors.ServerException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InvalidResponseException;
-import io.minio.errors.XmlParserException;
-import io.minio.errors.InternalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,10 +16,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -62,7 +55,7 @@ public class PlaceService {
     }
 
     @Cacheable(value = "places")
-    public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) {
         log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}, search={}",
                 districtStr, subDistrictStr, outdoor, placeType, search);
         District district;
@@ -92,10 +85,7 @@ public class PlaceService {
         }
 
         var result = placeRepository.findWithFilters(district, subDistrict, outdoorVal, placeTypeEnum, search);
-        log.info("findAll Places | resolved district={}, subDistrict={}, outdoor={}, placeType={}, search={} | found={} entities",
-                district, subDistrict, outdoorVal, placeTypeEnum, search, result.size());
-        ListPlaceResponse response = placeMapper.listPlaceToListPlaceResponse(result);
-        return response;
+        return placeMapper.listPlaceToListPlaceResponse(result);
     }
 
     public Place findByName(String name) {
@@ -128,6 +118,52 @@ public class PlaceService {
                 log.info("Photo deleted from MinIO for place '{}': {}", name, place.getPhotoUrl());
             }
             placeRepository.delete(place);
+        }
+    }
+
+    public byte[] getPhoto(String photoUrl) {
+        log.info("Getting photo for URL: {}", photoUrl);
+        if (photoUrl == null || photoUrl.isEmpty()) {
+            log.warn("No photoUrl provided");
+            return new byte[0];
+        }
+        try {
+            byte[] photo = minioService.getFile(photoUrl);
+            if (photo == null || photo.length == 0) {
+                log.warn("No photo found in MinIO for URL: {}", photoUrl);
+                return new byte[0];
+            }
+            return photo;
+        } catch (Exception e) {
+            log.error("Failed to get photo for URL {}: {}", photoUrl, e.getMessage());
+            return new byte[0];
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = "places", allEntries = true)
+    public String uploadPhoto(Long id, MultipartFile file) {
+        String objectName = "places/" + id + "/" + file.getOriginalFilename();
+        minioService.uploadFile(objectName, file);
+        String url = minioService.getFileUrl(objectName);
+        Place place = placeRepository.findById(id).orElse(null);
+        if (place != null) {
+            place.setPhotoUrl(url);
+            placeRepository.save(place);
+        }
+        log.info("Photo uploaded for place '{}': {}", id, objectName);
+        return url;
+    }
+
+    @Transactional
+    @CacheEvict(value = "places", allEntries = true)
+    public void deletePhoto(Long id) {
+        Place place = placeRepository.findById(id).orElse(null);
+        if (place != null && place.getPhotoUrl() != null) {
+            minioService.deleteFile(place.getPhotoUrl());
+            place.setPhotoUrl(null);
+            placeRepository.save(place);
+            log.info("Photo deleted for place '{}': {}", id, place.getPhotoUrl());
         }
     }
 }
