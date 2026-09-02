@@ -23,7 +23,7 @@ public class CoachResponse {
     private String education;
     private String phoneNumber;
     private List<String> workPlacesNames;
-    private byte[] photo;
+    private String photoUrl;
     private String telegramUsername;
     private List<String> trainingProgramsNames;
 }
