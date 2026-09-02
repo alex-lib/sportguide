@@ -16,7 +16,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE) //uses
 public interface CoachMapper {
 
-    Coach coachRequestToCoach(CoachRequest request, byte[] photo, Subscriber subscriber, List<TrainingProgram> trainingPrograms, List<Place> workPlaces);
+    Coach coachRequestToCoach(CoachRequest request, String photoUrl, Subscriber subscriber, List<TrainingProgram> trainingPrograms, List<Place> workPlaces);
 
     default ListCoachResponse listCoachToListCoachResponse(List<Coach> coaches) {
         return null;

@@ -19,7 +19,7 @@ import java.util.List;
 public abstract class CoachMapperDelegate implements CoachMapper {
 
     @Override
-    public Coach coachRequestToCoach(CoachRequest request, byte[] photo, Subscriber subscriber, List<TrainingProgram> trainingPrograms, List<Place> workPlaces) {
+    public Coach coachRequestToCoach(CoachRequest request, String photoUrl, Subscriber subscriber, List<TrainingProgram> trainingPrograms, List<Place> workPlaces) {
 
         LocalDate dateForSubscriptionToBeCoach = LocalDate.now().plusMonths(request.getMonthsForSubscriptionToBeCoach());
         Sex sex = SexStringMapper.sexStringToSexEnum(request.getSex());
@@ -37,7 +37,7 @@ public abstract class CoachMapperDelegate implements CoachMapper {
                     .education(request.getEducation())
                     .phoneNumber(request.getPhoneNumber())
                     .workPlaces(workPlaces)
-                    .photo(photo)
+                    .photoUrl(photoUrl)
                     .monthsForSubscriptionToBeCoach(request.getMonthsForSubscriptionToBeCoach())
                     .createdAt(LocalDate.now())
                     .expiredDateForSubscriptionToBeCoach(dateForSubscriptionToBeCoach)
@@ -68,7 +68,7 @@ public abstract class CoachMapperDelegate implements CoachMapper {
                     .education(coach.getEducation())
                     .phoneNumber(coach.getPhoneNumber())
                     .workPlacesNames(workPlacesName)
-                    .photo(coach.getPhoto())
+                    .photoUrl(coach.getPhotoUrl())
                     .telegramUsername(link)
                     .trainingProgramsNames(trainingProgramsTitles)
                     .build());

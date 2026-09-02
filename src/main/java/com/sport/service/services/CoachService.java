@@ -1,6 +1,7 @@
 package com.sport.service.services;
 
 import com.sport.service.constants.Constants;
+import com.sport.service.configurations.MinioService;
 import com.sport.service.entities.Coach;
 import com.sport.service.entities.Place;
 import com.sport.service.entities.Subscriber;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CoachService {
     private final CoachRepository coachRepository;
-
     private final SubscriberService subscriberService;
     private final PlaceService placeService;
     private final TrainingProgramService trainingProgramService;
+    private final MinioService minioService;
 
     private final CoachMapper coachMapper;
 
@@ -61,12 +61,6 @@ public class CoachService {
 
     @Transactional
     public void createCoach(CoachRequest request, MultipartFile photo) {
-        byte[] photoBytes = null;
-        try {
-            photoBytes = photo.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         Subscriber subscriber = subscriberService.findById(request.getSubscriberId());
         List<TrainingProgram> trainingPrograms = new ArrayList<>();
         List<String> titles = request.getTrainingProgramsTitles();
@@ -82,7 +76,18 @@ public class CoachService {
             workPlaces.add(placeService.findByName(workPlaceName));
         }
 
-        coachRepository.save(coachMapper.coachRequestToCoach(request, photoBytes, subscriber, trainingPrograms, workPlaces));
+        Coach coach = coachMapper.coachRequestToCoach(request, null, subscriber, trainingPrograms, workPlaces);
+        coachRepository.save(coach);
+
+        String photoUrl = null;
+        if (photo != null && !photo.isEmpty()) {
+            String objectName = "coaches/" + coach.getId() + "/" + photo.getOriginalFilename();
+            minioService.uploadFile(objectName, photo);
+            photoUrl = minioService.getFileUrl(objectName);
+            coach.setPhotoUrl(photoUrl);
+            coachRepository.save(coach);
+            log.info("Photo uploaded to MinIO for new coach '{}' (id={}): {}", request.getName(), coach.getId(), objectName);
+        }
     }
 
     @Transactional
@@ -103,12 +108,6 @@ public class CoachService {
 
     @Transactional
     public void updateCoachById(Long id, CoachRequest request, MultipartFile photo) {
-        byte[] photoBytes = null;
-        try {
-            photoBytes = photo.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         Coach coach = findCoachById(id);
         Subscriber subscriber = subscriberService.findById(request.getSubscriberId());
         List<TrainingProgram> trainingPrograms = new ArrayList<>();
@@ -124,8 +123,62 @@ public class CoachService {
         for (String workPlaceName : request.getWorkPlacesNames()) {
             workPlaces.add(placeService.findByName(workPlaceName));
         }
-        Coach updatedCoach = coachMapper.coachRequestToCoach(request, photoBytes, subscriber, trainingPrograms, workPlaces);
+
+        String photoUrl = coach.getPhotoUrl();
+        if (photo != null && !photo.isEmpty()) {
+            if (photoUrl != null) {
+                minioService.deleteFile(photoUrl);
+            }
+            String objectName = "coaches/" + coach.getName() + "/" + photo.getOriginalFilename();
+            minioService.uploadFile(objectName, photo);
+            photoUrl = minioService.getFileUrl(objectName);
+            log.info("Photo updated in MinIO for coach '{}' (id={}): {}", coach.getName(), id, objectName);
+        }
+
+        Coach updatedCoach = coachMapper.coachRequestToCoach(request, photoUrl, subscriber, trainingPrograms, workPlaces);
         BeanUtils.copyNonNullProperties(updatedCoach, coach);
         coachRepository.save(coach);
+    }
+
+    @Transactional
+    public String uploadPhoto(Long id, MultipartFile file) {
+        Coach coach = findCoachById(id);
+        String objectName = "coaches/" + id + "/" + file.getOriginalFilename();
+        minioService.uploadFile(objectName, file);
+        String url = minioService.getFileUrl(objectName);
+        coach.setPhotoUrl(url);
+        coachRepository.save(coach);
+        log.info("Photo uploaded for coach '{}' (id={}): {}", coach.getName(), id, objectName);
+        return url;
+    }
+
+    @Transactional
+    public void deletePhoto(Long id) {
+        Coach coach = findCoachById(id);
+        String photoUrl = coach.getPhotoUrl();
+        if (photoUrl != null) {
+            minioService.deleteFile(photoUrl);
+            coach.setPhotoUrl(null);
+            log.info("Photo deleted for coach '{}': {}", id, photoUrl);
+        }
+        coachRepository.save(coach);
+    }
+
+    public byte[] getPhoto(String photoUrl) {
+        if (photoUrl == null || photoUrl.isEmpty()) {
+            log.warn("No photoUrl provided");
+            return new byte[0];
+        }
+        try {
+            byte[] photo = minioService.getFile(photoUrl);
+            if (photo == null || photo.length == 0) {
+                log.warn("No photo found in MinIO for URL: {}", photoUrl);
+                return new byte[0];
+            }
+            return photo;
+        } catch (Exception e) {
+            log.error("Failed to get photo for URL {}: {}", photoUrl, e.getMessage());
+            return new byte[0];
+        }
     }
 }

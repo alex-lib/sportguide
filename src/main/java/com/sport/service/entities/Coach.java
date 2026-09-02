@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.Lob;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.FetchType;
@@ -22,8 +21,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 import lombok.Builder;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,7 +33,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@ToString(exclude = {"photo", "trainingPrograms"})
+@ToString(exclude = {"trainingPrograms"})
 public class Coach {
 
     @Id
@@ -81,10 +78,8 @@ public class Coach {
     @Builder.Default
     private List<Place> workPlaces = new ArrayList<>();
 
-    @Lob
-    @JdbcTypeCode(SqlTypes.BINARY)
-    @Column(name = "photo")
-    private byte[] photo;
+    @Column(name = "photo_url")
+    private String photoUrl;
 
     @Column(name = "created_at")
     private LocalDate createdAt;
