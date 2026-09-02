@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -79,8 +80,8 @@ public class EventService {
     @Transactional
     @Scheduled(cron = Constants.CRON_DELETE_EVENT, zone = Constants.TIME_ZONE)
     public void deleteEventByExpiredDate() {
-        LocalDate currentDate = LocalDate.now(ZoneId.of(Constants.TIME_ZONE));
-        eventRepository.deleteByDateBefore(currentDate);
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of(Constants.TIME_ZONE));
+        eventRepository.deleteByDateAndTimeBefore(now.toLocalDate(), now.toLocalTime());
     }
 
     public boolean existsEventByName(String name) {

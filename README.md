@@ -1,85 +1,112 @@
 # SportGuide
 
-SportGuide is a sport guide for the city of Voronezh, delivered as a **Telegram Mini App** with a Telegram bot and notifications. It helps people discover sport events, places to train, partners for joint workouts, ready-made training programs and coaches - and sends weather and event notifications.
+SportGuide — сервис для поиска спортивных мероприятий, мест для тренировок, партнёров для совместных занятий, готовых тренировочных программ и тренеров в городе Воронеж. Доступен через Telegram Mini App (Web App) и Telegram бот с уведомлениями.
 
-The product is two parts:
+Продукт состоит из двух частей:
 
-- **Backend** - a Spring Boot service (Java + Kotlin) that exposes the REST API, runs the Telegram bot, handles authentication, scheduling, weather and AI assistant features.
-- **Frontend** - a Telegram Web App (Vite + React) rendered inside Telegram, talking to the backend API.
+- **Backend** — Spring Boot сервис (Java), реализующий REST API, Telegram бот, аутентификацию, планировщик уведомлений, интеграцию с погодным API, AI-ассистентом и объектным хранилищем MinIO.
+- **Frontend** — Telegram Web App (Vite + React), встроенная в Telegram, общающаяся с backend API.
 
-## Navigation (app sections)
+## Навигация (разделы приложения)
 
-The Mini App is a 6-tab experience. Routes use a `HashRouter` (`frontend/src/App.jsx`); the bottom tab bar is defined in `frontend/src/components/Layout.jsx`.
+Mini App — это SPA с 6 вкладками. Роутинг через `HashRouter` (`frontend/src/App.jsx`); нижняя панель вкладок определена в `frontend/src/components/Layout.jsx`.
 
-| Tab | Route | Page | What it does |
+| Вкладка | Маршрут | Страница | Описание |
 | --- | --- | --- | --- |
-| Главная (Home) | `/` | `Home.jsx` | Entry screen with links into each section |
-| События (Events) | `/events` | `Events.jsx` | Upcoming sport events, filterable by district and date |
-| Места (Places) | `/places` | `Places.jsx` | Courts, gyms and grounds, filterable by district / type / indoor |
-| Тренировки (Joint trainings) | `/joint-trainings` | `JointTrainings.jsx` | Find partners and create/edit/delete training meetups |
-| Программы (Programs) | `/training-programs` | `TrainingPrograms.jsx` | Ready-made workout programs, filterable by sport |
-| Тренеры (Coaches) | `/coaches` | `Coaches.jsx` | Coach roster, filterable by sport / sex / age / experience |
+| Главная (Home) | `/` | `Home.jsx` | Входной экран со ссылками во все разделы |
+| События (Events) | `/events` | `Events.jsx` | Ближайшие спортивные события с фильтрами по району и дате |
+| Места (Places) | `/places` | `Places.jsx` | Спортплощадки, залы и стадионы с фильтрами по району / типу / помещению |
+| Тренировки (Joint trainings) | `/joint-trainings` | `JointTrainings.jsx` | Поиск партнёров, создание / редактирование / удаление совместных тренировок |
+| Программы (Programs) | `/training-programs` | `TrainingPrograms.jsx` | Готовые тренировочные программы с фильтрацией по виду спорта |
+| Тренеры (Coaches) | `/coaches` | `Coaches.jsx` | Каталог тренеров с фильтрацией по виду спорта |
 
-Shared pieces: `Layout.jsx` (tab bar), `FilterPanel.jsx` (collapsible filters), `Loading.jsx`, and auth in `services/auth.js`.
+Общие компоненты: `Layout.jsx` (нижняя панель), `FilterPanel.jsx` (сворачиваемые фильтры), набор UI-компонентов в `ui/` (`Card`, `Button`, `Chip`, `Modal`, `TabBar`, `MapView` и др.), аутентификация в `services/auth.js`.
 
-## Design mockups
+## API
 
-Interactive HTML mockups of every screen live in [`mockups/index.html`](mockups/index.html). Open the file in a browser (it is fully self-contained - no build, no network needed).
+| Controller | Описание |
+| --- | --- |
+| `AuthController` | Telegram OAuth2 аутентификация |
+| `EventController` | CRUD мероприятий, фильтрация |
+| `PlaceController` | CRUD мест, фильтрация |
+| `CoachController` | CRUD тренеров, фильтрация |
+| `JointTrainingController` | Совместные тренировки, запросы на присоединение |
+| `TrainingProgramController` | Тренировочные программы |
+| `AdminController` | Административные действия: управление пользователями, рассылки |
+| `AiController` | AI-ассистент через Spring AI (OpenAI) |
+| `AlertController` | Системные алерты (Redis health) |
 
-It includes:
+## Telegram бот
 
-- A **Design: Old / New** toggle - "Old" reproduces the current production UI faithfully; "New" is a refactored design aligned with Apple HIG 2026.
-- A **Light / Dark** theme switch (the New design adapts to the theme; the page background follows it).
-- Every screen rendered inside an iPhone 17 Pro frame, grouped by feature and tab.
+Бот (пакет `bot`) поддерживает текстовые команды, callback-кнопки и фото-ввод через интерфейсы `TextProcessable`, `CallbackProcessable`, `PhotoProcessable`.
 
-The chosen design variant and theme are remembered across reloads.
+**Команды пользователей:** `StartCommand`, `MenuCommand`, `GetUpcomingEventsCommand`, `GetPlaceCommand`, `GetNotificationsCommand`, `StopNotificationsCommand`, `CreateTrainingProgramCommand`, `ContactAdminCommand`, `SupportProjectCommand`.
+
+**Команды администраторов:** `CreateEventCommand`, `DeleteEventCommand`, `CreatePlaceCommand`, `DeletePlaceCommand`, `SendMessageToAllUsersCommand`, `GetUsersCountCommand`, `GetSubscriptionsCountCommand`.
+
+**Меню:** `SubscriberMenu`, `AdminMenu`, `ChoosingPlaceOptionsMenu`.
+
+Состояния команд хранятся в Redis (session-store), конфигурация в `RedisBotCommandSessionConfiguration`.
 
 ## Tech stack
 
 **Backend** (`src/`, `build.gradle.kts`)
-- Spring Boot 3.5, Java + Kotlin
-- Spring Security (OAuth2 resource server / client, JWT), Keycloak as the identity provider
-- Spring AI (sport assistant), Thymeleaf templates for messages
-- PostgreSQL (data), Redis (sessions / notifications)
-- Telegram bot integration, scheduled weather and event notifications
-- Runs on port `8081`
+
+- Spring Boot 3.5.4, Java 21
+- Spring Data JPA, Flyway (миграции БД), Spring Data Redis, Spring Cache
+- Spring Security (OAuth2 / JWT), Keycloak как IDP
+- Spring AI (Spring AI OpenAI Starter, sport assistant)
+- OpenFeign (HTTP-clients), Spring Cloud
+- Spring AOP (аннотация `@AdminOnly`)
+- MinIO (объектное хранилище для фото)
+- Lombok, MapStruct (mapper-компоненты)
+- Telegram Bots API 6.9.7.1
+- Prometheus + Micrometer (actuator metrics)
+- PostgreSQL (данные), Redis (сессии, уведомления, кеш)
+- Запуск на порту `8081`
 
 **Frontend** (`frontend/`)
-- Vite + React 18
+
+- Vite 6 + React 18
 - `react-router-dom` (HashRouter)
 - `@twa-dev/sdk` (Telegram Web App SDK)
-- `axios` for API calls
+- Leaflet + react-leaflet (карты)
+- Lucide React (иконки)
+- `axios` для вызовов API
 
-## Running locally
+## Локальный запуск
 
 ### Backend
 
 ```bash
-# build and run the service (needs PostgreSQL + Redis, see docker-compose.yml)
+# Запустить инфраструктуру (PostgreSQL, Redis, MinIO, Keycloak)
+docker compose up postgres redis minio keycloak
+
+# Собрать и запустить бэкенд
 ./gradlew bootRun
 ```
 
-Required infrastructure (PostgreSQL, Redis, Keycloak) is described in `docker-compose.yml`. Configuration lives in `src/main/resources/application.yml` and is driven by environment variables (bot token, DB credentials, etc.).
+Инфраструктура описана в `docker-compose.yml`. Конфигурация — `src/main/resources/application.yml`, управляется через переменные окружения (bot token, DB credentials и т.д.).
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev        # start the Vite dev server
-npm run build      # production build
-npm run lint       # lint
+npm run dev        # запустить Vite dev server
+npm run build      # продакшн-сборка
+npm run lint       # линтер
 ```
 
 ### Docker
 
 ```bash
-docker compose up        # postgres, redis, app, keycloak
+docker compose up              # postgres, redis, minio, keycloak, app
 ```
 
-## Telegram authentication
+## Telegram аутентификация
 
-The Web App sends Telegram `initData` to the backend, which validates it and issues a session:
+Web App отправляет Telegram `initData` на backend, который валидирует и выдаёт JWT-сессию:
 
 ```js
 const initData = Telegram.WebApp.initData;
@@ -90,17 +117,47 @@ fetch("https://app/auth/telegram", {
 });
 ```
 
-## Repository layout
+## Структура репозитория
 
 ```
 .
-├── src/                  # backend (Spring Boot, Java/Kotlin)
-│   └── main/resources/   # application.yml, init.sql, message templates, AI prompts
-├── frontend/             # Telegram Web App (Vite + React)
-│   └── src/{pages,components,services,config,constants}
-├── mockups/              # self-contained HTML screen mockups (Old/New, Light/Dark)
-├── config/               # prometheus / grafana / alertmanager configs
-├── keycloak/             # Keycloak realm export
+├── src/                              # backend (Spring Boot, Java 21)
+│   ├── main/
+│   │   ├── java/com/sport/service/
+│   │   │   ├── ServiceApplication.java
+│   │   │   ├── annotations/          # @AdminOnly, @PhoneNumberValid
+│   │   │   ├── aop/                  # @AdminOnly aspect
+│   │   │   ├── bot/                  # Telegram bot commands, menus, sessions
+│   │   │   ├── components/           # Schedulers, health checks
+│   │   │   ├── configurations/       # Bean configs (Redis, MinIO, Security, AI, etc.)
+│   │   │   ├── constants/            # Constants
+│   │   │   ├── dto/                  # Data transfer objects
+│   │   │   ├── entities/             # JPA entities + enums
+│   │   │   ├── exceptions/           # Global exception handling
+│   │   │   ├── mappers/              # MapStruct mappers + string mappers
+│   │   │   ├── repositories/         # JPA + Document repositories
+│   │   │   ├── security/             # JwtService, TelegramJwtFilter
+│   │   │   ├── services/             # Business logic services
+│   │   │   ├── store/                # Redis session-store (commands, notifications)
+│   │   │   ├── utils/                # Utility classes
+│   │   │   └── web/controllers/      # REST API controllers
+│   │   └── resources/                # application.yml, templates, prompts, migrations
+│   └── test/                         # Tests
+├── frontend/                         # Telegram Web App (Vite + React 18)
+│   └── src/
+│       ├── pages/                    # Home, Events, Places, JointTrainings, TrainingPrograms, Coaches
+│       ├── components/               # Layout, FilterPanel
+│       ├── ui/                       # Reusable UI: Card, Button, Modal, TabBar, MapView, etc.
+│       ├── services/                 # api.js, auth.js
+│       ├── context/                  # ThemeContext
+│       ├── config/                   # API config
+│       ├── constants/                # Filter constants, etc.
+│       └── utils/                    # Date formatting, pluralization
+├── config/                           # Prometheus / Grafana configs (commented out in compose)
+├── keycloak/                         # Keycloak realm export
+├── design/                           # Design resources
 ├── docker-compose.yml
-└── build.gradle.kts
+├── Dockerfile
+├── build.gradle.kts
+└── README.md
 ```
