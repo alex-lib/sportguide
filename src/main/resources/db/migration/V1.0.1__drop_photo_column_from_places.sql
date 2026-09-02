@@ -1,0 +1,1 @@
+ALTER TABLE app_schema.places DROP COLUMN IF EXISTS photo;

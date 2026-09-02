@@ -11,7 +11,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Column;
-import jakarta.persistence.Lob;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EnumType;
@@ -21,8 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 import lombok.Builder;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 
@@ -33,7 +30,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-@ToString(exclude = {"photo", "coaches"})
+@ToString(exclude = {"coaches"})
 public class Place {
 
     @Id
@@ -67,11 +64,6 @@ public class Place {
     @Enumerated(value = EnumType.STRING)
     @Column(name = "place_type", nullable = false)
     private PlaceType placeType;
-
-    @Lob
-    @JdbcTypeCode(SqlTypes.BINARY)
-    @Column(name = "photo")
-    private byte[] photo;
 
     @Column(name = "photo_url")
     private String photoUrl;
