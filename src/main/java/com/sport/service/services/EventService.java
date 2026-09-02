@@ -9,7 +9,6 @@ import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.web.models.event.ListEventResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,14 +22,11 @@ import java.util.List;
 @Service
 @EnableScheduling
 @RequiredArgsConstructor
-@Slf4j
 public class EventService {
     private final EventRepository eventRepository;
-
     private final SubscriberService subscriberService;
     private final NotificationCreatorService notificationCreatorService;
     private final NotificationSenderService notificationSenderService;
-
     private final EventMapper eventMapper;
 
     public List<Event> findAllEvents() {
@@ -38,7 +34,6 @@ public class EventService {
     }
 
     public ListEventResponse findAllEventsWithFilter(String districtStr, String dateStr, String search) {
-        log.info("findAll Events | district={}, date={}, search={}", districtStr, dateStr, search);
         LocalDate date = null;
 
         District district;
@@ -53,7 +48,6 @@ public class EventService {
         }
 
         var result = eventRepository.findWithFilters(district, date, search);
-        log.info("findAll Events | resolved district={} | found={} events", district, result.size());
         return eventMapper.listEventToListEventResponse(result);
     }
 

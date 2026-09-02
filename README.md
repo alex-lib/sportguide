@@ -32,9 +32,8 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 | `CoachController` | CRUD тренеров, фильтрация |
 | `JointTrainingController` | Совместные тренировки, запросы на присоединение |
 | `TrainingProgramController` | Тренировочные программы |
-| `AdminController` | Административные действия: управление пользователями, рассылки |
 | `AiController` | AI-ассистент через Spring AI (OpenAI) |
-| `AlertController` | Системные алерты (Redis health) |
+| `AlertController` | Системные алерты |
 
 ## Telegram бот
 
