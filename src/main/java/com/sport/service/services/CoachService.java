@@ -35,12 +35,9 @@ public class CoachService {
     private final PlaceService placeService;
     private final TrainingProgramService trainingProgramService;
     private final MinioService minioService;
-
     private final CoachMapper coachMapper;
 
       public ListCoachResponse findAllCoaches(List<String> sportTypesRequest, Integer age, String sex, Integer yearsOfExperience, String search) {
-          log.info("findAll Coaches | sportTypes={}, age={}, sex={}, yearsOfExperience={}, search={}",
-                  sportTypesRequest, age, sex, yearsOfExperience, search);
           List<SportType> sportTypes = null;
           if (sportTypesRequest != null && !sportTypesRequest.isEmpty()) {
               sportTypes = sportTypesRequest.stream()
@@ -54,8 +51,6 @@ public class CoachService {
                   age,
                   yearsOfExperience,
                   search);
-          log.info("findAll Coaches | filtered sportTypes={}, sex={}, age={}, yearsOfExperience={}, search={} | found={} coaches",
-                  sportTypes, sexEnum, age, yearsOfExperience, search, result.size());
           return coachMapper.listCoachToListCoachResponse(result);
       }
 
@@ -103,6 +98,10 @@ public class CoachService {
 
     @Transactional
     public void deleteCoachById(Long id) {
+        Coach coach = findCoachById(id);
+        if (coach.getPhotoUrl() != null) {
+            minioService.deleteFile(coach.getPhotoUrl());
+        }
         coachRepository.deleteById(id);
     }
 

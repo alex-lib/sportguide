@@ -56,8 +56,6 @@ public class PlaceService {
 
     @Cacheable(value = "places")
     public ListPlaceResponse findAll(String districtStr, String subDistrictStr, String outdoor, String placeType, String search) {
-        log.info("findAll Places | district={}, subDistrict={}, outdoor={}, placeType={}, search={}",
-                districtStr, subDistrictStr, outdoor, placeType, search);
         District district;
         if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
             district = null;

@@ -3,7 +3,6 @@ package com.sport.service.web.controllers;
 import com.sport.service.services.PlaceService;
 import com.sport.service.web.models.place.ListPlaceResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +20,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("api/places")
 @RequiredArgsConstructor
-@Slf4j
 public class PlaceController {
     private final PlaceService placeService;
 

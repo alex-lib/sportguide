@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/events")
 @RequiredArgsConstructor
-@Slf4j
 public class EventController {
     private final EventService eventService;
 
@@ -24,7 +23,6 @@ public class EventController {
         @RequestParam(required = false) String date,
         @RequestParam(required = false) String search
     ) {
-        log.info("[API] GET /api/events | district={}, date={}, search={}", district, date, search);
         return eventService.findAllEventsWithFilter(district, date, search);
     }
 }
