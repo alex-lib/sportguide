@@ -16,7 +16,7 @@ export const TourPage = () => {
   const [stepCount, setStepCount] = useState(-1);
   const tourFinishedRef = useRef(false);
 
-  const route = location.pathname === '/' ? '/' : location.pathname;
+  const route = location.pathname === '/' ? '' : location.pathname;
 
   useEffect(() => {
     setSkip(false);
