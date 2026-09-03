@@ -1,77 +1,107 @@
-import { useRef, useEffect, useState, createContext } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import Joyride from 'react-joyride';
 import { apiService } from '../services/api.js';
 
-export const TourContext = createContext(null);
+export const TourContext = () => null;
 
 export const TourProvider = ({ children }) => {
-  return (
-    <TourContext.Provider value={{}}>
-      {children}
-    </TourContext.Provider>
-  );
+  return children;
 };
 
 export const TourPage = () => {
   const location = useLocation();
-  const runRef = useRef(false);
-  const [tourSteps, setTourSteps] = useState([]);
-  const [skipTour, setSkipTour] = useState(false);
+  const [steps, setSteps] = useState([]);
+  const [skip, setSkip] = useState(false);
+  const [stepCount, setStepCount] = useState(-1);
+  const tourFinishedRef = useRef(false);
 
   const route = location.pathname === '/' ? '/' : location.pathname;
 
   useEffect(() => {
-    runRef.current = false;
-    setSkipTour(false);
+    setSkip(false);
+    setSteps([]);
+    setStepCount(-1);
+    tourFinishedRef.current = false;
+  }, [route]);
 
+  useEffect(() => {
     let cancelled = false;
 
     apiService.isTourShown(route)
       .then((isShown) => {
         if (cancelled) return;
         if (isShown) {
-          setSkipTour(true);
+          console.log('Tour: already shown for', route);
+          setSkip(true);
           return;
         }
-
         return apiService.getTourSteps(route);
       })
-      .then((steps) => {
+      .then((data) => {
         if (cancelled) return;
-        if (steps && steps.length > 0) {
-          const formatted = steps.map(step => ({
+        if (data && data.length > 0) {
+          const formatted = data.map(step => ({
             target: step.target,
             content: step.content,
             placement: step.placement || 'bottom',
             primary: step.isPrimary || false,
           }));
-          setTourSteps(formatted);
+          console.log('Tour: loaded', formatted.length, 'steps for', route);
+          formatted.forEach((step, i) => {
+            const el = document.querySelector(step.target);
+            console.log(`Tour: step ${i} "${step.target}" found:`, !!el);
+          });
+          setSteps(formatted);
+          setStepCount(formatted.length);
         } else {
-          setSkipTour(true);
+          console.log('Tour: no steps for', route);
+          setSkip(true);
+          setStepCount(0);
         }
       })
       .catch((e) => {
-        console.error('TourPage error:', e);
-        setSkipTour(true);
+        console.error('Tour error:', e);
+        setSkip(true);
+        setStepCount(0);
       });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [route]);
+
+  const callback = useCallback((data) => {
+    console.log('Joyride:', data.status, 'index:', data.index);
+    if (data.status === 'finished') {
+      apiService.syncTourShown(route).catch((e) => {
+        console.error('Tour: failed to sync:', e);
+      });
+      tourFinishedRef.current = true;
+    }
+    if (data.status === 'stalled') {
+      const step = steps[data.index];
+      console.warn('Stalled at step', data.index, step?.target);
+      if (step) {
+        const el = document.querySelector(step.target);
+        console.warn('Element found:', !!el, el);
+      }
+    }
+    if (data.status === 'error') {
+      console.error('Joyride error:', data);
+    }
+  }, [route, steps]);
+
+  const shouldRun = stepCount > 0 && !tourFinishedRef.current && !skip;
+  const joyrideKey = stepCount > 0 ? `${route}-${stepCount}` : `${route}-idle`;
 
   return (
     <Joyride
-      steps={skipTour ? [] : tourSteps}
-      callback={(data) => {
-        if (data.status === 'finished') {
-          apiService.syncTourShown(route).catch(() => {});
-        }
-      }}
-      run={tourSteps.length > 0 && !runRef.current}
+      key={joyrideKey}
+      steps={shouldRun ? steps : []}
+      callback={callback}
+      run={shouldRun}
       continuous
       showSkipButton
+      scrollToFirstStepDuringMount
       styles={{
         overlay: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
         tooltip: { maxWidth: 'calc(100vw - 32px)', padding: '16px' },
