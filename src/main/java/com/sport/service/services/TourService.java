@@ -16,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class TourService {
-
     private final TourRepository tourRepository;
     private final TooltipRepository tooltipRepository;
     private final TourRecordService tourRecordService;
