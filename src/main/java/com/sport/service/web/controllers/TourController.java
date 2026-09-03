@@ -27,7 +27,15 @@ public class TourController {
     public List<TooltipResponse> getTourSteps(
         @PathVariable String route
     ) {
-        return tourService.getStepsByRoute(route);
+        log.info("TourController.getTourSteps: route={}", route);
+        var result = tourService.getStepsByRoute(route);
+        log.info("TourController.getTourSteps: returning {} steps for route={}", result.size(), route);
+        return result;
+    }
+
+    @GetMapping("/steps")
+    public List<TooltipResponse> getTourSteps() {
+        return getTourSteps("/");
     }
 
     @GetMapping("/{route}/shown")
@@ -35,8 +43,17 @@ public class TourController {
         Authentication auth,
         @PathVariable String route
     ) {
+        log.info("TourController.isTourShown: route={}", route);
         Long userId = (Long) auth.getPrincipal();
-        return tourService.isTourShown(userId, route);
+        log.info("TourController.isTourShown: userId={}, route={}", userId, route);
+        boolean shown = tourService.isTourShown(userId, route);
+        log.info("TourController.isTourShown: userId={}, route={}, result={}", userId, route, shown);
+        return shown;
+    }
+
+    @GetMapping("/shown")
+    public boolean isTourShown(Authentication auth) {
+        return isTourShown(auth, "/");
     }
 
     @PostMapping("/record")
@@ -44,7 +61,9 @@ public class TourController {
         Authentication auth,
         @RequestParam String route
     ) {
+        log.info("TourController.recordTourShown: route={}", route);
         Long userId = (Long) auth.getPrincipal();
+        log.info("TourController.recordTourShown: userId={}, route={}", userId, route);
         tourRecordService.recordTourShown(userId, route);
     }
 }

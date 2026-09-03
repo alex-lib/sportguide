@@ -17,7 +17,8 @@ public class CorsConfig {
 
             config.setAllowedOrigins(List.of(
                     "http://localhost:3001",
-                    "https://sportguide.online"
+                    "https://sportguide.online",
+                    "https://api.sportguide.online"
             ));
 
             config.setAllowedMethods(List.of(

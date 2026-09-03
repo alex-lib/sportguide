@@ -139,22 +139,23 @@ class ApiService {
     return response.data;
   }
 
-  // Tours
+  // Tours — URL без двойного слеша
   async getTourSteps(route) {
-    const path = route ? `/${route}/steps` : '/steps';
-    const response = await this.api.get(`${API_ENDPOINTS.TOURS}${path}`);
+    const path = route ? `${route}/steps` : 'steps';
+    const response = await this.api.get(`${API_ENDPOINTS.TOURS}/${path}`);
     return response.data;
   }
 
   async isTourShown(route) {
-    const path = route ? `/${route}/shown` : '/shown';
-    const response = await this.api.get(`${API_ENDPOINTS.TOURS}${path}`);
+    const path = route ? `${route}/shown` : 'shown';
+    const response = await this.api.get(`${API_ENDPOINTS.TOURS}/${path}`);
     return response.data;
   }
 
   async syncTourShown(route) {
-    const params = route ? { route } : {};
-    await this.api.post(`${API_ENDPOINTS.TOURS}/record`, null, { params });
+    await this.api.post(`${API_ENDPOINTS.TOURS}/record`, null, {
+      params: { route },
+    });
   }
 }
 
