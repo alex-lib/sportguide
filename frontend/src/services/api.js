@@ -138,6 +138,23 @@ class ApiService {
     });
     return response.data;
   }
+
+  // Tours
+  async getTourSteps(route) {
+    const response = await this.api.get(`${API_ENDPOINTS.TOURS}/${route}/steps`);
+    return response.data;
+  }
+
+  async isTourShown(route) {
+    const response = await this.api.get(`${API_ENDPOINTS.TOURS}/${route}/shown`);
+    return response.data;
+  }
+
+  async syncTourShown(route) {
+    await this.api.post(`${API_ENDPOINTS.TOURS}/record`, null, {
+      params: { route },
+    });
+  }
 }
 
 export const apiService = new ApiService();

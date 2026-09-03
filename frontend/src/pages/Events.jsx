@@ -111,16 +111,17 @@ const Events = () => {
             icon="calendar"
             title="Пока ничего нет"
             message="По выбранным фильтрам событий не нашлось."
+            data-tour="events-empty"
             action={
-              <Button variant="ghost" onClick={handleResetFilters}>
+              <Button variant="ghost" onClick={handleResetFilters} data-tour="events-reset-filters">
                 Сбросить фильтры
               </Button>
             }
           />
         ) : (
-          <div>
+          <div data-tour="events-list">
             {events.map((event, index) => (
-              <Card key={event.id || index} first={index === 0}>
+              <Card key={event.id || index} first={index === 0} data-tour="event-card">
                 <CardRow>
                   <DateBadge date={event.date} />
                   <div style={{ flex: 1 }}>
@@ -145,7 +146,7 @@ const Events = () => {
                   <>
                     <Divider />
                     <CardActions>
-                      <Button href={event.link} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
+                      <Button href={event.link} target="_blank" rel="noopener noreferrer" size="sm" fullWidth data-tour="event-details">
                         Подробнее
                       </Button>
                     </CardActions>

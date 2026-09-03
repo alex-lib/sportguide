@@ -9,6 +9,7 @@ const TabBar = ({ items, pathname }) => (
         key={item.path}
         to={item.path}
         className={`tab ${pathname === item.path ? 'active' : ''}`.trim()}
+        data-tour={`nav-${item.path.replace(/\//g, '-')}`}
       >
         <span className="ti">
           <Icon name={item.icon} size={21} />

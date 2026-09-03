@@ -15,7 +15,7 @@ export const FilterChip = ({ active = false, icon, dot = false, className = '', 
 
 /** ChipRail - horizontally scrolling row of FilterChips. */
 export const ChipRail = ({ children, className = '', ...rest }) => (
-  <div className={`chip-rail ${className}`.trim()} {...rest}>
+  <div className={`chip-rail ${className}`.trim()} data-tour="chip-rail" {...rest}>
     {children}
   </div>
 );

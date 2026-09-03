@@ -95,7 +95,9 @@ const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'П
 
   return (
     <>
-      <SearchField placeholder={searchPlaceholder} value={search} onChange={onSearch} />
+      <div data-tour="search-field-wrapper">
+        <SearchField placeholder={searchPlaceholder} value={search} onChange={onSearch} />
+      </div>
 
       <ChipRail>
         {quick && (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import WebApp from '@twa-dev/sdk';
 import { useTheme } from './context/ThemeContext';
+import { TourProvider, TourPage } from './context/TourContext';
 import { authService } from './services/auth.js';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
@@ -159,17 +160,20 @@ function App() {
     <Router>
       <TelegramChromSync />
       <TelegramBackButtonHandler />
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/places" element={<Places />} />
-          <Route path="/joint-trainings" element={<JointTrainings />} />
-          <Route path="/training-programs" element={<TrainingPrograms />} />
-          <Route path="/coaches" element={<Coaches />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+      <TourProvider>
+        <TourPage />
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/places" element={<Places />} />
+            <Route path="/joint-trainings" element={<JointTrainings />} />
+            <Route path="/training-programs" element={<TrainingPrograms />} />
+            <Route path="/coaches" element={<Coaches />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Layout>
+      </TourProvider>
     </Router>
   );
 }
