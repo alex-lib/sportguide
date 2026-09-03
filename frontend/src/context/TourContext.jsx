@@ -1,4 +1,4 @@
-import { useContext, useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, createContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import Joyride from 'react-joyride';
 import { apiService } from '../services/api.js';
@@ -17,21 +17,29 @@ export const TourPage = () => {
   const location = useLocation();
   const runRef = useRef(false);
   const [tourSteps, setTourSteps] = useState([]);
-  const [shouldRun, setShouldRun] = useState(false);
+  const [skipTour, setSkipTour] = useState(false);
 
   const route = location.pathname === '/' ? '/' : location.pathname;
 
   useEffect(() => {
     runRef.current = false;
-    setTourSteps([]);
-    setShouldRun(false);
+    setSkipTour(false);
 
-    Promise.all([
-      apiService.isTourShown(route),
-      apiService.getTourSteps(route),
-    ])
-      .then(([isShown, steps]) => {
-        if (!isShown && steps?.length > 0) {
+    let cancelled = false;
+
+    apiService.isTourShown(route)
+      .then((isShown) => {
+        if (cancelled) return;
+        if (isShown) {
+          setSkipTour(true);
+          return;
+        }
+
+        return apiService.getTourSteps(route);
+      })
+      .then((steps) => {
+        if (cancelled) return;
+        if (steps && steps.length > 0) {
           const formatted = steps.map(step => ({
             target: step.target,
             content: step.content,
@@ -39,27 +47,29 @@ export const TourPage = () => {
             primary: step.isPrimary || false,
           }));
           setTourSteps(formatted);
-          setShouldRun(true);
+        } else {
+          setSkipTour(true);
         }
       })
       .catch((e) => {
-        console.error('Failed to load tour:', e);
-        setTourSteps([]);
-        setShouldRun(false);
+        console.error('TourPage error:', e);
+        setSkipTour(true);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [route]);
 
   return (
     <Joyride
-      steps={shouldRun ? tourSteps : []}
+      steps={skipTour ? [] : tourSteps}
       callback={(data) => {
         if (data.status === 'finished') {
-          apiService.syncTourShown(route).catch(e => {
-            console.error('Failed to sync tour to server:', e);
-          });
+          apiService.syncTourShown(route).catch(() => {});
         }
       }}
-      run={shouldRun && !runRef.current}
+      run={tourSteps.length > 0 && !runRef.current}
       continuous
       showSkipButton
       styles={{
