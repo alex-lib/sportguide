@@ -102,6 +102,7 @@ export const TourPage = () => {
       continuous
       showSkipButton
       scrollToFirstStepDuringMount
+      spotlightClicks={false}
       styles={{
         overlay: { backgroundColor: 'transparent' },
         tooltip: { maxWidth: 'calc(100vw - 32px)', padding: '16px' },
