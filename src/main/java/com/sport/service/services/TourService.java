@@ -22,13 +22,18 @@ public class TourService {
 
     @Transactional(readOnly = true)
     public List<TooltipResponse> getStepsByRoute(String route) {
+        log.info("TourService.getStepsByRoute: route={}", route);
         Tour tour = tourRepository.findByRoute(route).orElse(null);
         if (tour == null) {
+            log.warn("TourService.getStepsByRoute: tour not found for route={}", route);
             return List.of();
         }
-        return tooltipRepository.findByTourIdOrderByPositionAsc(tour.getId()).stream()
+        log.info("TourService.getStepsByRoute: found tour id={} route={}, loading tooltips", tour.getId(), tour.getRoute());
+        var steps = tooltipRepository.findByTourIdOrderByPositionAsc(tour.getId()).stream()
             .map(this::toResponse)
             .toList();
+        log.info("TourService.getStepsByRoute: returning {} steps for route={}", steps.size(), route);
+        return steps;
     }
 
     private TooltipResponse toResponse(Tooltip tooltip) {
@@ -42,6 +47,9 @@ public class TourService {
 
     @Transactional(readOnly = true)
     public boolean isTourShown(Long subscriberId, String route) {
-        return tourRecordService.hasTourBeenShown(subscriberId, route);
+        log.info("TourService.isTourShown: subscriberId={}, route={}", subscriberId, route);
+        boolean shown = tourRecordService.hasTourBeenShown(subscriberId, route);
+        log.info("TourService.isTourShown: subscriberId={}, route={}, alreadyShown={}", subscriberId, route, shown);
+        return shown;
     }
 }
