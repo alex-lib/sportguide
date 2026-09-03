@@ -14,7 +14,6 @@ export const TourPage = () => {
   const [steps, setSteps] = useState([]);
   const [skip, setSkip] = useState(false);
   const [stepCount, setStepCount] = useState(-1);
-  const [runTour, setRunTour] = useState(false);
   const tourFinishedRef = useRef(false);
 
   const route = location.pathname === '/' ? '' : location.pathname.substring(1);
@@ -23,7 +22,6 @@ export const TourPage = () => {
     setSkip(false);
     setSteps([]);
     setStepCount(-1);
-    setRunTour(false);
     tourFinishedRef.current = false;
   }, [route]);
 
@@ -56,7 +54,6 @@ export const TourPage = () => {
           });
           setSteps(formatted);
           setStepCount(formatted.length);
-          setRunTour(true);
         } else {
           console.log('Tour: no steps for', route);
           setSkip(true);
@@ -93,7 +90,7 @@ export const TourPage = () => {
     }
   }, [route, steps]);
 
-  const shouldRun = runTour && stepCount > 0 && !tourFinishedRef.current && !skip;
+  const shouldRun = stepCount > 0 && !tourFinishedRef.current && !skip;
   const joyrideKey = stepCount > 0 ? `${route}-${stepCount}` : `${route}-idle`;
 
   return (
@@ -106,7 +103,7 @@ export const TourPage = () => {
       showSkipButton
       scrollToFirstStepDuringMount
       styles={{
-        overlay: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+        overlay: { backgroundColor: 'transparent' },
         tooltip: { maxWidth: 'calc(100vw - 32px)', padding: '16px' },
         tooltipContent: { fontSize: '14px' },
         buttonClose: { right: '-10px', top: '-10px' },
