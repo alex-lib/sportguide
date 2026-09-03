@@ -14,6 +14,7 @@ export const TourPage = () => {
   const [steps, setSteps] = useState([]);
   const [skip, setSkip] = useState(false);
   const [stepCount, setStepCount] = useState(-1);
+  const [runTour, setRunTour] = useState(false);
   const tourFinishedRef = useRef(false);
 
   const route = location.pathname === '/' ? '' : location.pathname.substring(1);
@@ -22,6 +23,7 @@ export const TourPage = () => {
     setSkip(false);
     setSteps([]);
     setStepCount(-1);
+    setRunTour(false);
     tourFinishedRef.current = false;
   }, [route]);
 
@@ -54,6 +56,7 @@ export const TourPage = () => {
           });
           setSteps(formatted);
           setStepCount(formatted.length);
+          setRunTour(true);
         } else {
           console.log('Tour: no steps for', route);
           setSkip(true);
@@ -86,11 +89,11 @@ export const TourPage = () => {
       }
     }
     if (data.status === 'error') {
-      console.error('Joyride error:', data);
+      console.error('Tour error:', data);
     }
   }, [route, steps]);
 
-  const shouldRun = stepCount > 0 && !tourFinishedRef.current && !skip;
+  const shouldRun = runTour && stepCount > 0 && !tourFinishedRef.current && !skip;
   const joyrideKey = stepCount > 0 ? `${route}-${stepCount}` : `${route}-idle`;
 
   return (
