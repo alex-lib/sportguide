@@ -141,19 +141,20 @@ class ApiService {
 
   // Tours
   async getTourSteps(route) {
-    const response = await this.api.get(`${API_ENDPOINTS.TOURS}/${route}/steps`);
+    const path = route ? `/${route}/steps` : '/steps';
+    const response = await this.api.get(`${API_ENDPOINTS.TOURS}${path}`);
     return response.data;
   }
 
   async isTourShown(route) {
-    const response = await this.api.get(`${API_ENDPOINTS.TOURS}/${route}/shown`);
+    const path = route ? `/${route}/shown` : '/shown';
+    const response = await this.api.get(`${API_ENDPOINTS.TOURS}${path}`);
     return response.data;
   }
 
   async syncTourShown(route) {
-    await this.api.post(`${API_ENDPOINTS.TOURS}/record`, null, {
-      params: { route },
-    });
+    const params = route ? { route } : {};
+    await this.api.post(`${API_ENDPOINTS.TOURS}/record`, null, { params });
   }
 }
 
