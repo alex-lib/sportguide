@@ -5,7 +5,6 @@ import com.sport.service.services.TourRecordService;
 import com.sport.service.web.models.tooltip.TooltipResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +23,6 @@ public class TourController {
     private final TourService tourService;
     private final TourRecordService tourRecordService;
 
-    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'ADMIN')")
     @GetMapping("/{route}/steps")
     public List<TooltipResponse> getTourSteps(
         @PathVariable String route
@@ -32,7 +30,6 @@ public class TourController {
         return tourService.getStepsByRoute(route);
     }
 
-    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'ADMIN')")
     @GetMapping("/{route}/shown")
     public boolean isTourShown(
         Authentication auth,
@@ -42,7 +39,6 @@ public class TourController {
         return tourService.isTourShown(userId, route);
     }
 
-    @PreAuthorize("hasAnyRole('SUBSCRIBER', 'ADMIN')")
     @PostMapping("/record")
     public void recordTourShown(
         Authentication auth,
