@@ -122,7 +122,7 @@ const Places = () => {
       <PageHeader
         eyebrow={eyebrow}
         title="Места"
-        action={<IconButton icon="map" label="Карта" onClick={() => setMapOpen(true)} />}
+        action={<IconButton icon="map" label="Карта" onClick={() => setMapOpen(true)} data-tour="places-map-btn" />}
       />
       <Page>
         <FilterPanel
@@ -145,16 +145,17 @@ const Places = () => {
             accent
             title="Мест не найдено"
             message="По выбранным фильтрам ничего нет."
+            data-tour="places-empty"
             action={
-              <Button variant="ghost" onClick={handleResetFilters}>
+              <Button variant="ghost" onClick={handleResetFilters} data-tour="places-reset-filters">
                 Сбросить фильтры
               </Button>
             }
           />
         ) : (
-          <div>
+          <div data-tour="places-list">
             {places.map((place, index) => (
-              <Card key={place.id || index} first={index === 0}>
+              <Card key={place.id || index} first={index === 0} data-tour="place-card">
                 {place.photoUrl ? (
                   <PlacePhoto photoUrl={place.photoUrl} />
                 ) : (
@@ -177,11 +178,11 @@ const Places = () => {
 
                 <Divider />
                 <CardActions>
-                  <Button href={place.coordinates} target="_blank" rel="noopener noreferrer" size="sm" fullWidth>
+                  <Button href={place.coordinates} target="_blank" rel="noopener noreferrer" size="sm" fullWidth data-tour="place-map">
                     На карте
                   </Button>
                   {place.webSite && place.webSite !== '-' && (
-                    <Button href={place.webSite} target="_blank" rel="noopener noreferrer" variant="tint" size="sm" fullWidth>
+                    <Button href={place.webSite} target="_blank" rel="noopener noreferrer" variant="tint" size="sm" fullWidth data-tour="place-website">
                       Сайт
                     </Button>
                   )}

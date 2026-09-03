@@ -228,12 +228,13 @@ const JointTrainings = () => {
             icon="users"
             title="Пока нет тренировок"
             message="Создайте первую совместную тренировку или измените фильтры."
-            action={<Button onClick={openCreate}>Создать тренировку</Button>}
+            data-tour="trainings-empty"
+            action={<Button onClick={openCreate} data-tour="create-training-btn">Создать тренировку</Button>}
           />
         ) : (
-          <div>
+          <div data-tour="trainings-list">
             {trainings.map((training, index) => (
-              <Card key={training.id || index} first={index === 0}>
+              <Card key={training.id || index} first={index === 0} data-tour="training-card">
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                   <Thumb icon={sportIconName(training.sportType)} size={22} />
                   <div style={{ flex: 1 }}>
@@ -262,6 +263,7 @@ const JointTrainings = () => {
                       rel="noopener noreferrer"
                       size="sm"
                       style={{ flex: 1 }}
+                      data-tour="training-write"
                     >
                       <Icon name="message-circle" size={15} />
                       Написать
@@ -269,10 +271,10 @@ const JointTrainings = () => {
                   )}
                   {training.id && (
                     <>
-                      <Button variant="tint" size="sm" aria-label="Редактировать" onClick={() => handleEdit(training)}>
+                      <Button variant="tint" size="sm" aria-label="Редактировать" onClick={() => handleEdit(training)} data-tour="training-edit">
                         <Icon name="pencil" size={15} />
                       </Button>
-                      <Button variant="danger" size="sm" aria-label="Удалить" onClick={() => handleDelete(training.id)}>
+                      <Button variant="danger" size="sm" aria-label="Удалить" onClick={() => handleDelete(training.id)} data-tour="training-delete">
                         <Icon name="trash-2" size={15} />
                       </Button>
                     </>
@@ -284,7 +286,7 @@ const JointTrainings = () => {
         )}
       </Page>
 
-      {!showForm && <Fab label="Создать тренировку" onClick={openCreate} />}
+      {!showForm && <Fab label="Создать тренировку" onClick={openCreate} data-tour="fab-create" />}
 
       <Modal
         open={showForm}

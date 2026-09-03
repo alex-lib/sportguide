@@ -95,18 +95,19 @@ const TrainingPrograms = () => {
             accent
             title="Программ не найдено"
             message="По выбранным фильтрам ничего нет."
+            data-tour="programs-empty"
             action={
-              <Button variant="ghost" onClick={handleResetFilters}>
+              <Button variant="ghost" onClick={handleResetFilters} data-tour="programs-reset-filters">
                 Сбросить фильтры
               </Button>
             }
           />
         ) : (
-          <div>
+          <div data-tour="programs-list">
             {programs.map((program, index) => {
               const diff = difficultyTone(program.difficulty);
               return (
-                <Card key={program.id || index} first={index === 0}>
+                <Card key={program.id || index} first={index === 0} data-tour="program-card">
                   <CardRow>
                     <Thumb icon={sportIconName(program.sportType || program.name)} accent={index % 2 === 1} size={23} />
                     <div style={{ flex: 1 }}>

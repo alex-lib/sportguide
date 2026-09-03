@@ -13,4 +13,5 @@ export const API_ENDPOINTS = {
   JOINT_TRAININGS: `${API_BASE_URL}/api/joint-trainings`,
   TRAINING_PROGRAMS: `${API_BASE_URL}/api/training-programs`,
   COACHES: `${API_BASE_URL}/api/coaches`,
+  TOURS: `${API_BASE_URL}/api/tours`,
 };

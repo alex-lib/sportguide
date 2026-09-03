@@ -116,18 +116,19 @@ const Coaches = () => {
             icon="graduation-cap"
             title="Тренеров не найдено"
             message="По выбранным фильтрам никого нет."
+            data-tour="coaches-empty"
             action={
-              <Button variant="ghost" onClick={handleResetFilters}>
+              <Button variant="ghost" onClick={handleResetFilters} data-tour="coaches-reset-filters">
                 Сбросить фильтры
               </Button>
             }
           />
         ) : (
-          <div>
+          <div data-tour="coaches-list">
             {coaches.map((coach, index) => {
               const contact = coachContact(coach);
               return (
-                <Card key={coach.id || index} first={index === 0}>
+                <Card key={coach.id || index} first={index === 0} data-tour="coach-card">
                   <div className="coach">
                     {coach.photo ? (
                       <img className="avatar-img" src={`data:image/jpeg;base64,${coach.photo}`} alt={coach.name} />
@@ -167,7 +168,7 @@ const Coaches = () => {
                     <>
                       <Divider />
                       <CardActions>
-                        <Button href={contact} target="_blank" rel="noopener noreferrer" fullWidth>
+                        <Button href={contact} target="_blank" rel="noopener noreferrer" fullWidth data-tour="coach-contact">
                           Связаться с тренером
                         </Button>
                       </CardActions>
