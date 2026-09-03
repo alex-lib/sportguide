@@ -28,8 +28,9 @@ public class TourController {
         @PathVariable String route
     ) {
         log.info("TourController.getTourSteps: route={}", route);
-        var result = tourService.getStepsByRoute(route);
-        log.info("TourController.getTourSteps: returning {} steps for route={}", result.size(), route);
+        String normalized = normalizeRoute(route);
+        var result = tourService.getStepsByRoute(normalized);
+        log.info("TourController.getTourSteps: returning {} steps for route={}", result.size(), normalized);
         return result;
     }
 
@@ -44,10 +45,11 @@ public class TourController {
         @PathVariable String route
     ) {
         log.info("TourController.isTourShown: route={}", route);
+        String normalized = normalizeRoute(route);
         Long userId = (Long) auth.getPrincipal();
-        log.info("TourController.isTourShown: userId={}, route={}", userId, route);
-        boolean shown = tourService.isTourShown(userId, route);
-        log.info("TourController.isTourShown: userId={}, route={}, result={}", userId, route, shown);
+        log.info("TourController.isTourShown: userId={}, route={}", userId, normalized);
+        boolean shown = tourService.isTourShown(userId, normalized);
+        log.info("TourController.isTourShown: userId={}, route={}, result={}", userId, normalized, shown);
         return shown;
     }
 
@@ -62,8 +64,14 @@ public class TourController {
         @RequestParam String route
     ) {
         log.info("TourController.recordTourShown: route={}", route);
+        String normalized = normalizeRoute(route);
         Long userId = (Long) auth.getPrincipal();
-        log.info("TourController.recordTourShown: userId={}, route={}", userId, route);
-        tourRecordService.recordTourShown(userId, route);
+        log.info("TourController.recordTourShown: userId={}, route={}", userId, normalized);
+        tourRecordService.recordTourShown(userId, normalized);
+    }
+
+    private String normalizeRoute(String route) {
+        if (route == null || route.isEmpty()) return "/";
+        return route.startsWith("/") ? route : "/" + route;
     }
 }
