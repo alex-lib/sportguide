@@ -967,3 +967,125 @@
 .leaflet-container {
   background: #f0f0f0;
 }
+
+/* ------------------------------------------------------ Tour tooltip */
+
+.tour-tooltip {
+  width: max-content;
+  max-width: min(300px, calc(100vw - 40px));
+  background: var(--surface);
+  border: 1px solid var(--sep);
+  border-radius: 16px;
+  padding: 12px 14px 12px;
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-family);
+  animation: tour-tooltip-in 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+@keyframes tour-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.tour-tooltip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.tour-tooltip-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tour-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-round);
+  background: var(--fill-2);
+  transition: all 0.25s ease;
+}
+.tour-dot.active {
+  width: 16px;
+  border-radius: 3px;
+  background: var(--brand-grad);
+}
+
+.tour-tooltip-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -4px -6px -4px 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: var(--fill-2);
+  color: var(--label-3);
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+.tour-tooltip-close:active {
+  filter: brightness(0.92);
+}
+
+.tour-tooltip-content {
+  font-size: var(--text-base);
+  line-height: 1.45;
+  color: var(--label);
+}
+
+.tour-tooltip-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.tour-tooltip-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.tour-btn {
+  border: 0;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.2s ease;
+}
+.tour-btn:active {
+  transform: scale(0.97);
+}
+.tour-btn-skip {
+  padding: 7px 0;
+  background: none;
+  color: var(--label-3);
+}
+.tour-btn-back {
+  background: var(--fill-2);
+  color: var(--label-2);
+}
+.tour-btn-next {
+  background: var(--brand-grad);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: var(--shadow-brand);
+}
+
+/* Стрелка floater-а (react-joyride) в цвет поверхности тултипа */
+.__floater__arrow polygon {
+  fill: var(--surface);
+}

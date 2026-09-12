@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import Joyride from 'react-joyride';
 import { apiService } from '../services/api.js';
+import TourTooltip from '../ui/TourTooltip.jsx';
 
 export const TourContext = () => null;
 
@@ -103,14 +104,10 @@ export const TourPage = () => {
       showSkipButton
       scrollToFirstStepDuringMount
       spotlightClicks={false}
+      tooltipComponent={TourTooltip}
+      floaterProps={{ styles: { floater: { filter: 'none' } } }}
       styles={{
         overlay: { backgroundColor: 'transparent' },
-        tooltip: { maxWidth: 'calc(100vw - 32px)', padding: '16px' },
-        tooltipContent: { fontSize: '14px' },
-        buttonClose: { right: '-10px', top: '-10px' },
-        buttonNext: { backgroundColor: '#0f9d8f' },
-        buttonSkip: { color: '#666' },
-        buttonBack: { marginRight: '8px' },
         spotlight: { backgroundColor: 'transparent' },
         spotlightPadding: 0,
       }}
