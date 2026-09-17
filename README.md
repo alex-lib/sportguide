@@ -22,6 +22,8 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 
 Общие компоненты: `Layout.jsx` (нижняя панель), `FilterPanel.jsx` (сворачиваемые фильтры), набор UI-компонентов в `ui/` (`Card`, `Button`, `Chip`, `Modal`, `TabBar`, `MapView` и др.), аутентификация в `services/auth.js`.
 
+При первом посещении каждой вкладки показывается онбординг-тур с тултипами (`react-joyride`): шаги приходят с backend (`TourController`), состояние — в `TourContext.jsx` / `PageVisitContext.jsx`, кастомный тултип — `ui/TourTooltip.jsx`.
+
 ## API
 
 | Controller | Описание |
@@ -34,6 +36,7 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 | `TrainingProgramController` | Тренировочные программы |
 | `AiController` | AI-ассистент через Spring AI (OpenAI) |
 | `AlertController` | Системные алерты |
+| `TourController` | Онбординг-туры: шаги тултипов по маршруту, отметка о показе тура пользователю (без аутентификации) |
 
 ## Telegram бот
 
@@ -71,6 +74,7 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 - `@twa-dev/sdk` (Telegram Web App SDK)
 - Leaflet + react-leaflet (карты)
 - Lucide React (иконки)
+- `react-joyride` (онбординг-туры с тултипами)
 - `axios` для вызовов API
 
 ## Локальный запуск
@@ -146,9 +150,9 @@ fetch("https://app/auth/telegram", {
 │   └── src/
 │       ├── pages/                    # Home, Events, Places, JointTrainings, TrainingPrograms, Coaches
 │       ├── components/               # Layout, FilterPanel
-│       ├── ui/                       # Reusable UI: Card, Button, Modal, TabBar, MapView, etc.
+│       ├── ui/                       # Reusable UI: Card, Button, Modal, TabBar, MapView, TourTooltip, etc.
 │       ├── services/                 # api.js, auth.js
-│       ├── context/                  # ThemeContext
+│       ├── context/                  # ThemeContext, TourContext, PageVisitContext
 │       ├── config/                   # API config
 │       ├── constants/                # Filter constants, etc.
 │       └── utils/                    # Date formatting, pluralization
