@@ -2,7 +2,7 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.entities.enums.joint_training.ApprovalStatus;
+import com.sport.service.entities.enums.jointtraining.ApprovalStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
