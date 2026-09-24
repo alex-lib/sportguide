@@ -4,7 +4,7 @@ import com.sport.service.entities.Coach;
 import com.sport.service.entities.TrainingProgram;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.mappers.training_program.TrainingProgramMapper;
+import com.sport.service.mappers.trainingprogram.TrainingProgramMapper;
 import com.sport.service.repositories.CoachRepository;
 import com.sport.service.repositories.TrainingProgramRepository;
 import com.sport.service.utils.BeanUtils;

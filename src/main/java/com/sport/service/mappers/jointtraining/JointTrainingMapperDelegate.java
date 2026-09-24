@@ -1,4 +1,4 @@
-package com.sport.service.mappers.joint_training;
+package com.sport.service.mappers.jointtraining;
 
 import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Subscriber;

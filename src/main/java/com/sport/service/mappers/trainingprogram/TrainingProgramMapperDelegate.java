@@ -1,4 +1,4 @@
-package com.sport.service.mappers.training_program;
+package com.sport.service.mappers.trainingprogram;
 
 import com.sport.service.entities.Coach;
 import com.sport.service.entities.enums.common.SportType;

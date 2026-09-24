@@ -6,10 +6,10 @@ import com.sport.service.entities.JointTraining;
 import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.entities.enums.joint_training.ApprovalStatus;
+import com.sport.service.entities.enums.jointtraining.ApprovalStatus;
 import com.sport.service.entities.enums.subscriber.RoleType;
 import com.sport.service.exceptions.NotFoundException;
-import com.sport.service.mappers.joint_training.JointTrainingMapper;
+import com.sport.service.mappers.jointtraining.JointTrainingMapper;
 import com.sport.service.repositories.JointTrainingRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
@@ -27,14 +27,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.sport.service.entities.enums.joint_training.ApprovalStatus.PENDING;
+import static com.sport.service.entities.enums.jointtraining.ApprovalStatus.PENDING;
 
 @Service
 @RequiredArgsConstructor

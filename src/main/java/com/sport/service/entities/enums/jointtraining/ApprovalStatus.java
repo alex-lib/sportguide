@@ -1,4 +1,4 @@
-package com.sport.service.entities.enums.joint_training;
+package com.sport.service.entities.enums.jointtraining;
 
 public enum ApprovalStatus {
     PENDING,
