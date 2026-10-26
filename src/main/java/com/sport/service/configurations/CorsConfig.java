@@ -11,29 +11,29 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-        @Bean
-        CorsConfigurationSource corsConfigurationSource() {
-            CorsConfiguration config = new CorsConfiguration();
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
 
-            config.setAllowedOrigins(List.of(
-                    "http://localhost:3001",
-                    "https://sportguide.online",
-                    "https://api.sportguide.online"
-            ));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3001",
+                "https://sportguide.online",
+                "https://api.sportguide.online"
+        ));
 
-            config.setAllowedMethods(List.of(
-                    "GET", "POST", "PUT", "DELETE", "OPTIONS"
-            ));
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
 
-            config.setAllowedHeaders(List.of("*"));
-            config.setAllowCredentials(true);
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
-            UrlBasedCorsConfigurationSource source =
-                    new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", config);
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
 
-            return source;
-        }
+        return source;
     }
+}
 
 

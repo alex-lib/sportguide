@@ -28,7 +28,7 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 
 | Controller | Описание |
 | --- | --- |
-| `AuthController` | Telegram OAuth2 аутентификация |
+| `AuthController` | Telegram-аутентификация с выдачей JWT |
 | `EventController` | CRUD мероприятий, фильтрация |
 | `PlaceController` | CRUD мест, фильтрация |
 | `CoachController` | CRUD тренеров, фильтрация |
@@ -56,7 +56,7 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 
 - Spring Boot 3.5.4, Java 21
 - Spring Data JPA, Flyway (миграции БД), Spring Data Redis, Spring Cache
-- Spring Security (OAuth2 / JWT), Keycloak как IDP
+- Spring Security: проверка собственных JWT после входа через Telegram
 - Spring AI (Spring AI OpenAI Starter, sport assistant)
 - OpenFeign (HTTP-clients), Spring Cloud
 - Spring AOP (аннотация `@AdminOnly`)
@@ -82,8 +82,8 @@ Mini App — это SPA с 6 вкладками. Роутинг через `Hash
 ### Backend
 
 ```bash
-# Запустить инфраструктуру (PostgreSQL, Redis, MinIO, Keycloak)
-docker compose up postgres redis minio keycloak
+# Запустить инфраструктуру (PostgreSQL, Redis, MinIO)
+docker compose up postgres redis minio
 
 # Собрать и запустить бэкенд
 ./gradlew bootRun
@@ -104,7 +104,7 @@ npm run lint       # линтер
 ### Docker
 
 ```bash
-docker compose up              # postgres, redis, minio, keycloak, app
+docker compose up              # postgres, redis, minio, app
 ```
 
 ## Telegram аутентификация
@@ -157,7 +157,6 @@ fetch("https://app/auth/telegram", {
 │       ├── constants/                # Filter constants, etc.
 │       └── utils/                    # Date formatting, pluralization
 ├── config/                           # Prometheus / Grafana configs (commented out in compose)
-├── keycloak/                         # Keycloak realm export
 ├── design/                           # Design resources
 ├── docker-compose.yml
 ├── Dockerfile

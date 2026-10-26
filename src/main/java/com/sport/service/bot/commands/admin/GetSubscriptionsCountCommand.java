@@ -18,7 +18,6 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @Slf4j
 public class GetSubscriptionsCountCommand implements IBotCommand {
     private final SubscriberService subscriberService;
-
     private final TelegramMessageSender sender;
 
     @Override
