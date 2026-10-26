@@ -18,8 +18,9 @@ services:
   redis:
     image: redis:7.0.12
     container_name: redis
+    restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "redis-cli ping" ]
+      test: [ "CMD-SHELL", "redis-cli --raw ping | grep -qx PONG" ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -29,7 +30,12 @@ services:
         limits:
           memory: 512m
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   minio:
     image: minio/minio:latest
@@ -58,8 +64,6 @@ services:
       - ./logs:/app/logs
     container_name: app
     depends_on:
-#      keycloak:
-#        condition: service_healthy
       redis:
         condition: service_healthy
       postgres:
@@ -100,17 +104,7 @@ services:
 #      - ./config/grafana/provisioning:/etc/grafana/provisioning
 #    environment:
 #      - GF_SERVER_ROOT_URL=https://grafana.sportguide.online
-#      - GF_AUTH_GENERIC_OAUTH_ENABLED=true
-#      - GF_AUTH_GENERIC_OAUTH_NAME=Keycloak
-#      - GF_AUTH_GENERIC_OAUTH_CLIENT_ID=${GRAFANA_CLIENT_ID}
-#      - GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET=${KEYCLOAK_SECRET}
-#      - GF_AUTH_GENERIC_OAUTH_SCOPES=openid profile email
-#      - GF_AUTH_GENERIC_OAUTH_AUTH_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/auth
-#      - GF_AUTH_GENERIC_OAUTH_TOKEN_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/token
-#      - GF_AUTH_GENERIC_OAUTH_API_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/userinfo
-#      - GF_AUTH_SIGNOUT_REDIRECT_URL=https://auth.sportguide.online/realms/sportguide/protocol/openid-connect/logout
 #      - GF_AUTH_DISABLE_LOGIN_FORM=true
-#      - GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP=true
 #    depends_on:
 #      - prometheus
 
@@ -123,54 +117,6 @@ services:
 #      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 #      - ./config/prometheus/alerts.yml:/etc/prometheus/alerts.yml
 #      - ./prometheus:/prometheus
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:25.0.1
-    container_name: keycloak
-    environment:
-      - KC_PROXY=edge
-      - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
-      - KC_HEALTH_ENABLED=true
-    command: start-dev --import-realm
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && cat <&3 | grep \"200\"'",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 60
-      start_period: 60s
-    volumes:
-      - ./keycloak/realm-export:/opt/keycloak/data/import
-    ports:
-      - "8080:8080"
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:25.0.1
-#    container_name: keycloak
-#    environment:
-#      - KEYCLOAK_ADMIN=${KEYCLOAK_MAIN_ADMIN}
-#      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_MAIN_ADMIN_PASSWORD}
-#      - KC_HEALTH_ENABLED=true
-#      - KC_PROXY=edge
-#      - KC_HOSTNAME=auth.sportguide.online
-#      - KC_HOSTNAME_ADMIN_URL=http://keycloak:8080
-#      - KC_HTTP_ENABLED=true
-#      - KC_HOSTNAME_STRICT=false
-#      - KC_HOSTNAME_STRICT_HTTPS=false
-#    command: start-dev --import-realm
-#    healthcheck:
-#      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 60
-#      start_period: 60s
-#    volumes:
-#      - ./keycloak/realm-export:/opt/keycloak/data/import
-#    ports:
-#      - "8080:8080"
 
 #  alertmanager:
 #    container_name: alertmanager

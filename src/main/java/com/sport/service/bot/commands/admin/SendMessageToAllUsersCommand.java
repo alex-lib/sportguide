@@ -32,10 +32,8 @@ import java.util.List;
 public class SendMessageToAllUsersCommand implements IBotCommand, TextProcessable, PhotoProcessable {
     private final CommandStateStore commandStateStore;
     private final MessageSession messageSession;
-
     private final SubscriberService subscriberService;
     private final NotificationSenderService notificationSenderService;
-
     private final TelegramMessageSender sender;
 
     @Value("${telegram.bot.token}")

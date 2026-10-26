@@ -36,9 +36,7 @@ import java.util.List;
 public class CreatePlaceCommand implements IBotCommand, PhotoProcessable, TextProcessable, CallbackProcessable {
 	private final PlaceSession placeSession;
 	private final PlaceService placeService;
-
 	private final CommandStateStore commandStateStore;
-
 	private final TelegramMessageSender sender;
 
 	@Value("${telegram.bot.token}")

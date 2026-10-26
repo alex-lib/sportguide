@@ -20,9 +20,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 @Slf4j
 public class DeleteEventCommand implements IBotCommand, TextProcessable {
 	private final CommandStateStore commandStateStore;
-
 	private final TelegramMessageSender sender;
-
 	private final EventService eventService;
 
 	@Override
