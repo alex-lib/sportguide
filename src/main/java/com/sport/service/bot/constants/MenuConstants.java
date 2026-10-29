@@ -17,6 +17,10 @@ public final class MenuConstants {
             -----------------------------------
             ❌ <b>Удалить место</b>
             -----------------------------------
+            ➕ <b>Создать тренера</b>
+            -----------------------------------
+            ❌ <b>Удалить тренера</b>
+            -----------------------------------
             ➕ <b>Создать событие</b>
             -----------------------------------
             ❌ <b>Удалить событие</b>
@@ -66,6 +70,8 @@ public final class MenuConstants {
 
     public static final String CREATE_PLACE = "➕ Создать место";
     public static final String DELETE_PLACE = "❌ Удалить место";
+    public static final String CREATE_COACH = "➕ Добавить тренера";
+    public static final String DELETE_COACH = "❌ Удалить тренера";
     public static final String CREATE_EVENT = "➕ Создать событие";
     public static final String DELETE_EVENT = "❌ Удалить событие";
     public static final String SEND_MESSAGE_TO_ALL_USERS = "✉\uFE0F Отправить сообщение всем пользователям";

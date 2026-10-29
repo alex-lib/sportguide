@@ -58,6 +58,18 @@ public final class CommandsConstants {
     public static final String SEND_PLACE_PHOTO_2 = "\uD83D\uDDBC Пожалуйста, отправьте фото:";
     public static final String PLACE_CREATED = "Место создано ✅";
 
+    public static final String CREATE_COACH = "create_coach";
+    public static final String CREATE_COACH_DESCRIPTION = "Let admin create a new coach";
+    public static final String COACH_CREATED = "Тренер добавлен ✅";
+    public static final String CREATE_COACH_CANCELLED = "Добавление тренера отменено ❌";
+
+    public static final String DELETE_COACH = "delete_coach";
+    public static final String DELETE_COACH_DESCRIPTION = "Let admin delete a coach";
+    public static final String DELETING_COACH_INSTRUCTION = "Введите Telegram-никнейм тренера, которого хотите удалить, например @username. Можно без @.\n\nДля отмены: /cancel";
+    public static final String COACH_NOT_FOUND_FOR_DELETION = "Тренер с таким никнеймом не найден. Проверьте @username и повторите ввод или /cancel для отмены.";
+    public static final String DELETE_COACH_CANCELLED = "Удаление тренера отменено ❌";
+    public static final String COACH_DELETED = "Тренер удалён ✅";
+
     public static final String DELETE_PLACE = "delete_place";
     public static final String DELETE_PLACE_DESCRIPTION = "Let admin to delete a created place";
     public static final String DELETING_PLACE_INSTRUCTION = "Удалить место можно только по точному имени ранее сохраненного места. " +

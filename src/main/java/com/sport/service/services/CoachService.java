@@ -56,6 +56,27 @@ public class CoachService {
 
     @Transactional
     public void createCoach(CoachRequest request, MultipartFile photo) {
+        Coach coach = saveNewCoach(request);
+
+        if (photo != null && !photo.isEmpty()) {
+            String objectName = "coaches/" + coach.getId() + "/" + photo.getOriginalFilename();
+            minioService.uploadFile(objectName, photo);
+            coach.setPhotoUrl(minioService.getFileUrl(objectName));
+            coachRepository.save(coach);
+            log.info("Photo uploaded to MinIO for new coach '{}' (id={}): {}", request.getName(), coach.getId(), objectName);
+        }
+    }
+
+    @Transactional
+    public void createCoachFromBot(CoachRequest request, byte[] photo) {
+        Coach coach = saveNewCoach(request);
+        String objectName = "coaches/" + coach.getId() + "/photo.jpg";
+        minioService.uploadFileBytes(objectName, photo, "image/jpeg");
+        coach.setPhotoUrl(minioService.getFileUrl(objectName));
+        coachRepository.save(coach);
+    }
+
+    private Coach saveNewCoach(CoachRequest request) {
         Subscriber subscriber = subscriberService.findById(request.getSubscriberId());
         List<TrainingProgram> trainingPrograms = new ArrayList<>();
         List<String> titles = request.getTrainingProgramsTitles();
@@ -72,17 +93,7 @@ public class CoachService {
         }
 
         Coach coach = coachMapper.coachRequestToCoach(request, null, subscriber, trainingPrograms, workPlaces);
-        coachRepository.save(coach);
-
-        String photoUrl = null;
-        if (photo != null && !photo.isEmpty()) {
-            String objectName = "coaches/" + coach.getId() + "/" + photo.getOriginalFilename();
-            minioService.uploadFile(objectName, photo);
-            photoUrl = minioService.getFileUrl(objectName);
-            coach.setPhotoUrl(photoUrl);
-            coachRepository.save(coach);
-            log.info("Photo uploaded to MinIO for new coach '{}' (id={}): {}", request.getName(), coach.getId(), objectName);
-        }
+        return coachRepository.save(coach);
     }
 
     @Transactional
@@ -98,11 +109,33 @@ public class CoachService {
 
     @Transactional
     public void deleteCoachById(Long id) {
-        Coach coach = findCoachById(id);
-        if (coach.getPhotoUrl() != null) {
-            minioService.deleteFile(coach.getPhotoUrl());
+        deleteCoach(findCoachById(id));
+    }
+
+    @Transactional
+    public boolean deleteCoachByUsername(String username) {
+        Coach coach = subscriberService.findByUsername(username)
+                .flatMap(subscriber -> coachRepository.findBySubscriberId(subscriber.getId()))
+                .orElse(null);
+        if (coach == null) return false;
+        deleteCoach(coach);
+        return true;
+    }
+
+    private void deleteCoach(Coach coach) {
+        for (TrainingProgram program : coach.getTrainingPrograms()) {
+            program.getCreators().removeIf(creator -> coach.getId().equals(creator.getId()));
         }
-        coachRepository.deleteById(id);
+        coachRepository.delete(coach);
+        coachRepository.flush();
+        if (coach.getPhotoUrl() != null) {
+            String objectName = coach.getPhotoUrl().replaceFirst("^https?://", "");
+            String storagePrefix = minioService.getFileUrl("");
+            if (objectName.startsWith(storagePrefix)) {
+                objectName = objectName.substring(storagePrefix.length());
+            }
+            minioService.deleteFile(objectName);
+        }
     }
 
     @Transactional

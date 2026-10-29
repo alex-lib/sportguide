@@ -14,4 +14,6 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Long> {
     int countByGetEventsTrue();
 
     List<Subscriber> findAllByGetEventsTrue();
+
+    List<Subscriber> findAllByUsernameIgnoreCase(String username);
 }

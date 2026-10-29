@@ -13,8 +13,6 @@ import java.util.List;
 public class AdminMenu {
     private final SendMessage answer;
 
-    public static final String ADMIN_MENU = MenuConstants.ADMIN_MENU;
-
     public void getAdminMenu() {
         KeyboardRow row1 = new KeyboardRow();
         row1.add(MenuConstants.CHOOSE_PLACE);
@@ -36,10 +34,15 @@ public class AdminMenu {
         row5.add(MenuConstants.SEND_MESSAGE_TO_ALL_USERS);
         row5.add(MenuConstants.CREATE_TRAINING_PROGRAM);
 
+        KeyboardRow row6 = new KeyboardRow();
+        row6.add(MenuConstants.CREATE_COACH);
+        row6.add(MenuConstants.DELETE_COACH);
+
         List<KeyboardRow> keyboard = new ArrayList<>();
         keyboard.add(row1);
         keyboard.add(row2);
         keyboard.add(row3);
+        keyboard.add(row6);
         keyboard.add(row4);
         keyboard.add(row5);
 
