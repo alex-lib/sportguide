@@ -4,6 +4,9 @@ public class Constants {
 
     public static final String WEATHER_CHANNEL_NAME = "notification:weather";
     public static final String EVENT_CHANNEL_NAME = "notification:event";
+    public static final String PLACE_CHANNEL_NAME = "notification:place";
+    public static final String COACH_CHANNEL_NAME = "notification:coach";
+    public static final String JOINT_TRAINING_CHANNEL_NAME = "notification:joint_training";
     public static final String SUBSCRIBER_TO_ADMIN_CHANNEL_NAME = "notification:subscriber_to_admin";
     public static final String ADMIN_TO_SUBSCRIBER_CHANNEL_NAME = "notification:admin_to_subscriber";
     public static final String ADMIN_ALERT_CHANNEL_NAME = "notification:admin_alert";

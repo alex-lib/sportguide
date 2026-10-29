@@ -4,7 +4,11 @@ import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.commands.interfaces.TextProcessable;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.store.commands.CommandStateStore;
-import com.sport.service.services.ai.AiAssistantService;
+import com.sport.service.services.ai.TrainingGenerationService;
+import com.sport.service.exceptions.AiQuotaExceededException;
+import com.sport.service.constants.Constants;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +23,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender;
 public class CreateTrainingProgramCommand implements IBotCommand, TextProcessable {
     private final TelegramMessageSender sender;
     private final CommandStateStore commandStateStore;
-    private final AiAssistantService aiAssistantService;
+    private final TrainingGenerationService trainingGenerationService;
 
     @Override
     public String getCommandIdentifier() {
@@ -66,8 +70,15 @@ public class CreateTrainingProgramCommand implements IBotCommand, TextProcessabl
 
         try {
             sender.sendMessageWithoutPhoto(chatId, CommandsConstants.CREATE_TRAINING_PROGRAM_CREATING_TEXT);
-            String trainingProgram = aiAssistantService.generateTrainingProgram(text);
+            String trainingProgram = trainingGenerationService.generate(userId, text);
             sender.sendMessageWithoutPhoto(chatId, trainingProgram);
+        } catch (AiQuotaExceededException e) {
+            String nextTime = DateTimeFormatter.ofPattern("dd.MM в HH:mm")
+                    .withZone(ZoneId.of(Constants.TIME_ZONE)).format(e.getAvailableAt());
+            sender.sendMessageWithoutPhoto(chatId, "Вы уже использовали ИИ-тренера. Следующая тренировка доступна "
+                    + nextTime + " (МСК).");
+        } catch (IllegalArgumentException e) {
+            sender.sendMessageWithoutPhoto(chatId, e.getMessage());
         } catch (Exception e) {
             log.error("Error processing text input", e);
             sender.sendMessageWithoutPhoto(chatId, CommandsConstants.CREATE_TRAINING_PROGRAM_ERROR);

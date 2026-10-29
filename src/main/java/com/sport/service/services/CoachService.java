@@ -14,6 +14,9 @@ import com.sport.service.repositories.CoachRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.coach.CoachRequest;
 import com.sport.service.web.models.coach.ListCoachResponse;
+import com.sport.service.store.notifications.Notification;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.util.HtmlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,6 +39,7 @@ public class CoachService {
     private final TrainingProgramService trainingProgramService;
     private final MinioService minioService;
     private final CoachMapper coachMapper;
+    private final ApplicationEventPublisher events;
 
       public ListCoachResponse findAllCoaches(List<String> sportTypesRequest, Integer age, String sex, Integer yearsOfExperience, String search) {
           List<SportType> sportTypes = null;
@@ -93,7 +97,13 @@ public class CoachService {
         }
 
         Coach coach = coachMapper.coachRequestToCoach(request, null, subscriber, trainingPrograms, workPlaces);
-        return coachRepository.save(coach);
+        Coach saved = coachRepository.save(coach);
+        if (Boolean.TRUE.equals(saved.getShowInWeb())) {
+            events.publishEvent(Notification.builder().type(Notification.NotificationType.COACH)
+                    .message("🏅 Новый тренер: <b>" + HtmlUtils.htmlEscape(saved.getName())
+                            + "</b>\nПосмотрите анкету в разделе «Тренеры» приложения.").build());
+        }
+        return saved;
     }
 
     @Transactional

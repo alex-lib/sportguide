@@ -3,22 +3,20 @@ package com.sport.service.bot.commands.subscriber;
 import com.sport.service.bot.TelegramMessageSender;
 import com.sport.service.bot.constants.CommandsConstants;
 import com.sport.service.bot.constants.ErrorConstants;
-import com.sport.service.entities.Subscriber;
-import com.sport.service.services.SubscriberService;
+import com.sport.service.services.NotificationPreferenceService;
+import com.sport.service.web.models.settings.NotificationPreferences;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class GetNotificationsCommand implements IBotCommand {
-    private final SubscriberService subscriberService;
-
+    private final NotificationPreferenceService preferences;
     private final TelegramMessageSender sender;
 
     @Override
@@ -33,23 +31,13 @@ public class GetNotificationsCommand implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-        User user = message.getFrom();
-        Long userId = user.getId();
-        Long chatId = message.getChatId();
-        log.info("Call command get_notifications by userId={}, username={}", userId, user.getUserName());
-
+        if (Boolean.TRUE.equals(message.getFrom().getIsBot())) return;
         try {
-            Subscriber subscriber = subscriberService.findById(userId);
-            if (subscriber.getGetEvents().equals(Boolean.TRUE)) {
-                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.GET_NOTIFICATIONS_ALREADY_GET_TEXT);
-            } else {
-                subscriber.setGetEvents(Boolean.TRUE);
-                subscriberService.updateSubscriber(subscriber, user.getId());
-                sender.sendMessageWithoutPhoto(chatId, CommandsConstants.GET_NOTIFICATIONS_START_TEXT);
-            }
+            preferences.update(message.getFrom().getId(), new NotificationPreferences(true, true, true, true, true));
+            sender.sendMessageWithoutPhoto(message.getChatId(), CommandsConstants.GET_NOTIFICATIONS_START_TEXT);
         } catch (Exception e) {
-            log.error("Error occurred in /get_notifications command", e);
-            sender.sendMessageWithoutPhoto(chatId, ErrorConstants.ERROR_HAPPENED);
+            log.error("Failed to enable notifications for user {}", message.getFrom().getId(), e);
+            sender.sendMessageWithoutPhoto(message.getChatId(), ErrorConstants.ERROR_HAPPENED);
         }
     }
 }

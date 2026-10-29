@@ -1,8 +1,8 @@
-import { useTheme } from '../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 import { Page, PageHeader, IconButton, Hero, SectionLabel, Tiles, Tile } from '../ui';
 
 const Home = () => {
-  const { toggle } = useTheme();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -10,7 +10,7 @@ const Home = () => {
         eyebrow="Воронеж"
         eyebrowIcon="map-pin"
         title="Привет, чем займёмся?"
-        action={<IconButton icon="settings" label="Настройки" onClick={toggle} />}
+        action={<IconButton icon="settings" label="Настройки" onClick={() => navigate('/settings')} />}
       />
       <Page>
         <Hero

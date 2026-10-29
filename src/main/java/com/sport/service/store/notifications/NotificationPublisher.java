@@ -41,6 +41,9 @@ public class NotificationPublisher {
         return switch (type) {
             case EVENT -> Constants.EVENT_CHANNEL_NAME;
             case WEATHER -> Constants.WEATHER_CHANNEL_NAME;
+            case PLACE -> Constants.PLACE_CHANNEL_NAME;
+            case COACH -> Constants.COACH_CHANNEL_NAME;
+            case JOINT_TRAINING -> Constants.JOINT_TRAINING_CHANNEL_NAME;
             case ADMIN_TO_SUBSCRIBER -> Constants.ADMIN_TO_SUBSCRIBER_CHANNEL_NAME;
             case SUBSCRIBER_TO_ADMIN -> Constants.SUBSCRIBER_TO_ADMIN_CHANNEL_NAME;
             case ADMIN_ALERT -> Constants.ADMIN_ALERT_CHANNEL_NAME;

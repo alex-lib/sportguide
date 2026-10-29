@@ -11,6 +11,7 @@ import Places from './pages/Places.jsx';
 import JointTrainings from './pages/JointTrainings.jsx';
 import TrainingPrograms from './pages/TrainingPrograms.jsx';
 import Coaches from './pages/Coaches.jsx';
+import Settings from './pages/Settings.jsx';
 import { Page, EmptyState, Button, Loading } from './ui';
 
 const THEME_COLORS = {
@@ -164,6 +165,7 @@ function App() {
         <TourPage />
         <Layout>
           <Routes>
+            <Route path="/settings" element={<Settings />} />
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/places" element={<Places />} />

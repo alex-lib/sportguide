@@ -15,5 +15,13 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Long> {
 
     List<Subscriber> findAllByGetEventsTrue();
 
+    List<Subscriber> findAllByGetWeatherTrue();
+
+    List<Subscriber> findAllByGetPlacesTrue();
+
+    List<Subscriber> findAllByGetCoachesTrue();
+
+    List<Subscriber> findAllByGetJointTrainingsTrue();
+
     List<Subscriber> findAllByUsernameIgnoreCase(String username);
 }

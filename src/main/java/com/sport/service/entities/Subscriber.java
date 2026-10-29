@@ -44,6 +44,18 @@ public class Subscriber {
     @Column(name = "get_events")
     public Boolean getEvents;
 
+    @Column(name = "get_weather", nullable = false)
+    private Boolean getWeather;
+
+    @Column(name = "get_places", nullable = false)
+    private Boolean getPlaces;
+
+    @Column(name = "get_coaches", nullable = false)
+    private Boolean getCoaches;
+
+    @Column(name = "get_joint_trainings", nullable = false)
+    private Boolean getJointTrainings;
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     public RoleType role;

@@ -48,6 +48,9 @@ public class RedisNotificationConfiguration {
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(listener, weatherTopic());
         container.addMessageListener(listener, eventTopic());
+        container.addMessageListener(listener, placeTopic());
+        container.addMessageListener(listener, coachTopic());
+        container.addMessageListener(listener, jointTrainingTopic());
         container.addMessageListener(listener, subscriberToAdminTopic());
         container.addMessageListener(listener, adminToSubscriberTopic());
         container.addMessageListener(listener, adminAlertTopic());
@@ -62,6 +65,21 @@ public class RedisNotificationConfiguration {
     @Bean
     public ChannelTopic eventTopic() {
         return new ChannelTopic(Constants.EVENT_CHANNEL_NAME);
+    }
+
+    @Bean
+    public ChannelTopic placeTopic() {
+        return new ChannelTopic(Constants.PLACE_CHANNEL_NAME);
+    }
+
+    @Bean
+    public ChannelTopic coachTopic() {
+        return new ChannelTopic(Constants.COACH_CHANNEL_NAME);
+    }
+
+    @Bean
+    public ChannelTopic jointTrainingTopic() {
+        return new ChannelTopic(Constants.JOINT_TRAINING_CHANNEL_NAME);
     }
 
     @Bean

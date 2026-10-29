@@ -22,14 +22,11 @@ public final class CommandsConstants {
     public static final String THERE_ARE_NO_EVENTS = "Ближайших событий нет \uD83E\uDD37\u200D♂\uFE0F";
 
     public static final String GET_NOTIFICATIONS = "get_notifications";
-    public static final String GET_NOTIFICATIONS_DESCRIPTION = "Change variable getEvents to true";
-    public static final String GET_NOTIFICATIONS_ALREADY_GET_TEXT = "Вы уже подписаны на получение уведомлений \uD83D\uDC4C";
-    public static final String GET_NOTIFICATIONS_START_TEXT = "Теперь вы будете получать уведомление при создании события ✅";
-
+    public static final String GET_NOTIFICATIONS_DESCRIPTION = "Enable all notification categories";
+    public static final String GET_NOTIFICATIONS_START_TEXT = "Все уведомления включены: погода, новые события, места, тренеры и совместные тренировки ✅";
     public static final String STOP_NOTIFICATIONS = "stop_notifications";
-    public static final String STOP_NOTIFICATIONS_DESCRIPTION = "Change variable getEvents to false";
-    public static final String STOP_NOTIFICATIONS_ALREADY_STOP_TEXT = "Вы не подписаны на получение уведомлений \uD83D\uDC4C";
-    public static final String STOP_NOTIFICATIONS_STOP_TEXT = "Теперь вы не будете получать уведомление при создании события ✅";
+    public static final String STOP_NOTIFICATIONS_DESCRIPTION = "Disable all optional notification categories";
+    public static final String STOP_NOTIFICATIONS_STOP_TEXT = "Все уведомления отключены. Сообщения администратора продолжат приходить ✅";
 
     public static final String SUPPORT_PROJECT = "support_project";
     public static final String SUPPORT_PROJECT_DESCRIPTION = "Give to subscriber info to support project";
@@ -129,6 +126,7 @@ public final class CommandsConstants {
             <b>Пример:</b> <i>Тренировка для грудных и трицепса, без прыжков, дома.</i>
             
             Для отмены нажмите /cancel
+            Одна генерация в 24 часа. Для администратора ограничений нет.
             \s""";
     public static final String CREATE_TRAINING_PROGRAM_CANCEL = "/cancel";
     public static final String CREATE_TRAINING_PROGRAM_CANCEL_TEXT = "Создание тренировки отменено ❌";

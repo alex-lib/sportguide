@@ -3,11 +3,12 @@ package com.sport.service.services;
 import com.sport.service.constants.Constants;
 import com.sport.service.dto.EventDto;
 import com.sport.service.entities.Event;
-import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.mappers.event.EventMapper;
 import com.sport.service.repositories.EventRepository;
 import com.sport.service.web.models.event.ListEventResponse;
+import com.sport.service.store.notifications.Notification;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,9 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
-    private final SubscriberService subscriberService;
     private final NotificationCreatorService notificationCreatorService;
-    private final NotificationSenderService notificationSenderService;
+    private final ApplicationEventPublisher events;
     private final EventMapper eventMapper;
 
     public List<Event> findAllEvents() {
@@ -55,12 +55,9 @@ public class EventService {
     public void createEvent(EventDto dto) {
         Event event = eventMapper.eventDtoToEvent(dto);
         eventRepository.save(event);
-        List<Long> subscriberIds = subscriberService.getSubscribersWhoWantGetEvents()
-                .stream()
-                .map(Subscriber::getId)
-                .toList();
         String notification = notificationCreatorService.createEventNotification(event);
-        notificationSenderService.sendEventNotification(notification, subscriberIds);
+        events.publishEvent(Notification.builder().type(Notification.NotificationType.EVENT)
+                .message(notification).build());
     }
 
     @Transactional
