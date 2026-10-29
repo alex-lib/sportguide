@@ -72,6 +72,19 @@ public class SubscriberService {
         return subscriberRepository.findById(id).orElse(null);
     }
 
+    public Optional<Subscriber> findByUsername(String username) {
+        String normalized = username == null ? "" : username.trim();
+        if (normalized.startsWith("@")) normalized = normalized.substring(1);
+        if (!normalized.matches("[A-Za-z0-9_]{1,32}")) {
+            throw new IllegalArgumentException("Введите Telegram-никнейм в формате @username.");
+        }
+        List<Subscriber> matches = subscriberRepository.findAllByUsernameIgnoreCase(normalized);
+        if (matches.size() > 1) {
+            throw new IllegalArgumentException("Этот никнейм указан у нескольких пользователей в базе. Обновите их данные через /start и повторите поиск.");
+        }
+        return matches.stream().findFirst();
+    }
+
     public List<Subscriber> getSubscribersWhoWantGetEvents() {
         return subscriberRepository.findAllByGetEventsTrue();
     }

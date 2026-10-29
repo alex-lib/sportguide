@@ -17,6 +17,8 @@ public class ButtonToCommandMapper {
         BUTTON_COMMANDS.put(MenuConstants.SUBSCRIBE_TO_NOTIFICATIONS, "/" + CommandsConstants.GET_NOTIFICATIONS);
         BUTTON_COMMANDS.put(MenuConstants.UNSUBSCRIBE_TO_NOTIFICATIONS, "/" + CommandsConstants.STOP_NOTIFICATIONS);
         BUTTON_COMMANDS.put(MenuConstants.CREATE_PLACE, "/" + CommandsConstants.CREATE_PLACE);
+        BUTTON_COMMANDS.put(MenuConstants.CREATE_COACH, "/" + CommandsConstants.CREATE_COACH);
+        BUTTON_COMMANDS.put(MenuConstants.DELETE_COACH, "/" + CommandsConstants.DELETE_COACH);
         BUTTON_COMMANDS.put(MenuConstants.DELETE_PLACE, "/" + CommandsConstants.DELETE_PLACE);
         BUTTON_COMMANDS.put(MenuConstants.CREATE_EVENT, "/" + CommandsConstants.CREATE_EVENT);
         BUTTON_COMMANDS.put(MenuConstants.DELETE_EVENT, "/" + CommandsConstants.DELETE_EVENT);

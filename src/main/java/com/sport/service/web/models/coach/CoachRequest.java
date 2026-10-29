@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sport.service.annotations.PhoneNumberValid;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
+@Setter
 public class CoachRequest {
 
     @NotNull(message = "Coach's id must be pointed")
