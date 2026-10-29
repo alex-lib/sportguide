@@ -9,6 +9,9 @@ import com.sport.service.entities.enums.place.SubDistrict;
 import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.repositories.PlaceRepository;
 import com.sport.service.web.models.place.ListPlaceResponse;
+import com.sport.service.store.notifications.Notification;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.util.HtmlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +30,7 @@ public class PlaceService {
     private final PlaceRepository placeRepository;
     private final PlaceMapper placeMapper;
     private final MinioService minioService;
+    private final ApplicationEventPublisher events;
 
     @Transactional
     @CacheEvict(value = "places", allEntries = true)
@@ -40,6 +44,9 @@ public class PlaceService {
             placeRepository.save(place);
             log.info("Photo uploaded to MinIO for place '{}': {}", place.getName(), objectName);
         }
+        events.publishEvent(Notification.builder().type(Notification.NotificationType.PLACE)
+                .message("📍 Новое место: <b>" + HtmlUtils.htmlEscape(place.getName())
+                        + "</b>\nПосмотрите подробности в разделе «Места» приложения.").build());
     }
 
     public boolean existsByName(String name) {

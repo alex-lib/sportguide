@@ -24,6 +24,9 @@ public class Notification implements Serializable {
     public enum NotificationType {
         EVENT,
         WEATHER,
+        PLACE,
+        COACH,
+        JOINT_TRAINING,
         ADMIN_TO_SUBSCRIBER,
         SUBSCRIBER_TO_ADMIN,
         ADMIN_ALERT

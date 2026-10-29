@@ -1,6 +1,7 @@
 package com.sport.service.store.notifications;
 
 import com.sport.service.bot.TelegramMessageSender;
+import com.sport.service.services.NotificationPreferenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,6 +20,7 @@ public class NotificationListener implements MessageListener {
     private final RedisTemplate<String, Object> notificationRedisTemplate;
 
     private final TelegramMessageSender telegramMessageSender;
+    private final NotificationPreferenceService preferences;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -29,6 +31,7 @@ public class NotificationListener implements MessageListener {
 
         String keyPrefix = String.format("%s:%d:*", channel, userId);
         Set<String> keys = notificationRedisTemplate.keys(keyPrefix);
+        if (keys == null) return;
 
         for (String key : keys) {
             Notification notification = (Notification) notificationRedisTemplate.opsForValue().get(key);
@@ -39,6 +42,7 @@ public class NotificationListener implements MessageListener {
 
     //    @Scheduled(fixedRate = 35)
     private void sendNotification(Notification notification) {
+        if (notification == null || !preferences.isEnabled(notification.getUserId(), notification.getType())) return;
         Long userId = notification.getUserId();
         String message = notification.getMessage();
         byte[] photo = notification.getPhoto();

@@ -1089,3 +1089,81 @@
 .__floater__arrow polygon {
   fill: var(--surface);
 }
+
+/* Settings */
+.settings-page { display: grid; gap: 26px; }
+.settings-section-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--label-2);
+  margin: 8px 4px 10px;
+}
+.settings-intro, .settings-note {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--label-2);
+  margin: 0 4px 14px;
+}
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--sep);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 84px;
+  padding: 18px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--label);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.settings-row + .settings-row { border-top: 1px solid var(--sep); }
+.settings-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -4px; }
+.settings-row:disabled { cursor: wait; opacity: 0.6; }
+.settings-icon {
+  flex: 0 0 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--brand);
+}
+.settings-copy { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.settings-title { font-size: var(--text-md); font-weight: 650; }
+.settings-description { font-size: var(--text-sm); color: var(--label-2); line-height: 1.4; }
+.settings-switch {
+  flex: 0 0 46px;
+  height: 28px;
+  padding: 3px;
+  border-radius: 20px;
+  background: var(--label-3);
+  transition: background 0.15s;
+}
+.settings-switch > span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px #0002;
+  transition: transform 0.15s;
+}
+.settings-row[aria-checked="true"] .settings-switch { background: var(--brand); }
+.settings-row[aria-checked="true"] .settings-switch > span { transform: translateX(18px); }
+.settings-info { display: flex; align-items: flex-start; gap: 10px; color: var(--label-2); padding: 0 4px; }
+.settings-info svg { flex-shrink: 0; margin-top: 2px; }
+.settings-info p { margin: 0; font-size: var(--text-sm); line-height: 1.5; }
+.settings-save-status { min-height: 20px; margin: 10px 4px; color: var(--brand); font-size: var(--text-sm); }
+.settings-error { margin-top: 12px; display: grid; gap: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .settings-switch, .settings-switch > span { transition: none; }
+}

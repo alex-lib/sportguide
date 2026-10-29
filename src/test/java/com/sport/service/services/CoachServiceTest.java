@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,8 @@ class CoachServiceTest {
     private final TrainingProgramService programs = mock(TrainingProgramService.class);
     private final MinioService minio = mock(MinioService.class);
     private final CoachMapper mapper = mock(CoachMapper.class);
-    private final CoachService service = new CoachService(repository, subscribers, places, programs, minio, mapper);
+    private final ApplicationEventPublisher events = mock(ApplicationEventPublisher.class);
+    private final CoachService service = new CoachService(repository, subscribers, places, programs, minio, mapper, events);
     private final CoachRequest request = new CoachRequest();
     private final Coach coach = new Coach();
 
@@ -88,6 +90,24 @@ class CoachServiceTest {
         assertThrows(IllegalStateException.class, () -> service.createCoachFromBot(request, photo));
         assertNull(coach.getPhotoUrl());
         verify(repository).save(coach);
+    }
+
+    @Test
+    void publicCoachCreationPublishesAnnouncement() {
+        coach.setName("Иван <тренер>");
+        coach.setShowInWeb(true);
+        service.createCoachFromBot(request, new byte[]{1});
+        var announcement = org.mockito.ArgumentCaptor.forClass(com.sport.service.store.notifications.Notification.class);
+        verify(events).publishEvent(announcement.capture());
+        assertEquals(com.sport.service.store.notifications.Notification.NotificationType.COACH, announcement.getValue().getType());
+        assertTrue(announcement.getValue().getMessage().contains("Иван &lt;тренер&gt;"));
+    }
+
+    @Test
+    void hiddenCoachIsNotAnnounced() {
+        coach.setShowInWeb(false);
+        service.createCoachFromBot(request, new byte[]{1});
+        verifyNoInteractions(events);
     }
 
     @ParameterizedTest

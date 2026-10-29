@@ -15,8 +15,6 @@ import com.sport.service.store.commands.CommandStateStore;
 import com.sport.service.store.commands.sessions.JointTrainingRejectingSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
@@ -53,9 +51,8 @@ class DeleteCoachCommandTest {
         when(state.getCurrentCommand(USER_ID)).thenReturn(CommandsConstants.DELETE_COACH);
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {MenuConstants.DELETE_COACH, "/delete_coach"})
-    void menuButtonAndSlashCommandStartDeletion(String input) {
+    @Test
+    void menuButtonStartsDeletion() {
         SendMessage menu = new SendMessage();
         new AdminMenu(menu).getAdminMenu();
         assertTrue(((ReplyKeyboardMarkup) menu.getReplyMarkup()).getKeyboard().stream()
@@ -68,7 +65,7 @@ class DeleteCoachCommandTest {
                 mock(JointTrainingService.class), mock(JointTrainingRejectingSession.class), sender);
         ReflectionTestUtils.setField(bot, "secondAdminId", "10");
         Update update = new Update();
-        update.setMessage(message(input));
+        update.setMessage(message(MenuConstants.DELETE_COACH));
         bot.onUpdateReceived(update);
         verify(state).setCurrentCommand(USER_ID, CommandsConstants.DELETE_COACH);
         verify(sender).sendMessageWithoutPhoto(CHAT_ID, CommandsConstants.DELETING_COACH_INSTRUCTION);

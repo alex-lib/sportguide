@@ -39,7 +39,7 @@ public class NotificationSenderService {
 
     public void sendAdminToSubscriberNotification(String message, byte[] photo, List<Long> userIds) {
         Notification template = Notification.builder()
-                .type(Notification.NotificationType.EVENT)
+                .type(Notification.NotificationType.ADMIN_TO_SUBSCRIBER)
                 .message(message)
                 .photo(photo)
                 .build();

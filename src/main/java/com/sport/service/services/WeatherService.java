@@ -1,8 +1,8 @@
 package com.sport.service.services;
 
 import com.sport.service.constants.Constants;
-import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TodayWeather;
+import com.sport.service.store.notifications.Notification.NotificationType;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import java.util.List;
 public class WeatherService {
     private final OpenMeteoClientService openMeteoClientService;
     private final NotificationSenderService notificationSenderService;
-    private final SubscriberService subscriberService;
+    private final NotificationPreferenceService preferences;
     private final NotificationCreatorService notificationCreatorService;
 
     @Scheduled(cron = Constants.CRON_SEND_WEATHER, zone = Constants.TIME_ZONE)
@@ -26,11 +26,7 @@ public class WeatherService {
             TodayWeather weather = openMeteoClientService.getTodayWeather();
             String message = notificationCreatorService.createWeatherNotification(weather);
 
-            List<Long> subscriberIds = subscriberService
-                    .getSubscribersWhoWantGetEvents()
-                    .stream()
-                    .map(Subscriber::getId)
-                    .toList();
+            List<Long> subscriberIds = preferences.recipients(NotificationType.WEATHER);
 
             notificationSenderService.sendWeatherNotification(message, subscriberIds);
         } catch (FeignException e) {

@@ -78,6 +78,16 @@ class ApiService {
   }
 
   // Events
+  async getNotificationPreferences() {
+    const response = await this.api.get(API_ENDPOINTS.NOTIFICATION_SETTINGS);
+    return response.data;
+  }
+
+  async updateNotificationPreferences(preferences) {
+    const response = await this.api.put(API_ENDPOINTS.NOTIFICATION_SETTINGS, preferences);
+    return response.data;
+  }
+
   async getEvents(filter) {
     const response = await this.api.get(API_ENDPOINTS.EVENTS, {
       params: filter,

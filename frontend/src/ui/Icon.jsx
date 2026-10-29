@@ -39,6 +39,10 @@ import {
   MessageCircle,
   Globe,
   ArrowRight,
+  ArrowLeft,
+  Moon,
+  Sun,
+  Info,
   Check,
 } from 'lucide-react';
 
@@ -88,6 +92,10 @@ const ICONS = {
   'message-circle': MessageCircle,
   globe: Globe,
   'arrow-right': ArrowRight,
+  'arrow-left': ArrowLeft,
+  moon: Moon,
+  sun: Sun,
+  info: Info,
   check: Check,
 };
 

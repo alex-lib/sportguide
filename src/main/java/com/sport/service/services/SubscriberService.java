@@ -49,6 +49,10 @@ public class SubscriberService {
                     .lastName(user.getLastName())
                     .role(RoleType.SUBSCRIBER)
                     .getEvents(true)
+                    .getWeather(true)
+                    .getPlaces(false)
+                    .getCoaches(false)
+                    .getJointTrainings(false)
                     .build();
             subscriberRepository.save(transientSubscriber);
             log.info("New user is saved - {}", user.getId());

@@ -14,6 +14,9 @@ import com.sport.service.repositories.JointTrainingRepository;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.joint_training.CreateJointTrainingRequest;
 import com.sport.service.web.models.joint_training.ListJointTrainingResponse;
+import com.sport.service.store.notifications.Notification;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.web.util.HtmlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,6 +47,7 @@ public class JointTrainingService {
     private final SubscriberService subscriberService;
     private final NotificationCreatorService notificationCreatorService;
     private final TelegramMessageSender sender;
+    private final ApplicationEventPublisher events;
 
     @Value("${telegram.secondAdminId}")
     private String secondAdminId;
@@ -131,9 +135,15 @@ public class JointTrainingService {
         if (jt.getApprovalStatus() != ApprovalStatus.PENDING)
             return;
 
+        boolean firstPublication = jt.getApprovedAt() == null;
         jt.setApprovalStatus(ApprovalStatus.APPROVED);
         jt.setApprovedAt(LocalDateTime.now());
         jointTrainingRepository.save(jt);
+        if (firstPublication) {
+            events.publishEvent(Notification.builder().type(Notification.NotificationType.JOINT_TRAINING)
+                    .message("🤝 Новая совместная тренировка: <b>" + HtmlUtils.htmlEscape(jt.getTitle())
+                            + "</b>\nПосмотрите подробности в разделе «Тренировки» приложения.").build());
+        }
         notifyUserApproved(jt);
     }
 

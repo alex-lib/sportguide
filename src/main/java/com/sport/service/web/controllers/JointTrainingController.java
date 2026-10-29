@@ -46,7 +46,7 @@ public class JointTrainingController {
     public void createJointTraining(@Valid @RequestBody CreateJointTrainingRequest request,
                                      Authentication auth
     ) {
-        Long userId = ((Long) auth.getPrincipal());
+        Long userId = Long.parseLong(auth.getName());
         jointTrainingService.createJointTraining(request, userId);
     }
 
@@ -56,7 +56,7 @@ public class JointTrainingController {
                                      @PathVariable Long id,
                                      Authentication auth
     ) {
-        Long userId = ((Long) auth.getPrincipal());
+        Long userId = Long.parseLong(auth.getName());
         jointTrainingService.updateJointTrainingById(request, id, userId);
     }
 
@@ -65,7 +65,7 @@ public class JointTrainingController {
     public void deleteJointTraining(@PathVariable Long id,
                                     Authentication auth
     ) {
-        Long userId = ((Long) auth.getPrincipal());
+        Long userId = Long.parseLong(auth.getName());
         jointTrainingService.deleteJointTrainingById(id, userId);
     }
 }
