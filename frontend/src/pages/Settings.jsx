@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { apiService } from '../services/api';
-import { Page, PageHeader, IconButton, Icon, Button, ErrorBanner } from '../ui';
+import { Page, PageHeader, Icon, Button, ErrorBanner } from '../ui';
 
 const NOTIFICATIONS = [
   { key: 'weather', title: 'Погода', description: 'Утренний прогноз для планирования тренировок', icon: 'sun' },
@@ -27,7 +26,6 @@ function ToggleRow({ title, description, icon, checked, disabled, onChange }) {
 }
 
 export default function Settings() {
-  const navigate = useNavigate();
   const { isDark, toggle } = useTheme();
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,8 +68,7 @@ export default function Settings() {
 
   return (
     <>
-      <PageHeader eyebrow="Под себя" title="Настройки"
-        action={<IconButton icon="arrow-left" label="На главную" onClick={() => navigate('/')} />} />
+      <PageHeader eyebrow="Под себя" title="Настройки" />
       <Page className="settings-page">
         <section aria-labelledby="appearance-heading">
           <h2 className="settings-section-title" id="appearance-heading">Оформление</h2>
@@ -83,7 +80,7 @@ export default function Settings() {
 
         <section aria-labelledby="notifications-heading" aria-busy={loading || saving}>
           <h2 className="settings-section-title" id="notifications-heading">Уведомления в Telegram</h2>
-          <p className="settings-intro">Выберите, о чём вам рассказывать. Изменения сохраняются автоматически.</p>
+          <p className="settings-intro">Выберите, о чём вам рассказывать.</p>
           {loading ? <p className="settings-note" role="status">Загружаем настройки…</p> : preferences && (
             <div className="settings-card">
               {NOTIFICATIONS.map(item => <ToggleRow key={item.key} {...item}
@@ -95,10 +92,6 @@ export default function Settings() {
             {!preferences && <Button variant="ghost" onClick={() => setAttempt(value => value + 1)}>Повторить</Button>}
           </div>}
           <p className="settings-save-status" role="status" aria-live="polite">{status}</p>
-          <div className="settings-info">
-            <Icon name="info" size={19} />
-            <p>Сообщения администратора приходят всем, независимо от этих настроек.</p>
-          </div>
         </section>
       </Page>
     </>

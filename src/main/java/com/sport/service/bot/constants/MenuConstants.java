@@ -70,7 +70,7 @@ public final class MenuConstants {
 
     public static final String CREATE_PLACE = "➕ Создать место";
     public static final String DELETE_PLACE = "❌ Удалить место";
-    public static final String CREATE_COACH = "➕ Добавить тренера";
+    public static final String CREATE_COACH = "➕ Создать тренера";
     public static final String DELETE_COACH = "❌ Удалить тренера";
     public static final String CREATE_EVENT = "➕ Создать событие";
     public static final String DELETE_EVENT = "❌ Удалить событие";
