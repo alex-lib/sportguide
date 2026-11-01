@@ -135,7 +135,7 @@ public class EventImportStore {
                     || (event.getDate().equals(now.toLocalDate())
                             && event.getTime() != null
                             && !event.getTime().isAfter(now.toLocalTime()))) continue;
-            messages.queue(event, "Скоро домашний матч «Факела»!\n\n");
+            messages.queue(event, "");
             record.setAnnouncementQueued(true);
         }
     }
@@ -171,6 +171,12 @@ public class EventImportStore {
             event.setAddress(candidate.getAddress());
             event.setDistrict(candidate.getDistrict());
             event.setLink(candidate.getLink());
+        } else {
+            if (!EventCandidate.blank(candidate.getName())) event.setName(candidate.getName());
+            if (!EventCandidate.blank(candidate.getDescription()))
+                event.setDescription(candidate.getDescription());
+            if (!EventCandidate.blank(candidate.getAddress()))
+                event.setAddress(candidate.getAddress());
         }
         if (changed) {
             String change =
