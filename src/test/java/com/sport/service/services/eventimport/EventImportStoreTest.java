@@ -203,7 +203,7 @@ class EventImportStoreTest {
         store.queueFakelReminders(now);
         store.queueFakelReminders(now);
         assertThat(saved.isAnnouncementQueued()).isTrue();
-        verify(messages).queue(eq(event), contains("Скоро домашний матч"));
+        verify(messages).queue(event, "");
         verifyNoInteractions(publisher);
     }
 
@@ -239,6 +239,28 @@ class EventImportStoreTest {
                 .thenReturn(1, 0);
         assertThat(store.claimKassirCheck(today)).isTrue();
         assertThat(store.claimKassirCheck(today)).isFalse();
+    }
+
+    @Test
+    void refreshAppliesKassirPresentationRulesWithoutScheduleChangeNotification() {
+        var event = prepareRefresh();
+        event.setName("«Буран» Воронеж — «ЦСК ВВС» Самара");
+        event.setDescription("Старая аннотация клуба");
+        event.setAddress("г. Воронеж, ул. Карла Маркса, 116");
+        var candidate =
+                new EventCandidate(
+                        EventCandidate.Source.KASSIR, "1", "https://vrn.kassir.ru/sport/buran");
+        candidate.setName(event.getName());
+        candidate.setDescription(event.getDescription());
+        candidate.setAddress(event.getAddress());
+        candidate.setDate(event.getDate());
+        candidate.setTime(event.getTime());
+        EventImportRules.apply(candidate);
+        store.refresh(1L, candidate, now.toLocalDate().plusDays(4));
+        assertThat(event.getName()).isEqualTo("Хоккейный матч «Буран» Воронеж — «ЦСК ВВС» Самара");
+        assertThat(event.getDescription()).isEqualTo("Матч в рамках чемпионата ВХЛ.");
+        assertThat(event.getAddress()).isEqualTo("ул. Карла Маркса, 116");
+        verifyNoInteractions(messages, publisher);
     }
 
     private Event prepareRefresh() {

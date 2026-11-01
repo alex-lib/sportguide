@@ -36,8 +36,18 @@ class EventParsersTest {
                         LocalDate.of(2026, 11, 6));
         assertThat(events).allMatch(EventCandidate::complete);
         assertThat(events).allMatch(event -> event.getDistrict() == District.CENTRALNYY);
-        assertThat(events.getFirst().getDescription())
-                .isEqualTo("Хоккейный клуб «Буран» г. Воронеж был основан в 1977 году.");
+        assertThat(events)
+                .extracting(EventCandidate::getDescription)
+                .containsOnly("Матч в рамках чемпионата ВХЛ.");
+        assertThat(events)
+                .extracting(EventCandidate::getName)
+                .containsExactly(
+                        "Хоккейный матч «Буран» Воронеж — «Ижсталь» Ижевск",
+                        "Хоккейный матч «Буран» Воронеж — «Торос» Нефтекамск",
+                        "Хоккейный матч «Буран» Воронеж — «Молот» Пермь");
+        assertThat(events)
+                .extracting(EventCandidate::getAddress)
+                .containsOnly("ул. Карла Маркса, 116");
     }
 
     @Test
@@ -107,6 +117,64 @@ class EventParsersTest {
         unknown.setAddress("ул. Революции 1905 года, 1");
         EventImportRules.apply(unknown);
         assertThat(unknown.getDistrict()).isNull();
+    }
+
+    @Test
+    void removesOnlyVoronezhCityPrefixFromAddress() {
+        for (String address :
+                List.of(
+                        "г. Воронеж, ул. Карла Маркса, 116",
+                        "Воронеж, ул. Карла Маркса, 116",
+                        "г.Воронеж ул. Карла Маркса, 116",
+                        "город Воронеж, ул. Карла Маркса, 116")) {
+            assertThat(EventImportRules.addressWithoutCity(address))
+                    .isEqualTo("ул. Карла Маркса, 116");
+        }
+        assertThat(EventImportRules.addressWithoutCity("ул. Воронежская, 1"))
+                .isEqualTo("ул. Воронежская, 1");
+        assertThat(EventImportRules.addressWithoutCity("Воронежская область, село Новое"))
+                .isEqualTo("Воронежская область, село Новое");
+        assertThat(EventImportRules.addressWithoutCity("г. Воронеж")).isEmpty();
+    }
+
+    @Test
+    void normalizesUppercaseTitlesAndPreservesSportsAbbreviationsAndBrands() {
+        var event = new EventCandidate(EventCandidate.Source.KASSIR, "boxing", "url");
+        event.setName("ВЕЧЕР ПРОФЕССИОНАЛЬНОГО БОКСА");
+        event.setDescription(
+                "Бойцовский клуб Victory Team представляет вечер бокса. Второе предложение.");
+        EventImportRules.apply(event);
+        assertThat(event.getName()).isEqualTo("Вечер профессионального бокса");
+        assertThat(event.getDescription())
+                .isEqualTo("Бойцовский клуб Victory Team представляет вечер бокса.");
+        assertThat(EventImportRules.readableTitle("ТУРНИР ПО ММА И MMA"))
+                .isEqualTo("Турнир по ММА и MMA");
+        assertThat(EventImportRules.readableTitle("Бои MMA Fight Riot х Open FC"))
+                .isEqualTo("Бои MMA Fight Riot х Open FC");
+    }
+
+    @Test
+    void prefixesHomeBuranMatchesAndPreservesSourceNamesAndCities() {
+        var event = new EventCandidate(EventCandidate.Source.KASSIR, "buran", "url");
+        event.setName("«Буран» Воронеж — «Сокол» Красноярск");
+        EventImportRules.apply(event);
+        assertThat(event.getName())
+                .isEqualTo("Хоккейный матч «Буран» Воронеж — «Сокол» Красноярск");
+        assertThat(event.getDescription()).isEqualTo("Матч в рамках чемпионата ВХЛ.");
+        EventImportRules.apply(event);
+        assertThat(event.getName())
+                .isEqualTo("Хоккейный матч «Буран» Воронеж — «Сокол» Красноярск");
+        assertThat(EventImportRules.buranMatchTitle("«Буран» Воронеж — «ЦСК ВВС» Самара"))
+                .isEqualTo("Хоккейный матч «Буран» Воронеж — «ЦСК ВВС» Самара");
+        assertThat(EventImportRules.buranMatchTitle("Буран — Динамо-Алтай"))
+                .isEqualTo("Хоккейный матч Буран — Динамо-Алтай");
+        assertThat(EventImportRules.buranMatchTitle("Хоккейный матч Буран - ЦСК ВВС"))
+                .isEqualTo("Хоккейный матч Буран - ЦСК ВВС");
+        assertThat(EventImportRules.buranMatchTitle("«Молот» Пермь — «Буран» Воронеж")).isNull();
+        assertThat(
+                        EventImportRules.buranMatchTitle(
+                                "Абонемент на домашние игры ХК Буран в сезоне 2026-2027"))
+                .isNull();
     }
 
     @Test

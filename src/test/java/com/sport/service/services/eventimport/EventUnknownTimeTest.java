@@ -37,6 +37,9 @@ class EventUnknownTimeTest {
         var engine = new SpringTemplateEngine();
         engine.setTemplateResolver(resolver);
         String notification = new NotificationCreatorService(engine).createEventNotification(event);
-        assertThat(notification).contains("Время уточняется").doesNotContain("00:00");
+        assertThat(notification)
+                .startsWith("<i>Факел — ЦСКА</i>")
+                .contains("Время уточняется")
+                .doesNotContain("00:00", "Скоро домашний матч");
     }
 }
