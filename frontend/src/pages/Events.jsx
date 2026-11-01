@@ -26,6 +26,7 @@ import { pluralRu } from '../utils/plural.js';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
+  const [canEdit, setCanEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState({
@@ -35,6 +36,14 @@ const Events = () => {
   const [searchText, setSearchText] = useState('');
 
   const latestRequest = useRef(0);
+
+  useEffect(() => {
+    let active = true;
+    apiService.getEventPermissions()
+      .then((permissions) => { if (active) setCanEdit(permissions.canEdit === true); })
+      .catch(() => { if (active) setCanEdit(false); });
+    return () => { active = false; };
+  }, []);
 
   const loadEvents = useCallback(async () => {
     const requestId = ++latestRequest.current;
@@ -141,6 +150,14 @@ const Events = () => {
                 </Pills>
 
                 {event.address && <MetaLine>{event.address}</MetaLine>}
+
+                {canEdit && event.id != null && (
+                  <CardActions>
+                    <Button to={`/events/${event.id}/edit`} variant="tint" size="sm" fullWidth>
+                      Редактировать событие
+                    </Button>
+                  </CardActions>
+                )}
 
                 {event.link && event.link !== '-' && (
                   <>

@@ -56,6 +56,7 @@ dependencies {
     implementation("com.google.guava:guava:32.0.1-jre")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
     implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("org.jsoup:jsoup:1.23.2")
 
     // AI
     implementation("org.springframework.ai:spring-ai-openai-spring-boot-starter")

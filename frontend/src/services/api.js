@@ -95,6 +95,18 @@ class ApiService {
     return response.data;
   }
 
+  async getEventPermissions() {
+    return (await this.api.get(`${API_ENDPOINTS.EVENTS}/permissions`)).data;
+  }
+
+  async getEventForEditing(id) {
+    return (await this.api.get(`${API_ENDPOINTS.EVENTS}/${id}`)).data;
+  }
+
+  async updateEvent(id, data) {
+    return (await this.api.put(`${API_ENDPOINTS.EVENTS}/${id}`, data)).data;
+  }
+
   // Places
   async getPlaces(filter) {
     const response = await this.api.get(API_ENDPOINTS.PLACES, {

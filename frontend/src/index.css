@@ -158,3 +158,30 @@ body {
   background: var(--sep);
   border-radius: 2px;
 }
+/* Event editing uses the same controls and spacing as the other app forms. */
+.event-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.event-editor > * {
+  min-width: 0;
+}
+
+.event-editor .field-row > .field {
+  min-width: 0;
+  flex: 1;
+}
+
+.event-editor input[type="date"],
+.event-editor input[type="time"] {
+  min-width: 0;
+  width: 100%;
+}
+
+[data-theme="dark"] .event-editor input[type="date"],
+[data-theme="dark"] .event-editor input[type="time"] {
+  color-scheme: dark;
+}

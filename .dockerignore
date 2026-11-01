@@ -1,0 +1,5 @@
+**
+!Dockerfile
+!build/
+!build/libs/
+!build/libs/service-0.0.1-SNAPSHOT.jar

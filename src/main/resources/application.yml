@@ -108,6 +108,10 @@ management:
         enabled: true
 
 app:
+  event-import:
+    enabled: ${EVENT_IMPORT_ENABLED:true}
+    discovery-cron: "0 0 9 * * *"
+    fakel-reminder-cron: "0 0 10 * * *"
   redis:
     enable: true
     data-loader:

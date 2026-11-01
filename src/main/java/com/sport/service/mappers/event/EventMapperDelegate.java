@@ -32,29 +32,36 @@ public abstract class EventMapperDelegate implements EventMapper {
         List<EventResponse> eventResponses = new ArrayList<>();
 
         for (Event event : events) {
-            String districtString = DistrictStringMapper.districtEnumToDistrictString(event.getDistrict());
+            String districtString =
+                    DistrictStringMapper.districtEnumToDistrictString(event.getDistrict());
             String coordinates;
 
             if (event.getCoordinates() != null) {
                 String[] coordinatesArray = event.getCoordinates().split(",");
                 float latitude = Float.parseFloat(coordinatesArray[0].trim());
                 float longitude = Float.parseFloat(coordinatesArray[1].trim());
-                coordinates = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+                coordinates =
+                        String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
             } else {
                 coordinates = "Координаты места не указаны";
             }
 
-            eventResponses.add(EventResponse.builder()
-                    .name(event.getName())
-                    .description(event.getDescription())
-                    .placeName(event.getPlaceName())
-                    .district(districtString)
-                    .address(event.getAddress())
-                    .link(event.getLink())
-                    .date(event.getDate().toString())
-                    .time(event.getTime().toString())
-                    .coordinates(coordinates)
-                    .build());
+            eventResponses.add(
+                    EventResponse.builder()
+                            .id(event.getId())
+                            .name(event.getName())
+                            .description(event.getDescription())
+                            .placeName(event.getPlaceName())
+                            .district(districtString)
+                            .address(event.getAddress())
+                            .link(event.getLink())
+                            .date(event.getDate().toString())
+                            .time(
+                                    event.getTime() == null
+                                            ? "Время уточняется"
+                                            : event.getTime().toString())
+                            .coordinates(coordinates)
+                            .build());
         }
         return new ListEventResponse(eventResponses);
     }

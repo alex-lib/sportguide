@@ -2,7 +2,7 @@
 
 📝 <b>Описание:</b> [[${eventDescription}]]
 📅 <b>Дата:</b> [[${eventDate}]]
-⌚️ <b>Время:</b> [[${eventTime}]]
+⌚️ <b>Время:</b> [[${eventTime != null ? eventTime : 'Время уточняется'}]]
 🗺 <b>Район:</b> [[${eventDistrict}]]
 📮 <b>Адрес:</b> [[${eventAddress}]]
 📍 <b>Место:</b> [[${eventPlaceName}]][# th:if="${eventLink != null and eventLink != '-'}"]
