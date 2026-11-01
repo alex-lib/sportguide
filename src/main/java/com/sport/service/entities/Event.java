@@ -1,20 +1,23 @@
 package com.sport.service.entities;
 
 import com.sport.service.entities.enums.common.District;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+
 import jakarta.persistence.Column;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+
 import lombok.AllArgsConstructor;
-import lombok.ToString;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,6 +31,10 @@ import java.time.LocalTime;
 @Builder
 @ToString
 public class Event {
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
