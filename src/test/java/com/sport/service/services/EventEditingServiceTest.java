@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
@@ -31,7 +32,8 @@ class EventEditingServiceTest {
                         repository,
                         mock(NotificationCreatorService.class),
                         publisher,
-                        mock(EventMapper.class));
+                        mock(EventMapper.class),
+                        Clock.systemUTC());
         var event = Event.builder().id(1L).version(0L).build();
         when(repository.findById(1L)).thenReturn(Optional.of(event));
         var request =
