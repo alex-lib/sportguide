@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -35,6 +36,7 @@ public class EventService {
     private final NotificationCreatorService notificationCreatorService;
     private final ApplicationEventPublisher events;
     private final EventMapper eventMapper;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public EventEditResponse getForEditing(Long id) {
@@ -77,6 +79,25 @@ public class EventService {
 
     public List<Event> findAllEvents() {
         return eventRepository.findAll();
+    }
+
+    public List<Event> findUpcomingEvents() {
+        var now =
+                ZonedDateTime.now(clock.withZone(ZoneId.of(Constants.TIME_ZONE))).toLocalDateTime();
+        var until = now.plusDays(7);
+        return eventRepository
+                .findAllByDateBetweenOrderByDateAscTimeAsc(now.toLocalDate(), until.toLocalDate())
+                .stream()
+                .filter(
+                        event -> {
+                            // Events with an unknown start time are selected by date alone.
+                            if (event.getTime() == null) {
+                                return true;
+                            }
+                            var start = event.getDate().atTime(event.getTime());
+                            return !start.isBefore(now) && !start.isAfter(until);
+                        })
+                .toList();
     }
 
     public ListEventResponse findAllEventsWithFilter(
