@@ -3,25 +3,30 @@ package com.sport.service.web.controllers;
 import com.sport.service.services.CoachService;
 import com.sport.service.web.models.coach.CoachRequest;
 import com.sport.service.web.models.coach.ListCoachResponse;
+
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/coaches")
@@ -29,17 +34,39 @@ import java.util.List;
 public class CoachController {
     private final CoachService coachService;
 
+    @GetMapping("/permissions")
+    @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
+    public Map<String, Boolean> permissions(Authentication authentication) {
+        return Map.of(
+                "canManage",
+                authentication.getAuthorities().stream()
+                        .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public CoachRequest getForEditing(@PathVariable Long id) {
+        return coachService.getForEditing(id);
+    }
+
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
     @GetMapping
-      public ListCoachResponse getAllCoaches(
-          @RequestParam(required = false) List<String> sportTypes,
-          @RequestParam(required = false) Integer age,
-          @RequestParam(required = false) String sex,
-          @RequestParam(required = false) Integer yearsOfExperience,
-          @RequestParam(required = false) String search
-      ) {
-          return coachService.findAllCoaches(sportTypes, age, sex, yearsOfExperience, search);
-      }
+    public ListCoachResponse getAllCoaches(
+            @RequestParam(required = false) List<String> sportTypes,
+            @RequestParam(required = false) Integer age,
+            @RequestParam(required = false) String sex,
+            @RequestParam(required = false) Integer yearsOfExperience,
+            @RequestParam(required = false) String search,
+            Authentication authentication) {
+        return coachService.findAllCoaches(
+                sportTypes,
+                age,
+                sex,
+                yearsOfExperience,
+                search,
+                authentication.getAuthorities().stream()
+                        .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")));
+    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -60,18 +87,16 @@ public class CoachController {
         if (photo == null || photo.length == 0) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(photo);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(photo);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public void createCoach(@RequestPart("data") @Valid CoachRequest request,
-                            @RequestPart("photo") MultipartFile photo
-    ) {
-        coachService.createCoach(request, photo);
+    public Map<String, Long> createCoach(
+            @RequestPart("data") @Valid CoachRequest request,
+            @RequestPart(value = "photo", required = false) MultipartFile photo) {
+        return Map.of("id", coachService.createCoach(request, photo));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -79,8 +104,7 @@ public class CoachController {
     public void updateCoach(
             @PathVariable Long id,
             @RequestPart("data") @Valid CoachRequest request,
-            @RequestPart("photo") MultipartFile photo
-    ) {
+            @RequestPart(value = "photo", required = false) MultipartFile photo) {
         coachService.updateCoachById(id, request, photo);
     }
 

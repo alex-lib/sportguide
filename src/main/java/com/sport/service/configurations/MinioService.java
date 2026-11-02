@@ -4,8 +4,10 @@ import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,13 +31,10 @@ public class MinioService {
     public String uploadFile(String objectName, MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(objectName)
-                            .stream(inputStream, file.getSize(), -1)
+                    PutObjectArgs.builder().bucket(bucket).object(objectName).stream(
+                                    inputStream, file.getSize(), -1)
                             .contentType(file.getContentType())
-                            .build()
-            );
+                            .build());
             return objectName;
         } catch (Exception e) {
             log.error("Failed to upload file to MinIO: {}", e.getMessage());
@@ -43,13 +42,19 @@ public class MinioService {
         }
     }
 
+    private String objectKey(String value) {
+        String withoutScheme = value.replaceFirst("^https?://", "");
+        String prefix = getFileUrl("");
+        return withoutScheme.startsWith(prefix) ? withoutScheme.substring(prefix.length()) : value;
+    }
+
     public byte[] getFile(String objectName) {
-        try (InputStream stream = minioClient.getObject(
-                GetObjectArgs.builder()
-                        .bucket(bucket)
-                        .object(objectName)
-                        .build()
-        )) {
+        try (InputStream stream =
+                minioClient.getObject(
+                        GetObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(objectKey(objectName))
+                                .build())) {
             return stream.readAllBytes();
         } catch (Exception e) {
             log.error("Failed to get file from MinIO: {}", e.getMessage());
@@ -60,13 +65,10 @@ public class MinioService {
     public String uploadFileBytes(String objectName, byte[] data, String contentType) {
         try (InputStream inputStream = new ByteArrayInputStream(data)) {
             minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(objectName)
-                            .stream(inputStream, data.length, -1)
+                    PutObjectArgs.builder().bucket(bucket).object(objectName).stream(
+                                    inputStream, data.length, -1)
                             .contentType(contentType)
-                            .build()
-            );
+                            .build());
             return objectName;
         } catch (Exception e) {
             log.error("Failed to upload file to MinIO: {}", e.getMessage());
@@ -75,7 +77,8 @@ public class MinioService {
     }
 
     public String getFileUrl(String objectName) {
-        return String.format("%s/%s/%s",
+        return String.format(
+                "%s/%s/%s",
                 minioUrl.replaceFirst("http://", "").replaceFirst("https://", ""),
                 bucket,
                 objectName);
@@ -86,9 +89,8 @@ public class MinioService {
             minioClient.removeObject(
                     RemoveObjectArgs.builder()
                             .bucket(bucket)
-                            .object(objectName)
-                            .build()
-            );
+                            .object(objectKey(objectName))
+                            .build());
         } catch (Exception e) {
             log.error("Failed to delete file from MinIO: {}", e.getMessage());
         }
@@ -102,8 +104,7 @@ public class MinioService {
                             .bucket(bucket)
                             .object(objectName)
                             .expiry(24, TimeUnit.HOURS)
-                            .build()
-            );
+                            .build());
         } catch (Exception e) {
             log.error("Failed to get presigned URL for {}: {}", objectName, e.getMessage());
             return null;

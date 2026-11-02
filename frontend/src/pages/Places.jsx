@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
+import { CatalogActions, useCatalogPermissions } from '../components/CatalogAdmin.jsx';
+import CatalogPhoto from '../components/CatalogPhoto.jsx';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { DISTRICTS, SUBDISTRICTS, PLACE_TYPES, OUTDOOR_OPTIONS } from '../constants/filters.js';
 import {
@@ -24,35 +26,8 @@ import { pluralRu } from '../utils/plural.js';
 
 const isOutdoor = (place) => place.outdoor === 'true' || /улиц/i.test(place.outdoor || '');
 
-const PlacePhoto = ({ photoUrl }) => {
-  const [blob, setBlob] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let loaded = true;
-    if (!photoUrl) return;
-
-    (async () => {
-      try {
-        const file = await apiService.getPhoto(photoUrl);
-        if (!loaded) return;
-        setBlob(URL.createObjectURL(file));
-      } catch (e) {
-        if (!loaded) return;
-        setError(e);
-      }
-    })();
-
-    return () => { loaded = false; };
-  }, [photoUrl]);
-
-  if (error) return null;
-  if (!blob) return null;
-
-  return <img src={blob} alt="" className="card-photo" />;
-};
-
 const Places = () => {
+  const canManage = useCatalogPermissions('places');
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -125,6 +100,7 @@ const Places = () => {
         action={<IconButton icon="map" label="Карта" onClick={() => setMapOpen(true)} data-tour="places-map-btn" />}
       />
       <Page>
+        {canManage && <Button to="/places/new" fullWidth className="catalog-create">Добавить место</Button>}
         <FilterPanel
           filters={filterConfig}
           onFilterChange={handleFilterChange}
@@ -156,11 +132,7 @@ const Places = () => {
           <div data-tour="places-list">
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0} data-tour="place-card">
-                {place.photoUrl ? (
-                  <PlacePhoto photoUrl={place.photoUrl} />
-                ) : (
-                  <PhotoPlaceholder icon="building-2" />
-                )}
+                <CatalogPhoto catalog="places" photoUrl={place.photoUrl} className="card-photo" fallback={<PhotoPlaceholder icon="building-2" />} />
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                   <div style={{ flex: 1 }}>
@@ -187,6 +159,7 @@ const Places = () => {
                     </Button>
                   )}
                 </CardActions>
+                {canManage && <CatalogActions catalog="places" item={place} onDeleted={loadPlaces} />}
               </Card>
             ))}
           </div>

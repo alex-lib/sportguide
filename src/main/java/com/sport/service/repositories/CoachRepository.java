@@ -1,8 +1,9 @@
 package com.sport.service.repositories;
 
+import com.sport.service.entities.Coach;
 import com.sport.service.entities.enums.coach.Sex;
 import com.sport.service.entities.enums.common.SportType;
-import com.sport.service.entities.Coach;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,28 +20,32 @@ public interface CoachRepository extends JpaRepository<Coach, Long> {
     Optional<Coach> findBySubscriberId(Long subscriberId);
 
     @Modifying
-    @Query("""
+    @Query(
+            """
             UPDATE Coach c
             SET c.showInWeb = false
-            WHERE c.expiredDateForSubscriptionToBeCoach > :date""")
+            WHERE c.expiredDateForSubscriptionToBeCoach < :date\
+            """)
     void turnOffToShowInWebByExpiredDateForSubscriptionToBeCoach(LocalDate date);
 
-      @Query(nativeQuery = true, value = """
-              SELECT DISTINCT c.* FROM coaches c 
-              WHERE (CAST(:sportTypes AS varchar[]) IS NULL OR c.sport_types && CAST(:sportTypes AS varchar[]))
-                AND (CAST(:sex AS varchar) IS NULL OR c.sex = :sex)
-                AND (:age IS NULL OR c.age = :age)
-                AND (:yearsOfExperience IS NULL OR c.years_of_experience = :yearsOfExperience)
-                AND (CAST(:search AS varchar) IS NULL
-                     OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
-                     OR LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%'))
-                     OR LOWER(c.education) LIKE LOWER(CONCAT('%', :search, '%')))
-              """)
-      List<Coach> findWithFilters(
-              @Param("sportTypes") List<SportType> sportTypes,
-              @Param("sex") Sex sex,
-              @Param("age") Integer age,
-              @Param("yearsOfExperience") Integer yearsOfExperience,
-              @Param("search") String search
-      );
+    @Query(
+            nativeQuery = true,
+            value =
+                    """
+                    SELECT DISTINCT c.* FROM coaches c
+                    WHERE (CAST(:sportTypes AS varchar[]) IS NULL OR c.sport_types && CAST(:sportTypes AS varchar[]))
+                      AND (CAST(:sex AS varchar) IS NULL OR c.sex = :sex)
+                      AND (:age IS NULL OR c.age = :age)
+                      AND (:yearsOfExperience IS NULL OR c.years_of_experience = :yearsOfExperience)
+                      AND (CAST(:search AS varchar) IS NULL
+                           OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))
+                           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%'))
+                           OR LOWER(c.education) LIKE LOWER(CONCAT('%', :search, '%')))
+                    """)
+    List<Coach> findWithFilters(
+            @Param("sportTypes") List<SportType> sportTypes,
+            @Param("sex") Sex sex,
+            @Param("age") Integer age,
+            @Param("yearsOfExperience") Integer yearsOfExperience,
+            @Param("search") String search);
 }
