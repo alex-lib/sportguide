@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
+import { CatalogActions, useCatalogPermissions } from '../components/CatalogAdmin.jsx';
+import CatalogPhoto from '../components/CatalogPhoto.jsx';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { SPORT_TYPES, SEX_OPTIONS } from '../constants/filters.js';
 import {
@@ -28,6 +30,7 @@ const coachContact = (coach) => {
 };
 
 const Coaches = () => {
+  const canManage = useCatalogPermissions('coaches');
   const [coaches, setCoaches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,6 +100,7 @@ const Coaches = () => {
         // action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
       <Page>
+        {canManage && <Button to="/coaches/new" fullWidth className="catalog-create">Добавить тренера</Button>}
         <FilterPanel
           filters={filterConfig}
           onFilterChange={handleFilterChange}
@@ -130,13 +134,8 @@ const Coaches = () => {
               return (
                 <Card key={coach.id || index} first={index === 0} data-tour="coach-card">
                   <div className="coach">
-                    {coach.photo ? (
-                      <img className="avatar-img" src={`data:image/jpeg;base64,${coach.photo}`} alt={coach.name} />
-                    ) : (
-                      <div className={`ava ${index % 2 === 1 ? 'accent' : ''}`.trim()}>
-                        <Icon name="user" size={28} />
-                      </div>
-                    )}
+                    <CatalogPhoto catalog="coaches" photoUrl={coach.photoUrl} className="avatar-img" alt={coach.name}
+                      fallback={<div className={`ava ${index % 2 === 1 ? 'accent' : ''}`.trim()}><Icon name="user" size={28} /></div>} />
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <CardTitle style={{ margin: 0 }}>{coach.name}</CardTitle>
@@ -174,6 +173,7 @@ const Coaches = () => {
                       </CardActions>
                     </>
                   )}
+                  {canManage && <CatalogActions catalog="coaches" item={coach} onDeleted={loadCoaches} />}
                 </Card>
               );
             })}

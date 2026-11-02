@@ -1,9 +1,12 @@
 package com.sport.service.mappers.place;
+
 import com.sport.service.dto.PlaceDto;
 import com.sport.service.entities.Place;
 import com.sport.service.web.models.place.ListPlaceResponse;
+
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -13,6 +16,9 @@ import java.util.List;
 public interface PlaceMapper {
 
     Place placeDtoToPlace(PlaceDto dto);
+
+    @Mapping(source = "subDistrict", target = "subdistrict")
+    PlaceDto placeToDto(Place place);
 
     default ListPlaceResponse listPlaceToListPlaceResponse(List<Place> places) {
         return null;

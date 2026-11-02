@@ -7,6 +7,7 @@ import { authService } from './services/auth.js';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import Events from './pages/Events.jsx';
+import CatalogEditor from './pages/CatalogEditor.jsx';
 import EventEditor from './pages/EventEditor.jsx';
 import Places from './pages/Places.jsx';
 import JointTrainings from './pages/JointTrainings.jsx';
@@ -170,9 +171,13 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/events/:id/edit" element={<EventEditor />} />
+            <Route path="/places/new" element={<CatalogEditor key="places-new" catalog="places" />} />
+            <Route path="/places/:id/edit" element={<CatalogEditor key="places-edit" catalog="places" />} />
             <Route path="/places" element={<Places />} />
             <Route path="/joint-trainings" element={<JointTrainings />} />
             <Route path="/training-programs" element={<TrainingPrograms />} />
+            <Route path="/coaches/new" element={<CatalogEditor key="coaches-new" catalog="coaches" />} />
+            <Route path="/coaches/:id/edit" element={<CatalogEditor key="coaches-edit" catalog="coaches" />} />
             <Route path="/coaches" element={<Coaches />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

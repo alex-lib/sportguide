@@ -1167,3 +1167,13 @@
 @media (prefers-reduced-motion: reduce) {
   .settings-switch, .settings-switch > span { transition: none; }
 }
+
+.catalog-create { margin-bottom: 16px; }
+.catalog-admin-actions { margin-top: 12px; }
+.catalog-editor > fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.catalog-editor .field { margin-bottom: 16px; }
+.catalog-options { border: 1px solid var(--sep); border-radius: 12px; margin: 16px 0; padding: 12px; min-width: 0; display: grid; gap: 10px; }
+.catalog-options label, .catalog-check { display: flex; align-items: center; gap: 10px; }
+.catalog-check { margin: 16px 0; }
+.catalog-hint { color: var(--label-3); font-size: 13px; margin: 8px 0 16px; }
+.catalog-photo-preview { width: 100%; max-height: 240px; object-fit: contain; border-radius: 12px; margin-bottom: 12px; }

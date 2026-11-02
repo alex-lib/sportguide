@@ -107,6 +107,50 @@ class ApiService {
     return (await this.api.put(`${API_ENDPOINTS.EVENTS}/${id}`, data)).data;
   }
 
+  // Administration of places and coaches.
+  catalogUrl(catalog) {
+    return catalog === 'places' ? API_ENDPOINTS.PLACES : API_ENDPOINTS.COACHES;
+  }
+
+  async getCatalogPermissions(catalog) {
+    return (await this.api.get(`${this.catalogUrl(catalog)}/permissions`)).data;
+  }
+
+  async getCatalogItem(catalog, id) {
+    return (await this.api.get(`${this.catalogUrl(catalog)}/${id}`)).data;
+  }
+
+  async saveCatalogItem(catalog, id, data, photo) {
+    let body = data;
+    let config = {};
+    if (catalog === 'coaches') {
+      body = new FormData();
+      body.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+      if (photo) body.append('photo', photo);
+      config = { headers: { 'Content-Type': undefined } };
+    }
+    const url = `${this.catalogUrl(catalog)}${id ? `/${id}` : ''}`;
+    return (await this.api.request({ ...config, url, method: id ? 'put' : 'post', data: body })).data;
+  }
+
+  async deleteCatalogItem(catalog, id) {
+    await this.api.delete(`${this.catalogUrl(catalog)}/${id}`);
+  }
+
+  async uploadCatalogPhoto(catalog, id, photo) {
+    const body = new FormData();
+    body.append('file', photo);
+    await this.api.post(`${this.catalogUrl(catalog)}/${id}/photo`, body, { headers: { 'Content-Type': undefined } });
+  }
+
+  async deleteCatalogPhoto(catalog, id) {
+    await this.api.delete(`${this.catalogUrl(catalog)}/${id}/photo`);
+  }
+
+  async getCatalogPhoto(catalog, photoUrl) {
+    return (await this.api.get(`${this.catalogUrl(catalog)}/photo`, { params: { photoUrl }, responseType: 'blob' })).data;
+  }
+
   // Places
   async getPlaces(filter) {
     const response = await this.api.get(API_ENDPOINTS.PLACES, {
