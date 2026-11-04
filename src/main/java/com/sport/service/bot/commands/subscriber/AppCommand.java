@@ -7,9 +7,8 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
@@ -46,18 +45,14 @@ public class AppCommand implements IBotCommand {
         answer.setChatId(message.getChatId());
         answer.setText("🚀 Приложение Sportguide");
 
-        KeyboardButton webAppButton = KeyboardButton.builder()
+        // Inline Web App buttons provide the initData required for authentication.
+        InlineKeyboardButton webAppButton = InlineKeyboardButton.builder()
                 .text("🚀 Sportguide")
                 .webApp(new WebAppInfo(webappUrl))
                 .build();
 
-        KeyboardRow row = new KeyboardRow();
-        row.add(webAppButton);
-
-        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
-        keyboard.setResizeKeyboard(true);
-        keyboard.setOneTimeKeyboard(true);
-        keyboard.setKeyboard(List.of(row));
+        InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup();
+        keyboard.setKeyboard(List.of(List.of(webAppButton)));
 
         answer.setReplyMarkup(keyboard);
 
