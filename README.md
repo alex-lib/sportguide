@@ -189,3 +189,13 @@ Free OpenRouter models vary between requests: successful HTTP responses do not
 guarantee accurate exercise instructions or duration calculations.
 
 Routing and output checks: `./gradlew test --tests '*AiProviderRouterTest' --tests '*AiAssistantServiceTest'`.
+
+Live validation on 2026-11-18 used three synthetic briefs: a beginner home workout,
+an easy running session, and an upper-body session with explicit knee restrictions.
+Each brief was submitted before and after prompt refinement. Both Groq and
+OpenRouter returned six HTTP 200 responses. Groq took 2–4 seconds; OpenRouter took
+7–94 seconds and selected different free models. Duration arithmetic, wording,
+and exercise explanations remained inconsistent, especially on OpenRouter;
+these checks do not establish medical or coaching quality. The existing OpenAI
+key returned `429 / credit_balance_exhausted`, so paid fallback requires funding.
+All 176 automated tests passed, including real application YAML loading.
