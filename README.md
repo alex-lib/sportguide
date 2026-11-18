@@ -163,3 +163,29 @@ fetch("https://app/auth/telegram", {
 ├── build.gradle.kts
 └── README.md
 ```
+
+## AI provider routing
+
+Training generation uses `app.ai.primary` (Groq `openai/gpt-oss-120b`), then
+`app.ai.fallback` (OpenRouter `openrouter/free`) on HTTP 429, then the existing
+Spring AI OpenAI client (`gpt-4o`) if OpenRouter also returns HTTP 429.
+Other errors propagate and release the generation quota; they do not silently
+trigger paid OpenAI requests.
+
+Set `GROQ_API_KEY` and `OPENROUTER_API_KEY` in the server's private `.env` alongside
+its existing `OPENAI_API_KEY`. Compose already passes this file into `app` and
+maps the OpenAI key to `SPRING_AI_OPENAI_API_KEY`. Never commit this file.
+Recreate the app container after changing environment values.
+
+Groq `Retry-After` supports seconds and HTTP dates. During that pause, requests
+start at OpenRouter; at expiry they start at Groq again. Missing/invalid headers
+only affect the current request. The thread-safe cooldown belongs to each app
+process and resets on restart; multiple replicas do not share it.
+
+The same prompt is passed to every provider. Generated HTML is restricted to
+`b` and `i`; empty, truncated (for Groq/OpenRouter), or oversized answers fail
+rather than consuming a user's quota with an unusable Telegram message.
+Free OpenRouter models vary between requests: successful HTTP responses do not
+guarantee accurate exercise instructions or duration calculations.
+
+Routing and output checks: `./gradlew test --tests '*AiProviderRouterTest' --tests '*AiAssistantServiceTest'`.
