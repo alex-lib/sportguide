@@ -2,6 +2,7 @@
 # Called by GitHub Actions on the existing host; never starts another web server.
 set -Eeuo pipefail
 cd "$(dirname "$0")/../.."
+source deploy/static/checks.sh
 
 site=/var/www/sportguide
 config=/etc/nginx/sites-available/sportguide.online
@@ -34,6 +35,8 @@ fi
 test -s frontend/dist/index.html
 test -s frontend/dist/landing/index.html
 test -s frontend/dist/landing/assets/js/app.js
+expected_entry=$(sed -n 's/.*<script type="module"[^>]*src="\([^"]*\)".*/\1/p' frontend/dist/index.html)
+test -n "$expected_entry"
 test -f "$config"
 test "$(readlink -f /etc/nginx/sites-enabled/sportguide.online)" = "$config"
 nginx -t
@@ -49,7 +52,7 @@ tar -czf "$backup/site.tar.gz" -C "$site" .
 cp "$config" "$backup/nginx.conf"
 echo "STATIC_BACKUP_ID=$backup_id"
 
-trap 'status=$?; trap - ERR; echo "Deployment failed; restoring $backup_id" >&2; restore "$backup"; exit "$status"' ERR
+trap 'status=$?; trap - ERR; echo "Deployment failed at line $LINENO (exit $status); restoring $backup_id" >&2; restore "$backup"; exit "$status"' ERR
 # Publish dependencies first, entry point last. Retain old hashed app assets.
 find frontend/dist -mindepth 1 -maxdepth 1 ! -name index.html -exec cp -R {} "$site/" \;
 cp deploy/static/sportguide.online.conf "$config"
@@ -61,11 +64,25 @@ mv -f "$site/.index.next.html" "$site/index.html"
 # The origin certificate is Cloudflare Origin CA, not a public browser certificate.
 # -k is used ONLY for loopback origin checks; public HTTPS is checked with normal TLS.
 origin=(--silent --show-error --connect-timeout 5 --max-time 15 --insecure --resolve sportguide.online:443:127.0.0.1)
-[ "$(curl "${origin[@]}" -o /dev/null -w '%{http_code}' https://sportguide.online/landing)" = 308 ]
-[ "$(curl "${origin[@]}" -o /dev/null -w '%{http_code}' https://sportguide.online/landing/)" = 200 ]
-[ "$(curl "${origin[@]}" -o /dev/null -w '%{http_code}' https://sportguide.online/landing/missing.js)" = 404 ]
-curl "${origin[@]}" -fI https://sportguide.online/landing/assets/js/app.js | grep -qi 'content-type: .*javascript'
+wait_for_http_status https://sportguide.online/landing 308 "${origin[@]}"
+wait_for_http_status https://sportguide.online/landing/ 200 "${origin[@]}"
+wait_for_http_status https://sportguide.online/landing/missing.js 404 "${origin[@]}"
+# Capture headers first: grep -q in a pipe can cause curl to fail with SIGPIPE
+# under pipefail even when the expected header is present.
+module_headers=$(curl "${origin[@]}" -fI https://sportguide.online/landing/assets/js/app.js)
+if ! grep -qi '^content-type: .*javascript' <<< "$module_headers"; then
+  echo 'JavaScript MIME check failed for /landing/assets/js/app.js' >&2
+  false
+fi
 public_html=$(curl --fail --silent --show-error --connect-timeout 5 --max-time 20 https://sportguide.online/landing/)
-[[ "$public_html" == *'assets/js/app.js'* ]]
+if [[ "$public_html" != *'assets/js/app.js'* ]]; then
+  echo 'Public HTTPS returned unexpected content for /landing/' >&2
+  false
+fi
+public_index=$(curl --fail --silent --show-error --connect-timeout 5 --max-time 20 https://sportguide.online/)
+if [[ "$public_index" != *"$expected_entry"* ]]; then
+  echo "Public HTTPS is not serving the new application entry: $expected_entry" >&2
+  false
+fi
 trap - ERR
 echo "Static deployment succeeded. Rollback: bash deploy/static/publish.sh rollback $backup_id"

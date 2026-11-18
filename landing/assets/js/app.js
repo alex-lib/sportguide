@@ -25,12 +25,12 @@ function createScene() {
   scene.environment = env.texture;
   const time = { value: 0 };
   const dark = new T.MeshPhysicalMaterial({color:'#164e46',metalness:0.88,roughness:0.29,clearcoat:1,envMapIntensity:0.8});
-  cells({root, time, dark, aim(x,y,z){camera.position.set(x,y,z);camera.lookAt(0,0,0);}});
-  return {renderer, scene, camera, env, time};
+  const grid = cells({root, time, dark, aim(x,y,z){camera.position.set(x,y,z);camera.lookAt(0,0,0);}});
+  return {renderer, scene, camera, root, grid, env, time};
 }
 
 function runScene(state) {
-  const {renderer,scene,camera,time} = state;
+  const {renderer,scene,camera,root,grid,time} = state;
   let frame = 0;
   let visible = false;
   let last = 0;
@@ -52,6 +52,9 @@ function runScene(state) {
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(2200000/(width*height))));
     renderer.setSize(width,height,false);
     camera.aspect = width/height;
+    // Cover the whole section, with overscan for the grid's perspective tilt.
+    const viewHeight = 2 * camera.position.z * Math.tan(T.MathUtils.degToRad(camera.fov / 2));
+    root.scale.setScalar(1.25 * Math.max(viewHeight * camera.aspect / grid.width, viewHeight / grid.height));
     camera.updateProjectionMatrix();
     sync();
   }

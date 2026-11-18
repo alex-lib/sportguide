@@ -47,6 +47,7 @@ jobs:
 
             git pull --ff-only origin master
             test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
+            bash deploy/static/checks.test.sh
 
             # Frontend-only changes do not rebuild/restart the backend or databases.
             backend_changed=false
