@@ -34,6 +34,7 @@ public final class MenuConstants {
             ✉\uFE0F Отправить сообщение всем пользователям</b>
             
             /menu - нажми, что бы начать :)
+            /app - нажми, что бы открыть приложение :)
             \s""";
 
     public static final String SUBSCRIBER_MENU = """
@@ -55,6 +56,7 @@ public final class MenuConstants {
             \uD83E\uDE83 <b>Связаться с админом</b> (сотрудничество, создать/скорректировать место/событие)
             
             /menu - нажми, что бы начать :)
+            /app - нажми, что бы открыть приложение :)
             \s""";
 
     public static final String CHOOSE_PLACE = "📍 Выбрать место";

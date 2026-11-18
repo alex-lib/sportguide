@@ -83,10 +83,10 @@ services:
 #  frontend:
 #    container_name: frontend
 #    build:
-#      context: ./frontend
-#      dockerfile: Dockerfile
+#      context: .
+#      dockerfile: frontend/Dockerfile
 #      args:
-#        VITE_API_BASE_URL: http://api.sportguide.online
+#        VITE_API_BASE_URL: https://api.sportguide.online
 #    ports:
 #      - "3001:80"
 #    depends_on:

@@ -1,0 +1,9 @@
+**
+!frontend/
+!frontend/**
+!landing/
+!landing/**
+frontend/node_modules/
+frontend/dist/
+frontend/.env*
+**/.DS_Store

@@ -199,3 +199,9 @@ and exercise explanations remained inconsistent, especially on OpenRouter;
 these checks do not establish medical or coaching quality. The existing OpenAI
 key returned `429 / credit_balance_exhausted`, so paid fallback requires funding.
 All 176 automated tests passed, including real application YAML loading.
+
+## Публичный лендинг и размещение
+
+Лендинг хранится в `landing/` и включается в сборку frontend по пути `/landing/`.
+Приложение остаётся в корне и перед запуском проверяет Telegram launch data.
+Публикация и откат статики выполняются через GitHub Actions (`.github/workflows/deploy.yml`).
