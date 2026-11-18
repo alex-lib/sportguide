@@ -1,38 +1,11 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { ThemeProvider } from './context/ThemeContext'
-import App from './App.jsx'
-import './index.css'
+import WebApp from '@twa-dev/sdk';
+import { hasTelegramLaunchData } from './telegramLaunch.js';
 
-try {
-  if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-    const tg = window.Telegram.WebApp;
-
-    if (tg.themeParams) {
-      const p = tg.themeParams;
-      const root = document.documentElement.style;
-      if (p.bg_color) root.setProperty('--tg-theme-bg-color', p.bg_color);
-      if (p.text_color) root.setProperty('--tg-theme-text-color', p.text_color);
-      if (p.hint_color) root.setProperty('--tg-theme-hint-color', p.hint_color);
-      if (p.link_color) root.setProperty('--tg-theme-link-color', p.link_color);
-      if (p.button_color) root.setProperty('--tg-theme-button-color', p.button_color);
-      if (p.button_text_color) root.setProperty('--tg-theme-button-text-color', p.button_text_color);
-      if (p.secondary_bg_color) root.setProperty('--tg-theme-secondary-bg-color', p.secondary_bg_color);
-    }
-  }
-} catch (error) {
-  console.warn('Theme setup issue:', error);
+// The SDK synchronously reads Telegram launch data (including its session cache).
+// Decide before importing/mounting the application or starting API requests.
+// DEV only preserves the existing local workflow; it never grants API access.
+if (import.meta.env.DEV || hasTelegramLaunchData(WebApp)) {
+  import('./bootstrap.jsx');
+} else {
+  window.location.replace('/landing/');
 }
-
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error('Root element not found');
-}
-
-ReactDOM.createRoot(rootElement).render(
-  <React.StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
-  </React.StrictMode>,
-)

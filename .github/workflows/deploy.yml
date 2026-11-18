@@ -4,6 +4,17 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Static deployment or rollback (does not restart the backend)
+        type: choice
+        options: [deploy-static, rollback-static]
+        default: deploy-static
+      backup_id:
+        description: STATIC_BACKUP_ID from a previous deployment (rollback only)
+        type: string
+        required: false
 
 concurrency:
   group: production-deploy
@@ -12,47 +23,63 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
+        env:
+          DEPLOY_SHA: ${{ github.sha }}
+          DEPLOY_BEFORE: ${{ github.event.before }}
+          DEPLOY_OPERATION: ${{ inputs.operation || 'push' }}
+          STATIC_BACKUP_ID: ${{ inputs.backup_id }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
+          envs: DEPLOY_SHA,DEPLOY_BEFORE,DEPLOY_OPERATION,STATIC_BACKUP_ID
           command_timeout: 20m
           script: |
             set -eu
             cd /root/sport_point_telegram_bot
-            git pull --ff-only origin master
-            test "$(git rev-parse HEAD)" = "${{ github.sha }}"
-            ./gradlew clean build
+            if [ "$DEPLOY_OPERATION" = rollback-static ]; then
+              bash deploy/static/publish.sh rollback "$STATIC_BACKUP_ID"
+              exit 0
+            fi
 
-            # Build both parts before replacing the running application.
+            git pull --ff-only origin master
+            test "$(git rev-parse HEAD)" = "$DEPLOY_SHA"
+
+            # Frontend-only changes do not rebuild/restart the backend or databases.
+            backend_changed=false
+            if [ "$DEPLOY_OPERATION" = push ] && ! git diff --quiet --ignore-matching-lines='^[[:space:]]*#' "$DEPLOY_BEFORE" HEAD -- \
+              src build.gradle.kts settings.gradle.kts gradle.properties gradle gradlew Dockerfile docker-compose.yml; then
+              backend_changed=true
+              ./gradlew clean build
+            fi
+
             (
               cd frontend
               npm ci
-              npm run build
+              npm test
+              VITE_API_BASE_URL=https://api.sportguide.online npm run build
               test -s dist/index.html
+              test -s dist/landing/index.html
             )
-            docker-compose build app
-            docker-compose up -d --no-deps app
 
-            # A protected API must respond with 401, not a connection error or 502.
-            status=000
-            for attempt in $(seq 1 30); do
-              status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
-                --connect-timeout 2 --max-time 5 http://127.0.0.1:8081/api/events) || status=000
-              if [ "$status" = 401 ]; then
-                break
+            if [ "$backend_changed" = true ]; then
+              docker-compose build app
+              docker-compose up -d --no-deps app
+              status=000
+              for attempt in $(seq 1 30); do
+                status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+                  --connect-timeout 2 --max-time 5 http://127.0.0.1:8081/api/events) || status=000
+                if [ "$status" = 401 ]; then break; fi
+                sleep 5
+              done
+              if [ "$status" != 401 ]; then
+                echo "Application did not become ready (HTTP $status)" >&2
+                docker-compose ps app
+                exit 1
               fi
-              sleep 5
-            done
-            if [ "$status" != 401 ]; then
-              echo "Application did not become ready (HTTP $status)" >&2
-              docker-compose ps app
-              exit 1
             fi
 
-            # Keep previous assets available for clients with an older index.html.
-            cp -r frontend/dist/. /var/www/sportguide/
+            bash deploy/static/publish.sh deploy

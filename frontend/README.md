@@ -22,16 +22,11 @@ Telegram Web App frontend for SportGuide application.
 
 ## Setup
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Docker (optional local alternative)
 
-The frontend is included in the main `docker-compose.yml` file. To start everything:
-
-```bash
-# From project root
-docker-compose up --build
-```
-
-The frontend will be available at `http://localhost:3001`
+Production uses host Nginx and GitHub Actions (`.github/workflows/deploy.yml`).
+The frontend service in `docker-compose.yml` remains commented out. Use the
+standalone Docker commands below only for local testing.
 
 ### Option 2: Local Development
 
@@ -45,7 +40,7 @@ npm install
      ```env
      VITE_API_BASE_URL=http://localhost:8081
      ```
-   - For production: Use `http://api.sportguide.online`
+   - For production: Use `https://api.sportguide.online`
 
 3. **Start the backend** (if not already running):
    ```bash
@@ -86,19 +81,22 @@ frontend/
 
 ## Docker
 
+Run these commands from the repository root. `frontend/Dockerfile.dockerignore`
+selects only frontend and landing sources; the backend `.dockerignore` is unchanged.
+
 ### Build Docker Image
 ```bash
-docker build -t sportguide-frontend ./frontend
+docker build -f frontend/Dockerfile -t sportguide-frontend .
 ```
 
 ### Run Docker Container
 ```bash
-docker run -p 3001:80 sportguide-frontend
+docker run --rm -p 127.0.0.1:3001:80 sportguide-frontend
 ```
 
 ### Build with Custom API URL
 ```bash
-docker build --build-arg VITE_API_BASE_URL=http://api.sportguide.online -t sportguide-frontend ./frontend
+docker build -f frontend/Dockerfile --build-arg VITE_API_BASE_URL=https://api.sportguide.online -t sportguide-frontend .
 ```
 
 ## Telegram Web App Integration
@@ -134,3 +132,28 @@ Build the app and serve the `dist` folder. The app should be accessible via HTTP
 
 - **Development**: Port 3001 (to avoid conflict with Grafana on 3000)
 - **Docker**: Port 80 inside container, mapped to 3001 on host
+
+## Public landing and launch navigation
+
+`npm run build` also copies `../landing/index.html` and `../landing/assets/`
+byte-for-byte into `dist/landing/`. The landing has no build or API of its own.
+Serve it at `/landing/`; Nginx redirects `/landing` to `/landing/` with 308 and
+returns actual 404 responses for missing landing files.
+
+Production checks signed-data **structure** from the initialized `@twa-dev/sdk`
+before importing React/App. Without launch data it uses
+`location.replace('/landing/')`. SDK session recovery preserves hash routes on
+reload, including Telegram Web. This is a navigation hint, not authentication: the
+backend still verifies Telegram initData and protects API access with JWT.
+Launch modes without initData cannot authenticate this application (as before).
+
+`npm run dev` keeps the existing browser development workflow. It skips only the
+navigation gate and does not create a token or bypass API authentication. Production
+builds have no URL, localStorage or hostname switch to disable the gate. To preview
+the standalone landing during development, run `python3 -m http.server 18083` from
+`landing/`. For the integrated production behavior use Nginx or the Docker image.
+
+`npm test` checks the launch gate. `tests/browser-smoke.mjs` exercises a production
+Nginx site using Playwright and Chrome, synthetic launch data and mocked API replies.
+Set `SMOKE_BASE_URL`; optionally set `SMOKE_DEV_URL` and `PLAYWRIGHT_MODULE` to an
+installed Playwright module. This does not verify real Telegram signatures.
