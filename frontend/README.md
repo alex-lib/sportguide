@@ -135,8 +135,10 @@ Build the app and serve the `dist` folder. The app should be accessible via HTTP
 
 ## Public landing and launch navigation
 
-`npm run build` also copies `../landing/index.html` and `../landing/assets/`
-byte-for-byte into `dist/landing/`. The landing has no build or API of its own.
+`npm run build` also packages `../landing/` into `dist/landing/`. Assets are copied
+byte-for-byte into `assets/<content-hash>/`; only asset URLs in the published
+`index.html` are updated. Relative JS imports and CSS URLs stay inside that version,
+so CDN caching cannot mix releases. The source landing remains buildless, with no API.
 Serve it at `/landing/`; Nginx redirects `/landing` to `/landing/` with 308 and
 returns actual 404 responses for missing landing files.
 

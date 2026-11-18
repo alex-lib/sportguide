@@ -34,7 +34,9 @@ fi
 
 test -s frontend/dist/index.html
 test -s frontend/dist/landing/index.html
-test -s frontend/dist/landing/assets/js/app.js
+landing_entry=$(sed -n 's/.*<script type="module"[^>]*src="\([^"]*\/app\.js\)".*/\1/p' frontend/dist/landing/index.html)
+test -n "$landing_entry"
+test -s "frontend/dist/landing/$landing_entry"
 expected_entry=$(sed -n 's/.*<script type="module"[^>]*src="\([^"]*\)".*/\1/p' frontend/dist/index.html)
 test -n "$expected_entry"
 test -f "$config"
@@ -69,13 +71,13 @@ wait_for_http_status https://sportguide.online/landing/ 200 "${origin[@]}"
 wait_for_http_status https://sportguide.online/landing/missing.js 404 "${origin[@]}"
 # Capture headers first: grep -q in a pipe can cause curl to fail with SIGPIPE
 # under pipefail even when the expected header is present.
-module_headers=$(curl "${origin[@]}" -fI https://sportguide.online/landing/assets/js/app.js)
+module_headers=$(curl "${origin[@]}" -fI "https://sportguide.online/landing/$landing_entry")
 if ! grep -qi '^content-type: .*javascript' <<< "$module_headers"; then
-  echo 'JavaScript MIME check failed for /landing/assets/js/app.js' >&2
+  echo "JavaScript MIME check failed for /landing/$landing_entry" >&2
   false
 fi
 public_html=$(curl --fail --silent --show-error --connect-timeout 5 --max-time 20 https://sportguide.online/landing/)
-if [[ "$public_html" != *'assets/js/app.js'* ]]; then
+if [[ "$public_html" != *"$landing_entry"* ]]; then
   echo 'Public HTTPS returned unexpected content for /landing/' >&2
   false
 fi

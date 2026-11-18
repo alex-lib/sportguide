@@ -47,10 +47,17 @@ try {
   const canonical = await ctx.request.get(base + '/landing?source=test', { maxRedirects: 0 });
   assert.equal(canonical.status(), 308);
   assert.equal(canonical.headers().location, '/landing/?source=test');
+  const landingHtml = await (await ctx.request.get(base + '/landing/')).text();
+  const version = landingHtml.match(/src="assets\/([a-f0-9]{16})\/js\/app\.js"/)?.[1];
+  assert.ok(version, 'published landing must use content-versioned assets');
   for (const file of await listFiles(new URL('../../landing/', import.meta.url))) {
-    const response = await ctx.request.get(base + '/landing/' + file);
+    const publishedFile = file.replace(/^assets\//, `assets/${version}/`);
+    const response = await ctx.request.get(base + '/landing/' + publishedFile);
     assert.equal(response.status(), 200, file);
-    assert.deepEqual(await response.body(), await readFile(new URL('../../landing/' + file, import.meta.url)), file);
+    const body = file === 'index.html'
+      ? Buffer.from((await response.text()).replaceAll(`assets/${version}/`, 'assets/'))
+      : await response.body();
+    assert.deepEqual(body, await readFile(new URL('../../landing/' + file, import.meta.url)), file);
     if (file.endsWith('.js')) assert.match(response.headers()['content-type'], /javascript/);
   }
   for (const missing of ['missing.js', 'assets/missing.js', 'nested/missing']) {
