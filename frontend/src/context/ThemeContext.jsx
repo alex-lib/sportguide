@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useCallback, useState } from 'react';
 import WebApp from '@twa-dev/sdk';
-import { THEME_KEY, THEME_MODES, readThemeMode, resolveSystemTheme } from './theme.js';
+import { THEME_KEY, THEME_MODES, readThemeMode, resolveSystemTheme, resolveScheduledTheme } from './theme.js';
 
 const ThemeContext = createContext(null);
 const mediaQuery = () => window.matchMedia?.('(prefers-color-scheme: dark)');
@@ -12,7 +12,8 @@ const initialMode = () => {
 export function ThemeProvider({ children }) {
   const [mode, setModeInternal] = useState(initialMode);
   const [automaticTheme, setAutomaticTheme] = useState(systemTheme);
-  const theme = mode === 'system' ? automaticTheme : mode;
+  const [scheduledTheme, setScheduledTheme] = useState(resolveScheduledTheme);
+  const theme = mode === 'system' ? automaticTheme : mode === 'scheduled' ? scheduledTheme : mode;
 
   useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -33,6 +34,25 @@ export function ThemeProvider({ children }) {
       WebApp.offEvent?.('themeChanged', update);
       if (mq?.removeEventListener) mq.removeEventListener('change', update);
       else mq?.removeListener?.(update);
+      window.removeEventListener('focus', update);
+      document.removeEventListener('visibilitychange', update);
+    };
+  }, [mode]);
+
+  useLayoutEffect(() => {
+    if (mode !== 'scheduled') return;
+    let timer;
+    const update = () => {
+      window.clearTimeout(timer);
+      setScheduledTheme(resolveScheduledTheme());
+      // Align to the next minute, including 07:00/19:00, and pick up clock/timezone changes.
+      timer = window.setTimeout(update, 60000 - Date.now() % 60000);
+    };
+    update();
+    window.addEventListener('focus', update);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      window.clearTimeout(timer);
       window.removeEventListener('focus', update);
       document.removeEventListener('visibilitychange', update);
     };

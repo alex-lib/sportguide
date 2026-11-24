@@ -7,7 +7,7 @@ const sdk = await readFile(new URL('../node_modules/@twa-dev/sdk/dist/telegram-w
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 const errors = [];
 try {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light' });
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', timezoneId: 'Europe/Moscow' });
   await ctx.route('https://telegram.org/js/telegram-web-app.js*', r => r.fulfill({ contentType: 'application/javascript', body: sdk }));
   await ctx.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: '' }));
   await ctx.route('https://api.sportguide.online/**', r => {
@@ -51,6 +51,34 @@ try {
   await page.screenshot({ path: '/tmp/sportguide-theme-dark.png', fullPage: true });
   await page.getByRole('radio', { name: 'Светлая', exact: true }).check();
   await page.screenshot({ path: '/tmp/sportguide-theme-light.png', fullPage: true });
+  await page.clock.install({ time: new Date('2026-11-24T06:59:59+03:00') });
+  await page.clock.pauseAt(new Date('2026-11-24T06:59:59+03:00'));
+  const scheduled = page.getByRole('radio', { name: 'По времени', exact: true });
+  await scheduled.check();
+  assert.equal(await current(), 'dark');
+  await telegramTheme('#ffffff');
+  assert.equal(await current(), 'dark');
+  await page.clock.runFor(1000);
+  await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
+  assert.equal(await page.evaluate(() => localStorage.getItem('theme')), 'scheduled');
+  await page.reload(); await scheduled.waitFor();
+  assert.equal(await scheduled.isChecked(), true);
+  assert.equal(await current(), 'light');
+  await page.clock.setSystemTime(new Date('2026-11-24T18:59:59+03:00'));
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await page.clock.runFor(1000);
+  await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
+  // Returning from a suspended WebView must re-evaluate the local clock immediately.
+  await page.clock.setSystemTime(new Date('2026-11-25T12:00:00+03:00'));
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
+  await page.getByRole('radio', { name: 'Тёмная', exact: true }).check();
+  await page.clock.runFor(60000);
+  assert.equal(await current(), 'dark');
+  await telegramTheme('#ffffff');
+  await page.getByRole('radio', { name: 'Системная', exact: true }).check();
+  await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   assert.deepEqual(errors, []);
-  console.log('PASS: system theme updates live; manual themes persist and ignore system changes; system can be restored; mobile controls fit; no page errors');
+  console.log('PASS: system/manual themes; scheduled 07:00/19:00 transitions, persistence and resume; mobile controls fit; no page errors');
 } finally { await browser.close(); }
