@@ -18,12 +18,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
+import java.util.Locale;
 
 @RequiredArgsConstructor
 @Service
@@ -125,6 +129,37 @@ public class PlaceService {
             String outdoor,
             String placeType,
             String search) {
+        return findFiltered(districtStr, subDistrictStr, outdoor, placeType, search, null);
+    }
+
+    @Cacheable(value = "places")
+    public ListPlaceResponse findPage(
+            String districtStr,
+            String subDistrictStr,
+            String outdoor,
+            String placeType,
+            String search,
+            int page,
+            int size) {
+        if (page < 0 || size < 1 || size > 100) {
+            throw new IllegalArgumentException("page must be >= 0; size must be between 1 and 100");
+        }
+        return findFiltered(
+                districtStr,
+                subDistrictStr,
+                outdoor,
+                placeType,
+                search,
+                PageRequest.of(page, size, Sort.by("id")));
+    }
+
+    private ListPlaceResponse findFiltered(
+            String districtStr,
+            String subDistrictStr,
+            String outdoor,
+            String placeType,
+            String search,
+            Pageable pageable) {
         District district;
         if (districtStr == null || districtStr.isEmpty() || districtStr.equals("ALL_DISTRICTS")) {
             district = null;
@@ -153,9 +188,26 @@ public class PlaceService {
             placeTypeEnum = PlaceType.valueOf(placeType);
         }
 
+        String normalizedSearch = search == null ? null : search.trim().toLowerCase(Locale.ROOT);
+        if (pageable != null) {
+            var result =
+                    placeRepository.findWithFilters(
+                            district,
+                            subDistrict,
+                            outdoorVal,
+                            placeTypeEnum,
+                            normalizedSearch,
+                            pageable);
+            var response = placeMapper.listPlaceToListPlaceResponse(result.getContent());
+            response.setPage(result.getNumber());
+            response.setSize(result.getSize());
+            response.setTotalElements(result.getTotalElements());
+            response.setTotalPages(result.getTotalPages());
+            return response;
+        }
         var result =
                 placeRepository.findWithFilters(
-                        district, subDistrict, outdoorVal, placeTypeEnum, search);
+                        district, subDistrict, outdoorVal, placeTypeEnum, normalizedSearch);
         return placeMapper.listPlaceToListPlaceResponse(result);
     }
 

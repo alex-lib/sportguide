@@ -22,7 +22,6 @@ import {
   SkeletonList,
   MapView,
 } from '../ui';
-import { pluralRu } from '../utils/plural.js';
 
 const isOutdoor = (place) => place.outdoor === 'true' || /улиц/i.test(place.outdoor || '');
 
@@ -32,6 +31,12 @@ const Places = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mapOpen, setMapOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [mapPlaces, setMapPlaces] = useState([]);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapError, setMapError] = useState(null);
+  const [mapAttempt, setMapAttempt] = useState(0);
   const [filter, setFilter] = useState({
     district: null,
     subDistrict: null,
@@ -42,23 +47,30 @@ const Places = () => {
 
   const latestRequest = useRef(0);
 
+  const getFilterParams = useCallback(() => {
+    const params = {};
+    if (searchText) params.search = searchText;
+    for (const [key, value] of Object.entries(filter)) {
+      if (value) params[key] = value;
+    }
+    return params;
+  }, [filter, searchText]);
+
   const loadPlaces = useCallback(async () => {
     const requestId = ++latestRequest.current;
     setLoading(true);
     setError(null);
     try {
-      const filterParams = {};
-      if (searchText) filterParams.search = searchText;
-      if (filter.district) filterParams.district = filter.district;
-      if (filter.subDistrict) filterParams.subDistrict = filter.subDistrict;
-      if (filter.outdoor) filterParams.outdoor = filter.outdoor;
-      if (filter.placeType) filterParams.placeType = filter.placeType;
-
-      const response = await apiService.getPlaces(filterParams);
+      const response = await apiService.getPlaces({ ...getFilterParams(), page, size: 20 });
       if (requestId !== latestRequest.current) return;
+      const pages = response?.totalPages ?? 0;
+      if (page > 0 && page >= pages) {
+        setPage(Math.max(0, pages - 1));
+        return;
+      }
       const items = response?.list || [];
       setPlaces(items);
-      console.log('Places loaded:', items[0]?.id, items[0]?.name, items[0]?.photoUrl);
+      setTotalPages(pages);
     } catch (error) {
       if (requestId !== latestRequest.current) return;
       console.error('Failed to load places:', error);
@@ -66,17 +78,34 @@ const Places = () => {
     } finally {
       if (requestId === latestRequest.current) setLoading(false);
     }
-  }, [filter, searchText]);
+  }, [getFilterParams, page]);
 
   useEffect(() => {
     loadPlaces();
+    return () => { latestRequest.current += 1; };
   }, [loadPlaces]);
 
+  useEffect(() => {
+    if (!mapOpen) return;
+    let active = true;
+    setMapLoading(true);
+    setMapError(null);
+    setMapPlaces([]);
+    // Fetch all matching places only when opening the map, without loading their photos.
+    apiService.getPlaces(getFilterParams())
+      .then(response => { if (active) setMapPlaces(response?.list || []); })
+      .catch(error => { if (active) setMapError(error.message || 'Не удалось загрузить карту'); })
+      .finally(() => { if (active) setMapLoading(false); });
+    return () => { active = false; };
+  }, [mapOpen, getFilterParams, mapAttempt]);
+
   const handleFilterChange = (key, value) => {
+    setPage(0);
     setFilter((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleResetFilters = () => {
+    setPage(0);
     setFilter({ district: null, subDistrict: null, outdoor: null, placeType: null });
   };
 
@@ -87,15 +116,9 @@ const Places = () => {
     { type: 'chip', key: 'outdoor', title: 'Расположение', options: OUTDOOR_OPTIONS, value: filter.outdoor },
   ];
 
-  const eyebrow =
-    !loading && places.length > 0
-      ? `${places.length} ${pluralRu(places.length, ['место', 'места', 'мест'])}`
-      : undefined;
-
   return (
     <>
       <PageHeader
-        eyebrow={eyebrow}
         title="Места"
         action={<IconButton icon="map" label="Карта" onClick={() => setMapOpen(true)} data-tour="places-map-btn" />}
       />
@@ -108,10 +131,10 @@ const Places = () => {
           searchPlaceholder="Поиск мест"
           hideQuickChips
           search={searchText}
-          onSearch={(e) => setSearchText(e.target.value)}
+          onSearch={(e) => { setPage(0); setSearchText(e.target.value); }}
         />
 
-        {error && <ErrorBanner>{error}</ErrorBanner>}
+        {error && <><ErrorBanner>{error}</ErrorBanner><Button variant="ghost" onClick={loadPlaces}>Повторить</Button></>}
 
         {loading ? (
           <SkeletonList />
@@ -128,7 +151,7 @@ const Places = () => {
               </Button>
             }
           />
-        ) : (
+        ) : !error && (
           <div data-tour="places-list">
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0} data-tour="place-card">
@@ -164,8 +187,18 @@ const Places = () => {
             ))}
           </div>
         )}
+        {totalPages > 1 && (
+          <nav className="catalog-pagination" aria-label="Страницы мест">
+            <Button variant="tint" size="sm" disabled={loading || page === 0}
+              onClick={() => { setPage(value => value - 1); window.scrollTo(0, 0); }}>Назад</Button>
+            <span aria-live="polite">Страница {page + 1} из {totalPages}</span>
+            <Button variant="tint" size="sm" disabled={loading || page + 1 >= totalPages}
+              onClick={() => { setPage(value => value + 1); window.scrollTo(0, 0); }}>Далее</Button>
+          </nav>
+        )}
       </Page>
-      <MapView places={places} open={mapOpen} onClose={() => setMapOpen(false)} />
+      <MapView places={mapPlaces} open={mapOpen} onClose={() => setMapOpen(false)}
+        loading={mapLoading} error={mapError} onRetry={() => setMapAttempt(value => value + 1)} />
     </>
   );
 };
