@@ -1,5 +1,6 @@
 package com.sport.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sport.service.entities.enums.common.District;
 import com.sport.service.entities.enums.place.PlaceType;
 import com.sport.service.entities.enums.place.SubDistrict;
@@ -48,11 +49,13 @@ public class PlaceDto {
 
     private int step = 0;
 
+    @JsonIgnore
     @AssertTrue(message = "Укажите конкретный район и подрайон")
     public boolean isDistrictValid() {
         return district != District.ALL_DISTRICTS && subdistrict != SubDistrict.ALL_SUBDISTRICTS;
     }
 
+    @JsonIgnore
     @AssertTrue(message = "Проверьте ссылку и координаты: широта, долгота")
     public boolean isLocationValid() {
         try {
