@@ -958,8 +958,28 @@
 }
 
 /* --------------------------------------------------------- Map */
+.catalog-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+}
+.catalog-pagination > span {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--label-3);
+}
+.map-modal-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
+}
 .map-container {
-  height: 65vh;
+  flex: 1;
+  min-height: 0;
   border-radius: 12px;
   overflow: hidden;
   margin: 0;

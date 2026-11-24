@@ -12,4 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 public class ListPlaceResponse implements Serializable {
     private List<PlaceResponse> list;
+    private Integer page;
+    private Integer size;
+    private Long totalElements;
+    private Integer totalPages;
+
+    public ListPlaceResponse(List<PlaceResponse> list) {
+        this.list = list;
+    }
 }

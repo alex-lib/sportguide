@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import Modal from './Modal.jsx';
+import Button from './Button.jsx';
 
 const extractCoords = (url) => {
   if (!url) return null;
@@ -24,13 +25,19 @@ const defaultIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-const MapView = ({ places, open, onClose }) => {
+const MapView = ({ places, open, onClose, loading = false, error, onRetry }) => {
   const validPlaces = places
     .map((p) => ({ ...p, latLng: extractCoords(p.coordinates) }))
     .filter((p) => p.latLng != null);
 
-  if (validPlaces.length === 0) {
-    return null;
+  if (loading || error || validPlaces.length === 0) {
+    return (
+      <Modal open={open} title="Карта" onCancel={onClose} bodyClassName="map-modal-body">
+        {loading ? <p role="status">Загружаем карту…</p> : error ? (
+          <div><p role="alert">{error}</p><Button onClick={onRetry}>Повторить</Button></div>
+        ) : <p role="status">По выбранным фильтрам нет мест с координатами.</p>}
+      </Modal>
+    );
   }
 
   const center = [
@@ -39,7 +46,7 @@ const MapView = ({ places, open, onClose }) => {
   ];
 
   return (
-    <Modal open={open} title="Карта" onCancel={onClose}>
+    <Modal open={open} title="Карта" onCancel={onClose} bodyClassName="map-modal-body">
       <div className="map-container">
         <style>{`.map-container .leaflet-control-attribution { display: none !important; }`}</style>
         <MapContainer

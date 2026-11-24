@@ -12,6 +12,7 @@ import com.sport.service.exceptions.GlobalExceptionHandler;
 import com.sport.service.exceptions.NotFoundException;
 import com.sport.service.services.CoachService;
 import com.sport.service.services.PlaceService;
+import com.sport.service.web.models.place.ListPlaceResponse;
 
 import jakarta.servlet.Filter;
 
@@ -33,11 +34,52 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.List;
 
 @SpringJUnitConfig({SecurityConfiguration.class, CatalogAdminApiTest.Config.class})
 @WebAppConfiguration
 @TestPropertySource(properties = "jwt.secret=catalog-admin-tests-secret-at-least-32-bytes")
 class CatalogAdminApiTest {
+    @Test
+    void subscriberCanPagePlacesAndLegacyMapRequestRemainsAvailable() throws Exception {
+        var response = new ListPlaceResponse(List.of());
+        response.setPage(1);
+        response.setSize(20);
+        response.setTotalElements(45L);
+        response.setTotalPages(3);
+        when(places.findPage(null, null, null, "GYM", null, 1, 20)).thenReturn(response);
+        mvc.perform(
+                        get("/api/places")
+                                .param("page", "1")
+                                .param("placeType", "GYM")
+                                .header("Authorization", token("SUBSCRIBER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.size").value(20));
+        mvc.perform(
+                        get("/api/places")
+                                .param("placeType", "GYM")
+                                .header("Authorization", token("SUBSCRIBER")))
+                .andExpect(status().isOk());
+        verify(places).findAll(null, null, null, "GYM", null);
+        mvc.perform(get("/api/places").param("page", "0")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void invalidPageParametersReturnBadRequest() throws Exception {
+        for (String[] args :
+                new String[][] {{"-1", "20"}, {"0", "0"}, {"0", "101"}, {"abc", "20"}}) {
+            mvc.perform(
+                            get("/api/places")
+                                    .param("page", args[0])
+                                    .param("size", args[1])
+                                    .header("Authorization", token("SUBSCRIBER")))
+                    .andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(places);
+    }
+
     private static final String PLACE =
             """
             {"name":"Зал","district":"SOVETSKYY","subdistrict":null,"placeType":"GYM",

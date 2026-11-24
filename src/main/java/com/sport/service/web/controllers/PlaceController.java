@@ -75,7 +75,17 @@ public class PlaceController {
             @RequestParam(required = false) String subDistrict,
             @RequestParam(required = false) String outdoor,
             @RequestParam(required = false) String placeType,
-            @RequestParam(required = false) String search) {
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(defaultValue = "20") int size) {
+        if (page != null) {
+            if (page < 0 || size < 1 || size > 100) {
+                throw new IllegalArgumentException(
+                        "page must be >= 0; size must be between 1 and 100");
+            }
+            return placeService.findPage(
+                    district, subDistrict, outdoor, placeType, search, page, size);
+        }
         return placeService.findAll(district, subDistrict, outdoor, placeType, search);
     }
 

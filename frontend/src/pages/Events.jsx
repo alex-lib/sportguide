@@ -22,7 +22,6 @@ import {
   ErrorBanner,
   SkeletonList,
 } from '../ui';
-import { pluralRu } from '../utils/plural.js';
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -89,15 +88,9 @@ const Events = () => {
     { type: 'chip', key: 'district', title: 'Район', options: DISTRICTS || [], value: filter.district },
   ];
 
-  const eyebrow =
-    !loading && events.length > 0
-      ? `${events.length} ${pluralRu(events.length, ['событие', 'события', 'событий'])}`
-      : undefined;
-
   return (
     <>
       <PageHeader
-        eyebrow={eyebrow}
         title="События"
         // action={<IconButton icon="arrow-up-down" label="Сортировка" />}
       />
