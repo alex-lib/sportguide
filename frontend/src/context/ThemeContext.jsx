@@ -1,76 +1,60 @@
-import { createContext, useContext, useEffect, useCallback, useState } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useCallback, useState } from 'react';
+import WebApp from '@twa-dev/sdk';
+import { THEME_KEY, THEME_MODES, readThemeMode, resolveSystemTheme } from './theme.js';
 
 const ThemeContext = createContext(null);
-
-const THEME_KEY = 'theme';
-
-function resolveInitialTheme() {
-  try {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === 'dark' || stored === 'light') return stored;
-  } catch { /* */ }
-
-  const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
-  const inTelegram = !!(tg && tg.initData);
-  if (inTelegram && tg.colorScheme) return tg.colorScheme;
-
-  if (typeof window !== 'undefined' && window.matchMedia) {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-  }
-
-  return 'light';
-}
+const mediaQuery = () => window.matchMedia?.('(prefers-color-scheme: dark)');
+const systemTheme = () => resolveSystemTheme(WebApp, mediaQuery());
+const initialMode = () => {
+  try { return readThemeMode(window.localStorage); } catch { return 'system'; }
+};
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeInternal] = useState(resolveInitialTheme);
+  const [mode, setModeInternal] = useState(initialMode);
+  const [automaticTheme, setAutomaticTheme] = useState(systemTheme);
+  const theme = mode === 'system' ? automaticTheme : mode;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem(THEME_KEY, theme); } catch { /* */ }
+    document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
-  // Listen for Telegram theme changes — only override if user hasn't set a manual preference
+  useLayoutEffect(() => {
+    if (mode !== 'system') return;
+    const mq = mediaQuery();
+    const update = () => setAutomaticTheme(resolveSystemTheme(WebApp, mq));
+    update();
+    WebApp.onEvent?.('themeChanged', update);
+    if (mq?.addEventListener) mq.addEventListener('change', update);
+    else mq?.addListener?.(update);
+    window.addEventListener('focus', update);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      WebApp.offEvent?.('themeChanged', update);
+      if (mq?.removeEventListener) mq.removeEventListener('change', update);
+      else mq?.removeListener?.(update);
+      window.removeEventListener('focus', update);
+      document.removeEventListener('visibilitychange', update);
+    };
+  }, [mode]);
+
   useEffect(() => {
-    const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
-    if (!tg || !tg.initData) return;
-
-    const checkUserOverride = () => {
-      try {
-        const stored = localStorage.getItem(THEME_KEY);
-        return stored === 'dark' || stored === 'light';
-      } catch { return false; }
+    const onStorage = event => {
+      if (event.key === THEME_KEY || event.key === null) setModeInternal(initialMode());
     };
-
-    const onTelegramThemeChange = () => {
-      if (!checkUserOverride()) {
-        setThemeInternal(tg.colorScheme || 'light');
-      }
-    };
-
-    if (typeof tg.onEvent === 'function') {
-      tg.onEvent('themeChanged', onTelegramThemeChange);
-    }
-
-    // Listen for OS preference changes outside Telegram
-    if (typeof window.matchMedia === 'function') {
-      const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      const onOsChange = () => {
-        if (!checkUserOverride()) {
-          const newTheme = mq.matches ? 'dark' : 'light';
-          setThemeInternal(newTheme);
-        }
-      };
-      if (mq.addEventListener) mq.addEventListener('change', onOsChange);
-      else if (mq.addListener) mq.addListener(onOsChange);
-    }
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const toggle = useCallback(() => {
-    setThemeInternal(prev => prev === 'dark' ? 'light' : 'dark');
+  const setMode = useCallback(next => {
+    if (!THEME_MODES.includes(next)) return;
+    setModeInternal(next);
+    // Store the chosen mode, never the automatically resolved light/dark value.
+    try { localStorage.setItem(THEME_KEY, next); } catch { /* Keep working without storage. */ }
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggle, isDark: theme === 'dark' }}>
+    <ThemeContext.Provider value={{ theme, mode, setMode, isDark: theme === 'dark' }}>
       {children}
     </ThemeContext.Provider>
   );

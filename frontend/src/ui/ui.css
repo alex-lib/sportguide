@@ -1177,3 +1177,12 @@
 .catalog-check { margin: 16px 0; }
 .catalog-hint { color: var(--label-3); font-size: 13px; margin: 8px 0 16px; }
 .catalog-photo-preview { width: 100%; max-height: 240px; object-fit: contain; border-radius: 12px; margin-bottom: 12px; }
+
+.settings-theme-option { cursor: pointer; }
+.settings-theme-option input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand);
+}
+.settings-theme-option:focus-within { outline: 2px solid var(--brand); outline-offset: -4px; }

@@ -26,7 +26,7 @@ function ToggleRow({ title, description, icon, checked, disabled, onChange }) {
 }
 
 export default function Settings() {
-  const { isDark, toggle } = useTheme();
+  const { mode, setMode } = useTheme();
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -72,9 +72,23 @@ export default function Settings() {
       <Page className="settings-page">
         <section aria-labelledby="appearance-heading">
           <h2 className="settings-section-title" id="appearance-heading">Оформление</h2>
-          <div className="settings-card">
-            <ToggleRow title="Тёмная тема" description="Сохраняется на этом устройстве" icon="moon"
-              checked={isDark} onChange={toggle} />
+          <p className="settings-intro">Системная тема следует оформлению Telegram или устройства, в том числе его автоматическому расписанию.</p>
+          <div className="settings-card" role="group" aria-label="Тема оформления">
+            {[
+              { value: 'system', title: 'Системная', description: 'Меняется автоматически вместе с Telegram или устройством', icon: 'settings' },
+              { value: 'light', title: 'Светлая', description: 'Всегда светлое оформление', icon: 'sun' },
+              { value: 'dark', title: 'Тёмная', description: 'Всегда тёмное оформление', icon: 'moon' },
+            ].map(option => (
+              <label className="settings-row settings-theme-option" key={option.value}>
+                <span className="settings-icon"><Icon name={option.icon} size={20} /></span>
+                <span className="settings-copy">
+                  <span className="settings-title">{option.title}</span>
+                  <span className="settings-description">{option.description}</span>
+                </span>
+                <input type="radio" name="theme" value={option.value} checked={mode === option.value}
+                  aria-label={option.title} onChange={() => setMode(option.value)} />
+              </label>
+            ))}
           </div>
         </section>
 
