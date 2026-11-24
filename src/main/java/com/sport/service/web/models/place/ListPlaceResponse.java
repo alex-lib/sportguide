@@ -11,6 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListPlaceResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private List<PlaceResponse> list;
     private Integer page;
     private Integer size;

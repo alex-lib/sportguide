@@ -33,6 +33,10 @@ import java.util.Locale;
 @Service
 @Slf4j
 public class PlaceService {
+    // Keep the namespace in the existing cache so allEntries eviction still covers every view.
+    private static final String CACHE_KEY =
+            "'v2:' + #root.methodName + ':' + "
+                + "T(org.springframework.cache.interceptor.SimpleKeyGenerator).generateKey(#root.args)";
     private final PlaceRepository placeRepository;
     private final PlaceMapper placeMapper;
     private final MinioService minioService;
@@ -122,7 +126,7 @@ public class PlaceService {
         return placeRepository.findByDistrictAndPlaceType(district, placeType);
     }
 
-    @Cacheable(value = "places")
+    @Cacheable(value = "places", key = CACHE_KEY)
     public ListPlaceResponse findAll(
             String districtStr,
             String subDistrictStr,
@@ -132,7 +136,7 @@ public class PlaceService {
         return findFiltered(districtStr, subDistrictStr, outdoor, placeType, search, null);
     }
 
-    @Cacheable(value = "places")
+    @Cacheable(value = "places", key = CACHE_KEY)
     public ListPlaceResponse findPage(
             String districtStr,
             String subDistrictStr,
