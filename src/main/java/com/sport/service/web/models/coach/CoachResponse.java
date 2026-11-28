@@ -1,5 +1,7 @@
 package com.sport.service.web.models.coach;
 
+import com.sport.service.web.models.place.PlaceResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +26,7 @@ public class CoachResponse {
     private String education;
     private String phoneNumber;
     private List<String> workPlacesNames;
+    private List<PlaceResponse> workPlaces;
     private String photoUrl;
     private String telegramUsername;
     private List<String> trainingProgramsNames;

@@ -20,6 +20,7 @@ import {
   EmptyState,
   ErrorBanner,
   SkeletonList,
+  MapView,
 } from '../ui';
 import { pluralRu } from '../utils/plural.js';
 
@@ -34,6 +35,7 @@ const Coaches = () => {
   const [coaches, setCoaches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mapPlace, setMapPlace] = useState(null);
   const [filter, setFilter] = useState({
     sportTypes: [],
     age: null,
@@ -156,6 +158,19 @@ const Coaches = () => {
 
                   {coach.description && <CardText style={{ marginTop: '12px' }}>{coach.description}</CardText>}
 
+                  {coach.workPlaces?.length > 0 ? (
+                    <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {coach.workPlaces.map((place) => (
+                        <Button key={place.id} variant="ghost" size="sm" onClick={() => setMapPlace(place)}
+                          aria-label={`Показать ${place.name} на карте`}>
+                          <Icon name="map-pin" size={16} /> {place.name}
+                        </Button>
+                      ))}
+                    </div>
+                  ) : coach.workPlacesNames?.length > 0 && (
+                    <CardText>{coach.workPlacesNames.join(', ')}</CardText>
+                  )}
+
                   {(coach.yearsOfExperience || coach.district) && (
                     <Pills>
                       {coach.yearsOfExperience && <Pill icon="award">{coach.yearsOfExperience} {pluralRu(coach.yearsOfExperience, ['год', 'года', 'лет'])} опыта</Pill>}
@@ -180,6 +195,7 @@ const Coaches = () => {
           </div>
         )}
       </Page>
+      {mapPlace && <MapView places={[mapPlace]} open onClose={() => setMapPlace(null)} />}
     </>
   );
 };

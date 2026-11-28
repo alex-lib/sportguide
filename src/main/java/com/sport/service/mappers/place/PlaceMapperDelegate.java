@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 public abstract class PlaceMapperDelegate implements PlaceMapper {
@@ -48,7 +49,12 @@ public abstract class PlaceMapperDelegate implements PlaceMapper {
                 String[] coordinatesArray = place.getCoordinates().split(",");
                 float latitude = Float.parseFloat(coordinatesArray[0].trim());
                 float longitude = Float.parseFloat(coordinatesArray[1].trim());
-                coordinates = String.format("https://maps.google.com/?q=%f,%f", latitude, longitude);
+                coordinates =
+                        String.format(
+                                Locale.ROOT,
+                                "https://maps.google.com/?q=%f,%f",
+                                latitude,
+                                longitude);
             } else {
                 coordinates = "Координаты места не указаны";
             }

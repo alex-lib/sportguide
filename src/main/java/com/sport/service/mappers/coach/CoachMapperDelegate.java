@@ -6,17 +6,22 @@ import com.sport.service.entities.Subscriber;
 import com.sport.service.entities.TrainingProgram;
 import com.sport.service.entities.enums.coach.Sex;
 import com.sport.service.entities.enums.common.SportType;
+import com.sport.service.mappers.place.PlaceMapper;
 import com.sport.service.mappers.string.SexStringMapper;
 import com.sport.service.mappers.string.SportTypeStringMapper;
 import com.sport.service.web.models.coach.CoachRequest;
 import com.sport.service.web.models.coach.CoachResponse;
 import com.sport.service.web.models.coach.ListCoachResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class CoachMapperDelegate implements CoachMapper {
+
+    @Autowired private PlaceMapper placeMapper;
 
     @Override
     public Coach coachRequestToCoach(
@@ -108,6 +113,13 @@ public abstract class CoachMapperDelegate implements CoachMapper {
                             .education(coach.getEducation())
                             .phoneNumber(coach.getPhoneNumber())
                             .workPlacesNames(workPlacesName)
+                            .workPlaces(
+                                    coach.getWorkPlaces().isEmpty()
+                                            ? List.of()
+                                            : placeMapper
+                                                    .listPlaceToListPlaceResponse(
+                                                            coach.getWorkPlaces())
+                                                    .getList())
                             .photoUrl(coach.getPhotoUrl())
                             .telegramUsername(link)
                             .trainingProgramsNames(trainingProgramsTitles)
