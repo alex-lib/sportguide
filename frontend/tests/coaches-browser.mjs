@@ -1,0 +1,60 @@
+// Synthetic launch and API fixtures: no production authentication or bot calls.
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const base = process.env.SMOKE_BASE_URL || 'http://127.0.0.1:4175';
+const sdk = await readFile(new URL('../node_modules/@twa-dev/sdk/dist/telegram-web-apps.js', import.meta.url), 'utf8');
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const tile = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==', 'base64');
+const places = [
+  { id: 173, name: 'HYDRA GYM', address: 'ул. Бакунина, 45А', coordinates: 'https://maps.google.com/?q=51.671105,39.185911' },
+  { id: 174, name: 'Второй зал', address: 'Другой адрес', coordinates: 'https://maps.google.com/?q=51.7,39.3' },
+  { id: 175, name: 'Без координат', coordinates: 'Координаты места не указаны' },
+];
+const errors = [], placeRequests = [];
+try {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.route('https://telegram.org/js/telegram-web-app.js*', r => r.fulfill({ contentType: 'application/javascript', body: sdk }));
+  await ctx.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: '' }));
+  await ctx.route('https://*.tile.openstreetmap.org/**', r => r.fulfill({ contentType: 'image/png', body: tile }));
+  await ctx.route('https://unpkg.com/**', r => r.fulfill({ contentType: 'image/png', body: tile }));
+  await ctx.route('https://api.sportguide.online/**', r => {
+    const u = new URL(r.request().url());
+    if (u.pathname === '/api/auth/telegram') return r.fulfill({ json: { token: 'synthetic-test-token' } });
+    if (u.pathname.endsWith('/shown')) return r.fulfill({ json: true });
+    if (u.pathname === '/api/places') placeRequests.push(u.href);
+    if (u.pathname === '/api/coaches') return r.fulfill({ json: { list: [
+      { id: 1, name: 'Тренер с местами', workPlaces: places, workPlacesNames: places.map(p => p.name) },
+      { id: 2, name: 'Тренер без мест', workPlaces: [], workPlacesNames: [] },
+      { id: 3, name: 'Старая версия API', workPlacesNames: ['Название зала из старого API'] },
+    ] } });
+    return r.fulfill({ json: { list: [], canManage: false } });
+  });
+  const page = await ctx.newPage();
+  page.on('pageerror', e => errors.push(e.message));
+  const launch = new URLSearchParams({ tgWebAppData: new URLSearchParams({ auth_date: '1806060000', hash: 'a'.repeat(64), user: JSON.stringify({ id: 123, first_name: 'Test' }) }).toString(), tgWebAppVersion: '8.0', tgWebAppPlatform: 'android', tgWebAppThemeParams: '{}' });
+  await page.goto(`${base}/#${launch}`);
+  await page.waitForSelector('[data-theme]');
+  await page.evaluate(() => { location.hash = '/coaches'; });
+  await page.getByText('Тренер с местами', { exact: true }).waitFor();
+  assert.equal(await page.locator('[data-tour="coach-card"]').count(), 3);
+  await page.getByText('Название зала из старого API', { exact: true }).waitFor();
+  for (const place of places.slice(0, 2)) {
+    await page.getByRole('button', { name: `Показать ${place.name} на карте`, exact: true }).click();
+    await page.locator('.leaflet-marker-icon').waitFor();
+    assert.equal(await page.locator('.leaflet-marker-icon').count(), 1);
+    await page.locator('.leaflet-marker-icon').click();
+    assert.equal(await page.locator('.leaflet-popup-content strong').innerText(), place.name);
+    assert.equal(await page.locator('.leaflet-popup-content a').getAttribute('href'), place.coordinates);
+    assert.ok((await page.locator('.leaflet-popup-content').innerText()).includes(place.address));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.getByRole('button', { name: 'Отмена', exact: true }).click();
+    assert.equal(await page.locator('.leaflet-container').count(), 0);
+  }
+  await page.getByRole('button', { name: 'Показать Без координат на карте', exact: true }).click();
+  await page.getByRole('status').filter({ hasText: 'нет мест с координатами' }).waitFor();
+  await page.getByRole('button', { name: 'Отмена', exact: true }).click();
+  assert.deepEqual(placeRequests, []);
+  assert.deepEqual(errors, []);
+  console.log('PASS: linked gym opens one correct marker, switching gyms, close/reopen, no coordinates, no workplaces, legacy API names, mobile layout; no entire places catalog load');
+} finally { await browser.close(); }
