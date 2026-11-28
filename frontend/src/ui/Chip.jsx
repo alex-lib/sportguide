@@ -27,6 +27,7 @@ export const SearchField = ({ placeholder = 'Поиск', value, onChange, readO
     <input
       type="search"
       placeholder={placeholder}
+      aria-label={placeholder}
       value={value}
       onChange={onChange}
       readOnly={readOnly}

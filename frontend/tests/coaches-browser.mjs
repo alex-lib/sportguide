@@ -74,6 +74,7 @@ try {
   const detail = page.locator('[data-tour="coach-profile"]');
   await detail.waitFor();
   assert.equal(new URL(page.url()).hash, '#/coaches/1');
+  assert.equal(await page.locator('.tab[aria-current="page"]').innerText(), 'Тренеры');
   for (const text of ['@test_coach', 'Фитнес', '33 года', 'Мужской', '8 лет', ...profile.education.split('; ').map(part => part.trim()), profile.description, profile.phoneNumber]) {
     await detail.getByText(text, { exact: true }).waitFor();
   }

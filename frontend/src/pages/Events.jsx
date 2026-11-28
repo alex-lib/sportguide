@@ -121,7 +121,7 @@ const Events = () => {
             }
           />
         ) : (
-          <div data-tour="events-list">
+          <div className="catalog-grid" data-tour="events-list">
             {events.map((event, index) => (
               <Card key={event.id || index} first={index === 0} data-tour="event-card">
                 <CardRow>

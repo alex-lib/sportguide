@@ -8,7 +8,8 @@ const TabBar = ({ items, pathname }) => (
       <Link
         key={item.path}
         to={item.path}
-        className={`tab ${pathname === item.path ? 'active' : ''}`.trim()}
+        className={`tab ${pathname === item.path || (item.path !== '/' && pathname.startsWith(`${item.path}/`)) ? 'active' : ''}`.trim()}
+        aria-current={pathname === item.path || (item.path !== '/' && pathname.startsWith(`${item.path}/`)) ? 'page' : undefined}
         data-tour={`nav-${item.path}`}
       >
         <span className="ti">
