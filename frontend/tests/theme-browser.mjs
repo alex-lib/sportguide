@@ -51,34 +51,21 @@ try {
   await page.screenshot({ path: '/tmp/sportguide-theme-dark.png', fullPage: true });
   await page.getByRole('radio', { name: 'Светлая', exact: true }).check();
   await page.screenshot({ path: '/tmp/sportguide-theme-light.png', fullPage: true });
-  await page.clock.install({ time: new Date('2026-11-24T06:59:59+03:00') });
-  await page.clock.pauseAt(new Date('2026-11-24T06:59:59+03:00'));
-  const scheduled = page.getByRole('radio', { name: 'По времени', exact: true });
-  await scheduled.check();
-  assert.equal(await current(), 'dark');
-  await telegramTheme('#ffffff');
-  assert.equal(await current(), 'dark');
-  await page.clock.runFor(1000);
-  await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
-  assert.equal(await page.evaluate(() => localStorage.getItem('theme')), 'scheduled');
-  await page.reload(); await scheduled.waitFor();
-  assert.equal(await scheduled.isChecked(), true);
-  assert.equal(await current(), 'light');
-  await page.clock.setSystemTime(new Date('2026-11-24T18:59:59+03:00'));
-  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
-  await page.clock.runFor(1000);
+  assert.equal(await page.getByRole('radio').count(), 3);
+  assert.equal(await page.getByRole('radio', { name: 'По времени', exact: true }).count(), 0);
+  // Users who selected the removed mode now follow the system theme on reload.
+  await page.evaluate(() => localStorage.setItem('theme', 'scheduled'));
+  await page.reload();
+  const system = page.getByRole('radio', { name: 'Системная', exact: true });
+  await system.waitFor();
+  assert.equal(await system.isChecked(), true);
+  await telegramTheme('#000000');
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
-  // Returning from a suspended WebView must re-evaluate the local clock immediately.
-  await page.clock.setSystemTime(new Date('2026-11-25T12:00:00+03:00'));
-  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await telegramTheme('#ffffff');
   await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
   await page.getByRole('radio', { name: 'Тёмная', exact: true }).check();
-  await page.clock.runFor(60000);
-  assert.equal(await current(), 'dark');
-  await telegramTheme('#ffffff');
-  await page.getByRole('radio', { name: 'Системная', exact: true }).check();
-  await page.waitForFunction(() => document.documentElement.dataset.theme === 'light');
+  assert.equal(await page.evaluate(() => localStorage.getItem('theme')), 'dark');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   assert.deepEqual(errors, []);
-  console.log('PASS: system/manual themes; scheduled 07:00/19:00 transitions, persistence and resume; mobile controls fit; no page errors');
+  console.log('PASS: three system/manual modes; removed scheduled preference falls back to system; persistence and Telegram updates; mobile controls fit; no page errors');
 } finally { await browser.close(); }
