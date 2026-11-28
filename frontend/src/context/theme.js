@@ -1,10 +1,5 @@
 export const THEME_KEY = 'theme';
-export const THEME_MODES = ['system', 'scheduled', 'light', 'dark'];
-
-export function resolveScheduledTheme(date = new Date()) {
-  const hour = date.getHours();
-  return hour >= 7 && hour < 19 ? 'light' : 'dark';
-}
+export const THEME_MODES = ['system', 'light', 'dark'];
 
 export function readThemeMode(storage) {
   try {

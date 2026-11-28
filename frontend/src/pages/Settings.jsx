@@ -76,7 +76,6 @@ export default function Settings() {
           <div className="settings-card" role="group" aria-label="Тема оформления">
             {[
               { value: 'system', title: 'Системная', description: 'Меняется автоматически вместе с Telegram или устройством', icon: 'settings' },
-              { value: 'scheduled', title: 'По времени', description: 'Светлая 07:00–19:00, тёмная 19:00–07:00 по времени устройства', icon: 'clock' },
               { value: 'light', title: 'Светлая', description: 'Всегда светлое оформление', icon: 'sun' },
               { value: 'dark', title: 'Тёмная', description: 'Всегда тёмное оформление', icon: 'moon' },
             ].map(option => (
