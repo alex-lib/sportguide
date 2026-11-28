@@ -3,30 +3,84 @@
   text-decoration: none;
   border-radius: 12px;
 }
-.coach-profile-link:focus-visible {
+.coach-profile-link:focus-visible,
+.coach-profile a:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 4px;
 }
+.coach-profile-header, .coach-profile-page { max-width: 960px; margin-inline: auto; }
 .coach-profile { overflow-wrap: anywhere; }
+.coach-profile .card { margin-bottom: 14px; }
+.coach-profile-hero { position: relative; overflow: hidden; }
+.coach-profile-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: var(--brand-grad);
+}
+.coach-profile-identity { display: flex; align-items: center; gap: 16px; }
 .coach-profile-photo {
   display: block;
-  width: min(100%, 240px);
-  aspect-ratio: 1;
+  flex: 0 0 auto;
+  width: 92px;
+  height: 108px;
   object-fit: cover;
-  border-radius: 20px;
-  margin: 0 auto 20px;
+  border-radius: 18px;
+  background: var(--fill);
 }
-.coach-profile-placeholder {
-  display: grid;
-  place-items: center;
+.coach-profile-placeholder { display: grid; place-items: center; color: var(--brand); }
+.coach-profile-heading { min-width: 0; }
+.coach-profile-specialties { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.coach-profile-specialties span {
+  padding: 4px 8px;
+  border-radius: 7px;
   background: var(--fill);
   color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
 }
-.coach-profile-name { margin: 0 0 20px; }
-.coach-profile-facts { margin: 0; }
-.coach-profile-facts > div { margin: 0 0 16px; }
-.coach-profile-facts dt { font-size: 13px; opacity: .7; margin-bottom: 4px; }
-.coach-profile-facts dd { margin: 0; }
-.coach-profile-facts a { color: var(--brand); }
-.coach-profile h3 { margin: 20px 0 8px; }
-.coach-profile-text { white-space: pre-line; }
+.coach-profile-name { margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: -.5px; }
+.coach-profile-username { display: inline-block; margin-top: 8px; color: var(--brand); font-size: 14px; text-decoration: none; }
+.coach-profile-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 22px 0 18px;
+  padding: 14px 0;
+  border-block: 1px solid var(--sep);
+}
+.coach-profile-facts > div { display: flex; flex-direction: column; gap: 5px; text-align: center; }
+.coach-profile-facts > div + div { border-left: 1px solid var(--sep); }
+.coach-profile-facts dt { font-size: 12px; color: var(--label-2); }
+.coach-profile-facts dd { margin: 0; font-size: 16px; font-weight: 650; }
+.coach-profile-contact p { margin: 8px 0 0; text-align: center; color: var(--label-2); font-size: 12px; }
+.coach-profile-section h3 { display: flex; align-items: center; gap: 9px; margin: 0 0 14px; font-size: 16px; line-height: 1.4; }
+.coach-profile-section h3 svg { flex-shrink: 0; color: var(--brand); }
+.coach-profile-text { white-space: pre-line; line-height: 1.65; color: var(--label-2); }
+.coach-profile-education { margin: 0; padding: 0; list-style: none; }
+.coach-profile-education li { position: relative; padding-left: 17px; color: var(--label-2); font-size: 14px; line-height: 1.65; }
+.coach-profile-education li + li { margin-top: 14px; }
+.coach-profile-education li::before { content: ''; position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--brand); left: 0; top: 9px; }
+.coach-profile-workplaces { display: grid; gap: 10px; }
+.coach-profile .coach-profile-place { justify-content: space-between; height: auto; padding: 14px; text-align: left; white-space: normal; }
+.coach-profile-place > span, .coach-profile-phone > span { display: grid; gap: 5px; min-width: 0; }
+.coach-profile-place strong { font-size: 15px; }
+.coach-profile-place small { font-size: 13px; font-weight: 400; color: var(--label-2); }
+.coach-profile-place em { font-style: normal; font-size: 12px; font-weight: 500; }
+.coach-profile-place > svg, .coach-profile-phone > svg { flex-shrink: 0; }
+.coach-profile-phone { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--brand); text-decoration: none; padding-block: 4px; }
+.coach-profile-phone strong { font-size: 17px; font-weight: 600; }
+.coach-profile-phone small { color: var(--label-2); font-size: 13px; }
+@media (min-width: 720px) {
+  .coach-profile-hero { padding: 28px; }
+  .coach-profile-photo { width: 112px; height: 128px; }
+  .coach-profile-name { font-size: 28px; }
+  .coach-profile-sections { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0 16px; align-items: start; }
+}
+@media (max-width: 360px) {
+  .coach-profile-identity { gap: 12px; }
+  .coach-profile-photo { width: 76px; height: 92px; }
+  .coach-profile-name { font-size: 20px; }
+  .coach-profile-facts dd { font-size: 14px; }
+}

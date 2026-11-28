@@ -129,7 +129,7 @@ const Coaches = () => {
             {coaches.map((coach, index) => {
               return (
                 <Card key={coach.id || index} first={index === 0} data-tour="coach-card">
-                  <Link className="coach coach-profile-link" to={`/coaches/${coach.id}`} state={{ fromCoaches: true }}>
+                  <Link className="coach coach-profile-link" to={`/coaches/${coach.id}`}>
                     <CatalogPhoto catalog="coaches" photoUrl={coach.photoUrl} className="avatar-img" alt={coach.name}
                       fallback={<div className={`ava ${index % 2 === 1 ? 'accent' : ''}`.trim()}><Icon name="user" size={28} /></div>} />
                     <div style={{ flex: 1 }}>
@@ -163,7 +163,7 @@ const Coaches = () => {
 
                   <Divider />
                   <CardActions>
-                    <Button to={`/coaches/${coach.id}`} state={{ fromCoaches: true }} fullWidth data-tour="coach-open">
+                    <Button to={`/coaches/${coach.id}`} fullWidth data-tour="coach-open">
                       Открыть карточку
                     </Button>
                   </CardActions>

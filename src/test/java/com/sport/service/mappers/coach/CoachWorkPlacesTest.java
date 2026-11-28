@@ -26,6 +26,21 @@ class CoachWorkPlacesTest {
     @Autowired CoachMapper mapper;
 
     @Test
+    void profileIncludesSexStoredInTheDatabase() {
+        Coach coach = coach(List.of());
+        assertEquals(
+                "Мужчина",
+                mapper.listCoachToListCoachResponse(List.of(coach)).getList().getFirst().getSex());
+        coach.setSex(Sex.FEMALE);
+        assertEquals(
+                "Женщина",
+                mapper.listCoachToListCoachResponse(List.of(coach)).getList().getFirst().getSex());
+        coach.setSex(null);
+        assertNull(
+                mapper.listCoachToListCoachResponse(List.of(coach)).getList().getFirst().getSex());
+    }
+
+    @Test
     void mapsLinkedPlacesWithCoordinatesAndKeepsLegacyNames() {
         Place first =
                 Place.builder()

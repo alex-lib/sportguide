@@ -11,6 +11,7 @@ const places = [
   { id: 174, name: 'Второй зал', address: 'Другой адрес', coordinates: 'https://maps.google.com/?q=51.7,39.3' },
   { id: 175, name: 'Без координат', coordinates: 'Координаты места не указаны' },
 ];
+const portrait = process.env.COACH_TEST_PHOTO ? await readFile(process.env.COACH_TEST_PHOTO) : tile;
 const errors = [], placeRequests = [];
 let failProfile = false;
 const profile = { id: 1, name: 'Тренер с местами', telegramUsername: '[@test_coach](https://t.me/test_coach)',
@@ -33,7 +34,7 @@ try {
     if (u.pathname === '/api/auth/telegram') return r.fulfill({ json: { token: 'synthetic-test-token' } });
     if (u.pathname.endsWith('/shown')) return r.fulfill({ json: true });
     if (u.pathname === '/api/places') placeRequests.push(u.href);
-    if (u.pathname === '/api/coaches/photo') return r.fulfill({ contentType: 'image/png', body: tile });
+    if (u.pathname === '/api/coaches/photo') return r.fulfill({ contentType: process.env.COACH_TEST_PHOTO ? 'image/jpeg' : 'image/png', body: portrait });
     if (u.pathname === '/api/coaches/1/profile') return r.fulfill(failProfile ? { status: 503, json: {} } : { json: profile });
     if (u.pathname === '/api/coaches/2/profile') return r.fulfill({ json: { id: 2, name: 'Тренер без мест', yearsOfExperience: 0 } });
     if (u.pathname.endsWith('/profile')) return r.fulfill({ status: 404, json: {} });
@@ -73,7 +74,7 @@ try {
   const detail = page.locator('[data-tour="coach-profile"]');
   await detail.waitFor();
   assert.equal(new URL(page.url()).hash, '#/coaches/1');
-  for (const text of ['@test_coach', 'Фитнес', '33 года', 'Мужской', '8 лет', profile.education, profile.description, profile.phoneNumber]) {
+  for (const text of ['@test_coach', 'Фитнес', '33 года', 'Мужской', '8 лет', ...profile.education.split('; ').map(part => part.trim()), profile.description, profile.phoneNumber]) {
     await detail.getByText(text, { exact: true }).waitFor();
   }
   await detail.locator('img.coach-profile-photo').waitFor();
@@ -81,22 +82,29 @@ try {
   assert.equal(await contact.getAttribute('href'), 'https://t.me/test_coach');
   await contact.click();
   assert.ok(await page.evaluate(() => window.nativeEvents.some(e => e.type === 'web_app_open_tg_link' && JSON.parse(e.data).path_full === '/test_coach')));
-  assert.equal(await detail.getByRole('link', { name: profile.phoneNumber }).getAttribute('href'), `tel:${profile.phoneNumber}`);
+  assert.equal(await detail.locator('.coach-profile-phone').getAttribute('href'), `tel:${profile.phoneNumber}`);
   await detail.getByRole('button', { name: 'Показать HYDRA GYM на карте', exact: true }).click();
   await page.locator('.leaflet-marker-icon').waitFor();
   assert.equal(await page.locator('.leaflet-marker-icon').count(), 1);
   await page.locator('.leaflet-marker-icon').click();
   assert.equal(await page.locator('.leaflet-popup-content a').getAttribute('href'), places[0].coordinates);
   await page.getByRole('button', { name: 'Отмена', exact: true }).click();
-  for (const width of [390, 1440]) {
+  for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: '/tmp/sportguide-coach-profile.png', fullPage: true });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: '/tmp/sportguide-coach-profile.png' });
+  await page.evaluate(() => document.documentElement.dataset.theme = 'dark');
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: '/tmp/sportguide-coach-profile-dark.png' });
+  await page.evaluate(() => document.documentElement.dataset.theme = 'light');
   await page.reload();
   await detail.waitFor();
-  await page.getByRole('button', { name: 'К тренерам', exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: 'К тренерам', exact: true }).count(), 0);
+  await page.locator('.tabbar').getByRole('link', { name: 'Тренеры', exact: true }).click();
   await page.locator('[data-tour="coach-card"]').first().waitFor();
   // The photo/name link also opens the profile, and browser Back restores the list.
   await page.locator('.coach-profile-link').first().click();
@@ -116,7 +124,8 @@ try {
   assert.equal(await detail.getByRole('link', { name: 'Связаться с тренером', exact: true }).count(), 0);
   await page.evaluate(() => { location.hash = '/coaches/999'; });
   await page.getByText('Тренер не найден', { exact: true }).waitFor();
-  await page.getByRole('button', { name: 'К тренерам', exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: 'К тренерам', exact: true }).count(), 0);
+  await page.locator('.tabbar').getByRole('link', { name: 'Тренеры', exact: true }).click();
   await page.getByRole('link', { name: 'Открыть карточку', exact: true }).first().waitFor();
   assert.deepEqual(placeRequests, []);
   assert.deepEqual(errors, []);
