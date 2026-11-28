@@ -26,6 +26,34 @@ class CoachWorkPlacesTest {
     @Autowired CoachMapper mapper;
 
     @Test
+    void editingPreservesMultipleSpecialtiesAndFullProfileText() {
+        Coach original = coach(List.of());
+        original.setSportTypes(
+                List.of(
+                        SportType.STRETCHING,
+                        SportType.FITNESS,
+                        SportType.GROUP_TRAININGS,
+                        SportType.POLE_DANCE));
+        original.setDescription("Специализация и спортивные достижения. ".repeat(12));
+        original.setEducation("Образовательная организация — квалификация (2022).\n".repeat(8));
+        original.setMonthsForSubscriptionToBeCoach((short) 120);
+
+        var request = mapper.coachToRequest(original);
+        assertTrue(request.isClassificationValid());
+        var edited =
+                mapper.coachRequestToCoach(
+                        request, null, original.getSubscriber(), List.of(), List.of());
+        var response = mapper.listCoachToListCoachResponse(List.of(edited)).getList().getFirst();
+
+        assertEquals(original.getSportTypes(), edited.getSportTypes());
+        assertEquals(
+                List.of("Растяжка", "Фитнес", "Групповые тренировки", "Спортивный пилон"),
+                response.getSportTypes());
+        assertEquals(original.getDescription(), response.getDescription());
+        assertEquals(original.getEducation(), response.getEducation());
+    }
+
+    @Test
     void profileIncludesSexStoredInTheDatabase() {
         Coach coach = coach(List.of());
         assertEquals(

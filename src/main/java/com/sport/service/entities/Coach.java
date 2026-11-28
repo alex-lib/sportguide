@@ -2,25 +2,27 @@ package com.sport.service.entities;
 
 import com.sport.service.entities.enums.coach.Sex;
 import com.sport.service.entities.enums.common.SportType;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
-import lombok.ToString;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -52,7 +54,7 @@ public class Coach {
     @Enumerated(EnumType.STRING)
     private List<SportType> sportTypes;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "age", columnDefinition = "SMALLINT", nullable = false)
@@ -65,14 +67,15 @@ public class Coach {
     @Column(name = "years_of_experience", columnDefinition = "SMALLINT")
     private Integer yearsOfExperience;
 
-    @Column(name = "education")
+    @Column(name = "education", columnDefinition = "TEXT")
     private String education;
 
     @Column(name = "phone_number")
     private String phoneNumber;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "coaches_work_places",
+    @JoinTable(
+            name = "coaches_work_places",
             joinColumns = @JoinColumn(name = "coach_id"),
             inverseJoinColumns = @JoinColumn(name = "place_id"))
     @Builder.Default
