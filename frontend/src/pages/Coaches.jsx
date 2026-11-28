@@ -1,4 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import CoachWorkPlaces from '../components/CoachWorkPlaces.jsx';
+import './Coaches.css';
 import { apiService } from '../services/api.js';
 import { CatalogActions, useCatalogPermissions } from '../components/CatalogAdmin.jsx';
 import CatalogPhoto from '../components/CatalogPhoto.jsx';
@@ -20,22 +23,14 @@ import {
   EmptyState,
   ErrorBanner,
   SkeletonList,
-  MapView,
 } from '../ui';
 import { pluralRu } from '../utils/plural.js';
-
-// Contact link for the card's single primary action, when data allows.
-const coachContact = (coach) => {
-  if (coach.phoneNumber) return `tel:${coach.phoneNumber}`;
-  return coach.link || coach.telegram || coach.linkToChat || null;
-};
 
 const Coaches = () => {
   const canManage = useCatalogPermissions('coaches');
   const [coaches, setCoaches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [mapPlace, setMapPlace] = useState(null);
   const [filter, setFilter] = useState({
     sportTypes: [],
     age: null,
@@ -132,10 +127,9 @@ const Coaches = () => {
         ) : (
           <div data-tour="coaches-list">
             {coaches.map((coach, index) => {
-              const contact = coachContact(coach);
               return (
                 <Card key={coach.id || index} first={index === 0} data-tour="coach-card">
-                  <div className="coach">
+                  <Link className="coach coach-profile-link" to={`/coaches/${coach.id}`} state={{ fromCoaches: true }}>
                     <CatalogPhoto catalog="coaches" photoUrl={coach.photoUrl} className="avatar-img" alt={coach.name}
                       fallback={<div className={`ava ${index % 2 === 1 ? 'accent' : ''}`.trim()}><Icon name="user" size={28} /></div>} />
                     <div style={{ flex: 1 }}>
@@ -154,22 +148,11 @@ const Coaches = () => {
                         </p>
                       )}
                     </div>
-                  </div>
+                  </Link>
 
                   {coach.description && <CardText style={{ marginTop: '12px' }}>{coach.description}</CardText>}
 
-                  {coach.workPlaces?.length > 0 ? (
-                    <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {coach.workPlaces.map((place) => (
-                        <Button key={place.id} variant="ghost" size="sm" onClick={() => setMapPlace(place)}
-                          aria-label={`Показать ${place.name} на карте`}>
-                          <Icon name="map-pin" size={16} /> {place.name}
-                        </Button>
-                      ))}
-                    </div>
-                  ) : coach.workPlacesNames?.length > 0 && (
-                    <CardText>{coach.workPlacesNames.join(', ')}</CardText>
-                  )}
+                  <CoachWorkPlaces coach={coach} />
 
                   {(coach.yearsOfExperience || coach.district) && (
                     <Pills>
@@ -178,16 +161,12 @@ const Coaches = () => {
                     </Pills>
                   )}
 
-                  {contact && (
-                    <>
-                      <Divider />
-                      <CardActions>
-                        <Button href={contact} target="_blank" rel="noopener noreferrer" fullWidth data-tour="coach-contact">
-                          Связаться с тренером
-                        </Button>
-                      </CardActions>
-                    </>
-                  )}
+                  <Divider />
+                  <CardActions>
+                    <Button to={`/coaches/${coach.id}`} state={{ fromCoaches: true }} fullWidth data-tour="coach-open">
+                      Открыть карточку
+                    </Button>
+                  </CardActions>
                   {canManage && <CatalogActions catalog="coaches" item={coach} onDeleted={loadCoaches} />}
                 </Card>
               );
@@ -195,7 +174,6 @@ const Coaches = () => {
           </div>
         )}
       </Page>
-      {mapPlace && <MapView places={[mapPlace]} open onClose={() => setMapPlace(null)} />}
     </>
   );
 };

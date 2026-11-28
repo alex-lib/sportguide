@@ -13,6 +13,7 @@ import Places from './pages/Places.jsx';
 import JointTrainings from './pages/JointTrainings.jsx';
 import TrainingPrograms from './pages/TrainingPrograms.jsx';
 import Coaches from './pages/Coaches.jsx';
+import CoachProfile from './pages/CoachProfile.jsx';
 import Settings from './pages/Settings.jsx';
 import { Page, EmptyState, Button, Loading } from './ui';
 
@@ -179,6 +180,7 @@ function App() {
             <Route path="/coaches/new" element={<CatalogEditor key="coaches-new" catalog="coaches" />} />
             <Route path="/coaches/:id/edit" element={<CatalogEditor key="coaches-edit" catalog="coaches" />} />
             <Route path="/coaches" element={<Coaches />} />
+            <Route path="/coaches/:id" element={<CoachProfile />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

@@ -120,6 +120,10 @@ class ApiService {
     return (await this.api.get(`${this.catalogUrl(catalog)}/${id}`)).data;
   }
 
+  async getCoachProfile(id) {
+    return (await this.api.get(`${API_ENDPOINTS.COACHES}/${encodeURIComponent(id)}/profile`)).data;
+  }
+
   async saveCatalogItem(catalog, id, data, photo) {
     let body = data;
     let config = {};

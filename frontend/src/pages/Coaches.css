@@ -1,0 +1,32 @@
+.coach-profile-link {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 12px;
+}
+.coach-profile-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 4px;
+}
+.coach-profile { overflow-wrap: anywhere; }
+.coach-profile-photo {
+  display: block;
+  width: min(100%, 240px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 20px;
+  margin: 0 auto 20px;
+}
+.coach-profile-placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--fill);
+  color: var(--brand);
+}
+.coach-profile-name { margin: 0 0 20px; }
+.coach-profile-facts { margin: 0; }
+.coach-profile-facts > div { margin: 0 0 16px; }
+.coach-profile-facts dt { font-size: 13px; opacity: .7; margin-bottom: 4px; }
+.coach-profile-facts dd { margin: 0; }
+.coach-profile-facts a { color: var(--brand); }
+.coach-profile h3 { margin: 20px 0 8px; }
+.coach-profile-text { white-space: pre-line; }

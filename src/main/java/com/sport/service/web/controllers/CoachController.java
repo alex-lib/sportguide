@@ -2,6 +2,7 @@ package com.sport.service.web.controllers;
 
 import com.sport.service.services.CoachService;
 import com.sport.service.web.models.coach.CoachRequest;
+import com.sport.service.web.models.coach.CoachResponse;
 import com.sport.service.web.models.coach.ListCoachResponse;
 
 import jakarta.validation.Valid;
@@ -47,6 +48,15 @@ public class CoachController {
     @PreAuthorize("hasRole('ADMIN')")
     public CoachRequest getForEditing(@PathVariable Long id) {
         return coachService.getForEditing(id);
+    }
+
+    @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")
+    @GetMapping("/{id}/profile")
+    public CoachResponse getProfile(@PathVariable Long id, Authentication authentication) {
+        return coachService.getProfile(
+                id,
+                authentication.getAuthorities().stream()
+                        .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN")));
     }
 
     @PreAuthorize("hasAnyRole('SUBSCRIBER','ADMIN')")

@@ -14,6 +14,7 @@ import com.sport.service.repositories.CoachRepository;
 import com.sport.service.store.notifications.Notification;
 import com.sport.service.utils.BeanUtils;
 import com.sport.service.web.models.coach.CoachRequest;
+import com.sport.service.web.models.coach.CoachResponse;
 import com.sport.service.web.models.coach.ListCoachResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -131,7 +132,7 @@ public class CoachService {
                         () ->
                                 new IllegalArgumentException(
                                         "Пользователь не найден. Тренер должен сначала открыть бота"
-                                            + " SportGuide."));
+                                                + " SportGuide."));
     }
 
     private Coach saveNewCoach(CoachRequest request) {
@@ -184,6 +185,19 @@ public class CoachService {
         return coachRepository
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException("Coach with id " + id + " was not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public CoachResponse getProfile(Long id, boolean includeHidden) {
+        Coach coach = findCoachById(id);
+        if (!includeHidden
+                && (!Boolean.TRUE.equals(coach.getShowInWeb())
+                        || (coach.getExpiredDateForSubscriptionToBeCoach() != null
+                                && coach.getExpiredDateForSubscriptionToBeCoach()
+                                        .isBefore(LocalDate.now())))) {
+            throw new NotFoundException("Coach with id " + id + " was not found");
+        }
+        return coachMapper.listCoachToListCoachResponse(List.of(coach)).getList().getFirst();
     }
 
     @Transactional
