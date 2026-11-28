@@ -84,3 +84,23 @@
   .coach-profile-name { font-size: 20px; }
   .coach-profile-facts dd { font-size: 14px; }
 }
+
+/* Compact trainer summaries; full biography lives on the profile screen. */
+.coach-mini { display: flex; flex-direction: column; gap: 12px; }
+.coach-mini-header { display: flex; align-items: center; gap: 13px; }
+.coach-mini-photo { width: 64px; height: 76px; flex: 0 0 auto; object-fit: cover; border-radius: 16px; background: var(--fill); }
+.coach-mini-placeholder { display: grid; place-items: center; color: var(--brand); }
+.coach-mini-identity { min-width: 0; }
+.coach-mini .coach-mini-name { margin: 0; font-size: 18px; line-height: 1.25; }
+.coach-mini-specialties { margin: 5px 0 0; font-size: 13px; line-height: 1.4; font-weight: 600; color: var(--brand); overflow-wrap: anywhere; }
+.coach-mini-experience { display: flex; align-items: center; gap: 5px; margin: 5px 0 0; color: var(--label-2); font-size: 13px; line-height: 1.4; }
+.coach-mini-experience svg { flex-shrink: 0; }
+.coach-mini .coach-mini-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; line-height: 1.5; }
+.coach-mini-workplaces { display: grid; gap: 4px; padding-top: 9px; border-top: 1px solid var(--sep); }
+.coach-mini .coach-mini-place { padding: 4px 0; gap: 8px; background: transparent; border-radius: 8px; text-align: left; justify-content: flex-start; }
+.coach-mini-place > svg { flex-shrink: 0; }
+.coach-mini-place > span { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.coach-mini-place strong { color: var(--label); font-size: 14px; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
+.coach-mini-place small { color: var(--label-2); font-size: 12px; line-height: 1.4; font-weight: 400; overflow-wrap: anywhere; }
+.coach-mini .coach-mini-open { justify-content: space-between; min-height: 44px; font-size: 14px; padding: 10px 13px; }
+.coach-mini .catalog-admin-actions { margin-top: 0; }

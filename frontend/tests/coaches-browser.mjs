@@ -17,7 +17,7 @@ let failProfile = false;
 const profile = { id: 1, name: 'Тренер с местами', telegramUsername: '[@test_coach](https://t.me/test_coach)',
   sportTypes: ['Фитнес'], age: 33, sex: 'Мужчина', yearsOfExperience: 8,
   education: 'Инструктор групповых программ по направлению «кроссфит»; академия спорта; специалист центра тестирования ГТО.',
-  phoneNumber: '+79991234567', description: 'Персональные и групповые занятия, составление тренировочных программ.',
+  phoneNumber: '+79991234567', description: 'Персональные и групповые занятия, составление тренировочных программ и планов питания. Помогаю выстроить регулярный тренировочный процесс с учетом целей и уровня подготовки.',
   photoUrl: 'coaches/test.jpg', workPlaces: places, workPlacesNames: places.map(p => p.name) };
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -39,8 +39,8 @@ try {
     if (u.pathname === '/api/coaches/2/profile') return r.fulfill({ json: { id: 2, name: 'Тренер без мест', yearsOfExperience: 0 } });
     if (u.pathname.endsWith('/profile')) return r.fulfill({ status: 404, json: {} });
     if (u.pathname === '/api/coaches') return r.fulfill({ json: { list: [
-      { id: 1, name: 'Тренер с местами', workPlaces: places, workPlacesNames: places.map(p => p.name) },
-      { id: 2, name: 'Тренер без мест', workPlaces: [], workPlacesNames: [] },
+      { ...profile, sportTypes: ['FITNESS'] },
+      { id: 2, name: 'Тренер без мест', yearsOfExperience: 0, workPlaces: [], workPlacesNames: [] },
       { id: 3, name: 'Старая версия API', workPlacesNames: ['Название зала из старого API'] },
     ] } });
     return r.fulfill({ json: { list: [], canManage: false } });
@@ -53,6 +53,24 @@ try {
   await page.evaluate(() => { location.hash = '/coaches'; });
   await page.getByText('Тренер с местами', { exact: true }).waitFor();
   assert.equal(await page.locator('[data-tour="coach-card"]').count(), 3);
+  const firstCard = page.locator('[data-tour="coach-card"]').first();
+  await firstCard.getByText('Фитнес', { exact: true }).waitFor();
+  await firstCard.getByText('8 лет опыта', { exact: true }).waitFor();
+  await firstCard.locator('img.coach-mini-photo').waitFor();
+  await page.getByText('0 лет опыта', { exact: true }).waitFor();
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    const compact = await firstCard.locator('.coach-mini-description').evaluate(e => ({ height: e.clientHeight, line: parseFloat(getComputedStyle(e).lineHeight) }));
+    assert.ok(compact.height <= compact.line * 2 + 1);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: '/tmp/sportguide-coach-mini-light.png' });
+  await page.evaluate(() => document.documentElement.dataset.theme = 'dark');
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: '/tmp/sportguide-coach-mini-dark.png' });
+  await page.evaluate(() => document.documentElement.dataset.theme = 'light');
   await page.getByText('Название зала из старого API', { exact: true }).waitFor();
   for (const place of places.slice(0, 2)) {
     await page.getByRole('button', { name: `Показать ${place.name} на карте`, exact: true }).click();
