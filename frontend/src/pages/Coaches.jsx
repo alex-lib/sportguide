@@ -125,7 +125,7 @@ const Coaches = () => {
             }
           />
         ) : (
-          <div data-tour="coaches-list">
+          <div className="catalog-grid" data-tour="coaches-list">
             {coaches.map((coach, index) => {
               return (
                 <Card key={coach.id || index} first={index === 0} data-tour="coach-card">

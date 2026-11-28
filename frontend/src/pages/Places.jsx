@@ -152,15 +152,15 @@ const Places = () => {
             }
           />
         ) : !error && (
-          <div data-tour="places-list">
+          <div className="catalog-grid" data-tour="places-list">
             {places.map((place, index) => (
               <Card key={place.id || index} first={index === 0} data-tour="place-card">
-                <CatalogPhoto catalog="places" photoUrl={place.photoUrl} className="card-photo" fallback={<PhotoPlaceholder icon="building-2" />} />
+                <CatalogPhoto catalog="places" photoUrl={place.photoUrl} className="card-photo" alt={place.name} fallback={<PhotoPlaceholder icon="building-2" />} />
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
                   <div style={{ flex: 1 }}>
+                    {place.placeType && <p className="place-category">{place.placeType}</p>}
                     <CardTitle>{place.name}</CardTitle>
-                    {place.description && <CardText>{place.description}</CardText>}
                   </div>
                   <Pill tone="brand" icon={isOutdoor(place) ? 'land-plot' : 'building'}>
                     {isOutdoor(place) ? 'Улица' : 'Зал'}
@@ -170,6 +170,8 @@ const Places = () => {
                 {(place.address || place.district) && (
                   <MetaLine>{[place.address, place.district].filter(Boolean).join(' · ')}</MetaLine>
                 )}
+
+                {place.description && <CardText className="place-summary">{place.description}</CardText>}
 
                 <Divider />
                 <CardActions>

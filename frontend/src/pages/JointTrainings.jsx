@@ -232,11 +232,11 @@ const JointTrainings = () => {
             action={<Button onClick={openCreate} data-tour="create-training-btn">Создать тренировку</Button>}
           />
         ) : (
-          <div data-tour="trainings-list">
+          <div className="catalog-grid" data-tour="trainings-list">
             {trainings.map((training, index) => (
               <Card key={training.id || index} first={index === 0} data-tour="training-card">
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                  <Thumb icon={sportIconName(training.sportType)} size={22} />
+                  <Thumb icon={sportIconName(getSportLabel(training.sportType))} size={22} />
                   <div style={{ flex: 1 }}>
                     <CardTitle>{training.title}</CardTitle>
                     {training.description && <CardText>{training.description}</CardText>}

@@ -8,6 +8,7 @@ import {
   Button,
   Range,
   sportIconName,
+  Icon,
 } from '../ui';
 
 /*
@@ -54,7 +55,7 @@ const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'П
 
   const clear = (f) => onFilterChange(f.key, f.type === 'multiselect' ? [] : null);
 
-  const optionIcon = (f, opt) => (isSportKey(f.key) ? sportIconName(opt.value) : opt.icon);
+  const optionIcon = (f, opt) => (isSportKey(f.key) ? sportIconName(opt.label || opt.value) : opt.icon);
 
   const renderSheetFilter = (f) => {
     if (f.type === 'number') {
@@ -99,28 +100,43 @@ const FilterPanel = ({ filters, onFilterChange, onReset, searchPlaceholder = 'П
         <SearchField placeholder={searchPlaceholder} value={search} onChange={onSearch} />
       </div>
 
-      <ChipRail>
-        {quick && (
-          <FilterChip active={!filterActive(quick)} onClick={() => clear(quick)}>
-            Все
-          </FilterChip>
-        )}
-        {!hideQuickChips && quick?.options?.map((opt) =>
-          opt && opt.value ? (
-            <FilterChip
-              key={opt.value}
-              active={isSelected(quick, opt.value)}
-              icon={optionIcon(quick, opt)}
-              onClick={() => toggle(quick, opt.value)}
-            >
-              {opt.label || opt.value}
+      <div className="filter-toolbar" data-tour={hideQuickChips ? 'chip-rail' : undefined}>
+        {!hideQuickChips && <ChipRail>
+          {quick && (
+            <FilterChip active={!filterActive(quick)} onClick={() => clear(quick)}>
+              Все
             </FilterChip>
-          ) : null
-        )}
-        <FilterChip icon="sliders-horizontal" onClick={() => setSheetOpen(true)}>
+          )}
+          {quick?.options?.map((opt) =>
+            opt && opt.value ? (
+              <FilterChip
+                key={opt.value}
+                active={isSelected(quick, opt.value)}
+                icon={optionIcon(quick, opt)}
+                onClick={() => toggle(quick, opt.value)}
+              >
+                {opt.label || opt.value}
+              </FilterChip>
+            ) : null
+          )}
+        </ChipRail>}
+        <FilterChip className="filter-trigger" icon="sliders-horizontal" onClick={() => setSheetOpen(true)}>
           Фильтры{activeCount ? ` · ${activeCount}` : ''}
         </FilterChip>
-      </ChipRail>
+      </div>
+      {activeCount > 0 && <div className="active-filters" aria-label="Выбранные фильтры">
+        {filters.filter(filterActive).flatMap(f => {
+          const values = f.type === 'multiselect' ? f.value : [f.value];
+          return values.map(value => {
+            const label = `${f.title}: ${f.options?.find(option => option.value === value)?.label || value}`;
+            return <FilterChip key={`${f.key}-${value}`} className="active-filter"
+              aria-label={`Убрать фильтр: ${label}`}
+              onClick={() => f.type === 'multiselect' ? toggle(f, value) : clear(f)}>
+              {label}<Icon name="x" size={14} />
+            </FilterChip>;
+          });
+        })}
+      </div>}
 
       <Sheet
         open={sheetOpen}
