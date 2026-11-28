@@ -1,0 +1,29 @@
+.event-card { display: flex; flex-direction: column; gap: 14px; }
+.event-card-heading { display: flex; align-items: flex-start; gap: 13px; }
+.event-card-date { flex: 0 0 52px; text-align: center; }
+.event-card-date .date-badge { width: 52px; height: 60px; border: 1px solid var(--sep); }
+.event-card-date .date-badge .d { font-size: 23px; }
+.event-card-date .date-badge .m { font-size: 12px; margin-top: 3px; }
+.event-card-date > span { display: block; color: var(--label-2); margin-top: 5px; font-size: 11px; font-variant-numeric: tabular-nums; }
+.event-card-title-block { min-width: 0; flex: 1; }
+.event-card .card-title { margin: 0; font-size: 18px; line-height: 1.3; }
+.event-card-time { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; row-gap: 3px; margin-top: 9px; font-size: 13px; font-weight: 600; color: var(--brand); }
+.event-card-time svg { flex-shrink: 0; }
+.event-card-weekday { color: var(--label-2); font-weight: 400; }
+.event-card-weekday::before { content: '·'; margin-right: 6px; }
+.event-card-location { display: flex; align-items: flex-start; gap: 9px; padding: 11px 12px; background: var(--fill-2); border-radius: 12px; }
+.event-card-location > svg { flex-shrink: 0; color: var(--brand); margin-top: 2px; }
+.event-card-location > div { min-width: 0; overflow-wrap: anywhere; }
+.event-card-location strong { display: block; font-size: 14px; line-height: 1.4; font-weight: 600; }
+.event-card-location p { color: var(--label-2); font-size: 13px; line-height: 1.5; margin-top: 2px; }
+.event-card-description-text { display: block; font-size: 15px; line-height: 1.5; color: var(--label-2); overflow-wrap: anywhere; white-space: pre-line; }
+.event-card-description summary { display: block; cursor: pointer; border-radius: 6px; }
+.event-card-description summary::-webkit-details-marker { display: none; }
+.event-card-description summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
+.event-card-description:not([open]) .event-card-description-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.event-card-description-toggle { display: flex; align-items: center; gap: 5px; min-height: 44px; color: var(--brand); font-size: 13px; font-weight: 600; }
+.event-card-collapse { display: none; }
+.event-card-description[open] .event-card-expand { display: none; }
+.event-card-description[open] .event-card-collapse { display: inline; }
+.event-card-description[open] .event-card-description-toggle > svg { transform: rotate(180deg); }
+.event-card .event-card-open { justify-content: space-between; min-height: 44px; font-size: 14px; padding: 10px 13px; }

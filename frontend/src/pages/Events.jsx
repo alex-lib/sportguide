@@ -1,22 +1,13 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { apiService } from '../services/api.js';
 import FilterPanel from '../components/FilterPanel.jsx';
+import EventCard from '../components/EventCard.jsx';
+import './Events.css';
 import { DISTRICTS } from '../constants/filters.js';
 import { toLocalISODate } from '../utils/date.js';
 import {
   Page,
   PageHeader,
-  // IconButton,
-  Card,
-  CardRow,
-  CardTitle,
-  CardText,
-  CardActions,
-  Divider,
-  Pills,
-  Pill,
-  MetaLine,
-  DateBadge,
   Button,
   EmptyState,
   ErrorBanner,
@@ -123,46 +114,7 @@ const Events = () => {
         ) : (
           <div className="catalog-grid" data-tour="events-list">
             {events.map((event, index) => (
-              <Card key={event.id || index} first={index === 0} data-tour="event-card">
-                <CardRow>
-                  <DateBadge date={event.date} />
-                  <div style={{ flex: 1 }}>
-                    <CardTitle>{event.name}</CardTitle>
-                    {event.description && <CardText>{event.description}</CardText>}
-                  </div>
-                </CardRow>
-
-                <Pills>
-                  {event.time && (
-                    <Pill tone="brand" icon="clock">
-                      {event.time}
-                    </Pill>
-                  )}
-                  {event.placeName && <Pill icon="map-pin">{event.placeName}</Pill>}
-                  {event.district && <Pill>{event.district}</Pill>}
-                </Pills>
-
-                {event.address && <MetaLine>{event.address}</MetaLine>}
-
-                {canEdit && event.id != null && (
-                  <CardActions>
-                    <Button to={`/events/${event.id}/edit`} variant="tint" size="sm" fullWidth>
-                      Редактировать событие
-                    </Button>
-                  </CardActions>
-                )}
-
-                {event.link && event.link !== '-' && (
-                  <>
-                    <Divider />
-                    <CardActions>
-                      <Button href={event.link} target="_blank" rel="noopener noreferrer" size="sm" fullWidth data-tour="event-details">
-                        Подробнее
-                      </Button>
-                    </CardActions>
-                  </>
-                )}
-              </Card>
+              <EventCard key={event.id || index} event={event} canEdit={canEdit} />
             ))}
           </div>
         )}

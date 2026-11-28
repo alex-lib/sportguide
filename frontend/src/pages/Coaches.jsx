@@ -1,25 +1,14 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import CoachWorkPlaces from '../components/CoachWorkPlaces.jsx';
+import CoachMiniCard from '../components/CoachMiniCard.jsx';
 import './Coaches.css';
 import { apiService } from '../services/api.js';
-import { CatalogActions, useCatalogPermissions } from '../components/CatalogAdmin.jsx';
-import CatalogPhoto from '../components/CatalogPhoto.jsx';
+import { useCatalogPermissions } from '../components/CatalogAdmin.jsx';
 import FilterPanel from '../components/FilterPanel.jsx';
 import { SPORT_TYPES, SEX_OPTIONS } from '../constants/filters.js';
 import {
   Page,
   PageHeader,
-  // IconButton,
-  Card,
-  CardTitle,
-  CardText,
-  Icon,
-  Pills,
-  Pill,
   Button,
-  CardActions,
-  Divider,
   EmptyState,
   ErrorBanner,
   SkeletonList,
@@ -126,51 +115,9 @@ const Coaches = () => {
           />
         ) : (
           <div className="catalog-grid" data-tour="coaches-list">
-            {coaches.map((coach, index) => {
-              return (
-                <Card key={coach.id || index} first={index === 0} data-tour="coach-card">
-                  <Link className="coach coach-profile-link" to={`/coaches/${coach.id}`}>
-                    <CatalogPhoto catalog="coaches" photoUrl={coach.photoUrl} className="avatar-img" alt={coach.name}
-                      fallback={<div className={`ava ${index % 2 === 1 ? 'accent' : ''}`.trim()}><Icon name="user" size={28} /></div>} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CardTitle style={{ margin: 0 }}>{coach.name}</CardTitle>
-                        {coach.rating != null && (
-                          <span className="rate">
-                            <Icon name="star" size={13} />
-                            {coach.rating}
-                          </span>
-                        )}
-                      </div>
-                      {coach.specialization && (
-                        <p className="card-text" style={{ color: 'var(--brand)', fontWeight: 600, margin: '3px 0 0' }}>
-                          {coach.specialization}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-
-                  {coach.description && <CardText style={{ marginTop: '12px' }}>{coach.description}</CardText>}
-
-                  <CoachWorkPlaces coach={coach} />
-
-                  {(coach.yearsOfExperience || coach.district) && (
-                    <Pills>
-                      {coach.yearsOfExperience && <Pill icon="award">{coach.yearsOfExperience} {pluralRu(coach.yearsOfExperience, ['год', 'года', 'лет'])} опыта</Pill>}
-                      {coach.district && <Pill icon="map-pin">{coach.district}</Pill>}
-                    </Pills>
-                  )}
-
-                  <Divider />
-                  <CardActions>
-                    <Button to={`/coaches/${coach.id}`} fullWidth data-tour="coach-open">
-                      Открыть карточку
-                    </Button>
-                  </CardActions>
-                  {canManage && <CatalogActions catalog="coaches" item={coach} onDeleted={loadCoaches} />}
-                </Card>
-              );
-            })}
+            {coaches.map((coach) => (
+              <CoachMiniCard key={coach.id} coach={coach} canManage={canManage} onDeleted={loadCoaches} />
+            ))}
           </div>
         )}
       </Page>
