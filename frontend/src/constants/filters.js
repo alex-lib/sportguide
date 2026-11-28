@@ -81,6 +81,7 @@ export const SPORT_TYPES = [
   { value: 'RECOVERY', label: 'Восстановление' },
   { value: 'DANCING', label: 'Танцы' },
   { value: 'CYCLING', label: 'Велосипед' },
+  { value: 'POLE_DANCE', label: 'Спортивный пилон' },
 ];
 
 export const SEX_OPTIONS = [

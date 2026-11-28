@@ -141,7 +141,7 @@ const CatalogEditor = ({ catalog }) => {
                 {textField('age', 'Возраст', { type: 'number', required: true, min: 18, max: 120 })}
                 {selectField('sex', 'Пол', SEX_OPTIONS.map((option) => ({ value: option.label, label: option.label })))}
                 {textField('yearsOfExperience', 'Опыт работы, лет', { type: 'number', required: true, min: 0, max: 100 })}
-                {textField('education', 'Образование', { required: true, maxLength: 1000 })}
+                <Field label="Образование"><Textarea aria-label="Образование" value={form.education || ''} onChange={change('education')} required maxLength={1000} rows={5} /></Field>
                 {textField('phoneNumber', 'Телефон', { type: 'tel', required: true, placeholder: '+79991234567' })}
                 <fieldset className="catalog-options"><legend>Места работы</legend>
                   {workPlaces.length ? workPlaces.map((name) => <label key={name}><input type="checkbox" checked={form.workPlacesNames.includes(name)} onChange={() => toggle('workPlacesNames', name)} />{name}</label>) : <p>Мест пока нет. Их можно добавить в разделе «Места».</p>}

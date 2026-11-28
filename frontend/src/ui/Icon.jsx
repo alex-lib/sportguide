@@ -122,7 +122,7 @@ export const sportIconName = (sport = '') => {
   if (s.includes('бокс') || s.includes('мма') || s.includes('борьба') || s.includes('джиу') || s.includes('единобор'))
     return 'swords';
   if (s.includes('плав') || s.includes('бассейн')) return 'waves';
-  if (s.includes('йога') || s.includes('растяж') || s.includes('гимнаст') || s.includes('фигурн'))
+  if (s.includes('йога') || s.includes('растяж') || s.includes('гимнаст') || s.includes('фигурн') || s.includes('пилон'))
     return 'person-standing';
   if (s.includes('фитнес') || s.includes('зал') || s.includes('сил')) return 'dumbbell';
   return 'goal';

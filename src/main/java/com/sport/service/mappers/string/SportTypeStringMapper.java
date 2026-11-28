@@ -39,12 +39,14 @@ public class SportTypeStringMapper {
                 case SportType.RECOVERY -> sportTypesStrings.add("Восстановление");
                 case SportType.DANCING -> sportTypesStrings.add("Танцы");
                 case SportType.CYCLING -> sportTypesStrings.add("Велосипед");
+                case SportType.POLE_DANCE -> sportTypesStrings.add("Спортивный пилон");
             }
         }
         return sportTypesStrings;
     }
 
-    public static List<SportType> listSportTypeStringToListSportTypeEnum(List<String> sportTypesStrings) {
+    public static List<SportType> listSportTypeStringToListSportTypeEnum(
+            List<String> sportTypesStrings) {
         List<SportType> sportTypes = new ArrayList<>();
 
         for (String sportTypeString : sportTypesStrings) {
@@ -76,6 +78,7 @@ public class SportTypeStringMapper {
                 case "Восстановление" -> sportTypes.add(SportType.RECOVERY);
                 case "Танцы" -> sportTypes.add(SportType.DANCING);
                 case "Велосипед" -> sportTypes.add(SportType.CYCLING);
+                case "Спортивный пилон" -> sportTypes.add(SportType.POLE_DANCE);
             }
         }
         return sportTypes;

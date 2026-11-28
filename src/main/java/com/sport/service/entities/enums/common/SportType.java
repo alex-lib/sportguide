@@ -27,5 +27,6 @@ public enum SportType {
     POWERLIFTING,
     RECOVERY,
     DANCING,
-    CYCLING
+    CYCLING,
+    POLE_DANCE
 }
