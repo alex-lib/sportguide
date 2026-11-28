@@ -12,8 +12,18 @@ const places = [
   { id: 175, name: 'Без координат', coordinates: 'Координаты места не указаны' },
 ];
 const errors = [], placeRequests = [];
+let failProfile = false;
+const profile = { id: 1, name: 'Тренер с местами', telegramUsername: '[@test_coach](https://t.me/test_coach)',
+  sportTypes: ['Фитнес'], age: 33, sex: 'Мужчина', yearsOfExperience: 8,
+  education: 'Инструктор групповых программ по направлению «кроссфит»; академия спорта; специалист центра тестирования ГТО.',
+  phoneNumber: '+79991234567', description: 'Персональные и групповые занятия, составление тренировочных программ.',
+  photoUrl: 'coaches/test.jpg', workPlaces: places, workPlacesNames: places.map(p => p.name) };
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await ctx.addInitScript(() => {
+    window.nativeEvents = [];
+    window.TelegramWebviewProxy = { postEvent: (type, data) => window.nativeEvents.push({ type, data }) };
+  });
   await ctx.route('https://telegram.org/js/telegram-web-app.js*', r => r.fulfill({ contentType: 'application/javascript', body: sdk }));
   await ctx.route('https://fonts.googleapis.com/**', r => r.fulfill({ contentType: 'text/css', body: '' }));
   await ctx.route('https://*.tile.openstreetmap.org/**', r => r.fulfill({ contentType: 'image/png', body: tile }));
@@ -23,6 +33,10 @@ try {
     if (u.pathname === '/api/auth/telegram') return r.fulfill({ json: { token: 'synthetic-test-token' } });
     if (u.pathname.endsWith('/shown')) return r.fulfill({ json: true });
     if (u.pathname === '/api/places') placeRequests.push(u.href);
+    if (u.pathname === '/api/coaches/photo') return r.fulfill({ contentType: 'image/png', body: tile });
+    if (u.pathname === '/api/coaches/1/profile') return r.fulfill(failProfile ? { status: 503, json: {} } : { json: profile });
+    if (u.pathname === '/api/coaches/2/profile') return r.fulfill({ json: { id: 2, name: 'Тренер без мест', yearsOfExperience: 0 } });
+    if (u.pathname.endsWith('/profile')) return r.fulfill({ status: 404, json: {} });
     if (u.pathname === '/api/coaches') return r.fulfill({ json: { list: [
       { id: 1, name: 'Тренер с местами', workPlaces: places, workPlacesNames: places.map(p => p.name) },
       { id: 2, name: 'Тренер без мест', workPlaces: [], workPlacesNames: [] },
@@ -54,7 +68,57 @@ try {
   await page.getByRole('button', { name: 'Показать Без координат на карте', exact: true }).click();
   await page.getByRole('status').filter({ hasText: 'нет мест с координатами' }).waitFor();
   await page.getByRole('button', { name: 'Отмена', exact: true }).click();
+  assert.equal(await page.getByRole('link', { name: 'Связаться с тренером', exact: true }).count(), 0);
+  await page.getByRole('link', { name: 'Открыть карточку', exact: true }).first().click();
+  const detail = page.locator('[data-tour="coach-profile"]');
+  await detail.waitFor();
+  assert.equal(new URL(page.url()).hash, '#/coaches/1');
+  for (const text of ['@test_coach', 'Фитнес', '33 года', 'Мужской', '8 лет', profile.education, profile.description, profile.phoneNumber]) {
+    await detail.getByText(text, { exact: true }).waitFor();
+  }
+  await detail.locator('img.coach-profile-photo').waitFor();
+  const contact = detail.getByRole('link', { name: 'Связаться с тренером', exact: true });
+  assert.equal(await contact.getAttribute('href'), 'https://t.me/test_coach');
+  await contact.click();
+  assert.ok(await page.evaluate(() => window.nativeEvents.some(e => e.type === 'web_app_open_tg_link' && JSON.parse(e.data).path_full === '/test_coach')));
+  assert.equal(await detail.getByRole('link', { name: profile.phoneNumber }).getAttribute('href'), `tel:${profile.phoneNumber}`);
+  await detail.getByRole('button', { name: 'Показать HYDRA GYM на карте', exact: true }).click();
+  await page.locator('.leaflet-marker-icon').waitFor();
+  assert.equal(await page.locator('.leaflet-marker-icon').count(), 1);
+  await page.locator('.leaflet-marker-icon').click();
+  assert.equal(await page.locator('.leaflet-popup-content a').getAttribute('href'), places[0].coordinates);
+  await page.getByRole('button', { name: 'Отмена', exact: true }).click();
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: '/tmp/sportguide-coach-profile.png', fullPage: true });
+  await page.reload();
+  await detail.waitFor();
+  await page.getByRole('button', { name: 'К тренерам', exact: true }).click();
+  await page.locator('[data-tour="coach-card"]').first().waitFor();
+  // The photo/name link also opens the profile, and browser Back restores the list.
+  await page.locator('.coach-profile-link').first().click();
+  await detail.waitFor();
+  await page.goBack();
+  await page.getByRole('link', { name: 'Открыть карточку', exact: true }).first().waitFor();
+  failProfile = true;
+  await page.getByRole('link', { name: 'Открыть карточку', exact: true }).first().click();
+  await page.getByRole('alert').waitFor();
+  failProfile = false;
+  await page.getByRole('button', { name: 'Повторить', exact: true }).click();
+  await detail.waitFor();
+  await page.evaluate(() => { location.hash = '/coaches/2'; });
+  await detail.getByText('Тренер без мест', { exact: true }).waitFor();
+  await detail.getByText('0 лет', { exact: true }).waitFor();
+  await detail.getByText('Контакт Telegram не указан.', { exact: true }).waitFor();
+  assert.equal(await detail.getByRole('link', { name: 'Связаться с тренером', exact: true }).count(), 0);
+  await page.evaluate(() => { location.hash = '/coaches/999'; });
+  await page.getByText('Тренер не найден', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'К тренерам', exact: true }).click();
+  await page.getByRole('link', { name: 'Открыть карточку', exact: true }).first().waitFor();
   assert.deepEqual(placeRequests, []);
   assert.deepEqual(errors, []);
-  console.log('PASS: linked gym opens one correct marker, switching gyms, close/reopen, no coordinates, no workplaces, legacy API names, mobile layout; no entire places catalog load');
+  console.log('PASS: list workplace maps preserved; full profile, photo, all fields, Telegram SDK chat command, phone link, profile map, reload/back, mobile/desktop, retry/404/missing fields; no entire places catalog load');
 } finally { await browser.close(); }

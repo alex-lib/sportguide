@@ -41,6 +41,28 @@ import java.util.List;
 @TestPropertySource(properties = "jwt.secret=catalog-admin-tests-secret-at-least-32-bytes")
 class CatalogAdminApiTest {
     @Test
+    void profileIsAvailableToSubscribersButEditingRemainsAdminOnly() throws Exception {
+        var profile =
+                com.sport.service.web.models.coach.CoachResponse.builder()
+                        .id(1L)
+                        .name("Тренер")
+                        .build();
+        when(coaches.getProfile(1L, false)).thenReturn(profile);
+        when(coaches.getProfile(1L, true)).thenReturn(profile);
+        mvc.perform(get("/api/coaches/1/profile")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/coaches/1/profile").header("Authorization", token("SUBSCRIBER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Тренер"));
+        mvc.perform(get("/api/coaches/1/profile").header("Authorization", token("ADMIN")))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/coaches/1").header("Authorization", token("SUBSCRIBER")))
+                .andExpect(status().isForbidden());
+        verify(coaches).getProfile(1L, false);
+        verify(coaches).getProfile(1L, true);
+        verify(coaches, never()).getForEditing(anyLong());
+    }
+
+    @Test
     void subscriberCanPagePlacesAndLegacyMapRequestRemainsAvailable() throws Exception {
         var response = new ListPlaceResponse(List.of());
         response.setPage(1);
